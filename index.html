@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <title>Mass Travel</title>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+  <!-- Stylesheets -->
+  <link rel='stylesheet' type='text/css' href='css/main.css' media='screen' />
+  <link rel='stylesheet' type='text/css' href='css/nvd3.css' media='screen' />
+  <link rel='stylesheet' href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css'>
+  <link rel='stylesheet' href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css'>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        </button>
+        <a class="navbar-brand" href="#">Hacking Travel</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search">
+          </div>
+          <button type="submit" class="btn btn-default">Go</button>
+      </div>
+    </div>
+  </div>
+  <div class="container hundred-height">
+    <div class="row hundred-height">
+      <!-- Map -->
+      <div class="col-xs-6 .hidden-xs .hidden-sm" id="map-canvas" style="height: 80%"></div>
+      <!-- Metadata -->
+      <div class="col-xs-6" id="charts">
+        <div class="row">
+          <div class="col-xs-12">
+            <span class="glyphicon glyphicon-road"></span>
+            <span id='title'></span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-3">
+            <span style="font-size: 2.5em" id="speed"></span>
+            <span style="font-size: 1em">mph</span>
+          </div>
+          <div class="col-xs-3">
+            <span style="font-size: 2.5em" id="travelTime"></span>
+            <span style="font-size: 1em">min</span>
+          </div>
+          <div class="col-xs-3">
+            <span id="site-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span id="site-status-text" style="font-size: 1em">normal</span>
+          </div>
+        </div>
+        <div class="row">
+          <ul class="nav nav-tabs">
+            <li class="active"><a id="doy" href="#">Similar Days of the Week</a></li>
+            <li><a href="#">Similar Weather</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+<!-- Libraries -->
+<script type='text/javascript' src='//code.jquery.com/jquery-1.11.0.min.js'></script>
+<script type='text/javascript' src='//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js'></script>
+<script type='text/javascript' src='//maps.googleapis.com/maps/api/js?key=AIzaSyCXxVrTd3DeBuGka8NF3DQ2bVuEmPvVhKQ&sensor=false'></script>
+<script type='text/javascript' src='js/segments.js'></script>
+<script type='text/javascript' src='js/data.js'></script>
+<script type='text/javascript' src='js/map.js'></script>
