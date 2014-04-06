@@ -161,4 +161,20 @@ function getTraffic() {
     initializeMap(traffic);
   });
 }
+
 getTraffic();
+
+
+
+var graph = new Rickshaw.Graph({
+  element: document.querySelector("#historicalTravelTimes"),
+    renderer: 'line',
+    series: [{
+      data: [ { x: 0, y: 40 }, { x: 1, y: 49 }, { x: 2, y: 54 }, { x: 3, y: 60 } ],
+      color: 'steelblue'
+    }, {
+      data: [ { x: 0, y: 20 }, { x: 1, y: 23 }, { x: 2, y: 28 }, { x: 3, y: 36 } ],
+      color: 'lightblue'
+    }]
+  });
+graph.render();
