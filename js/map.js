@@ -7,6 +7,15 @@ var selectedRouteSegment = null;
 var highlightedRouteSegment = null;
 var currentData;
 
+// Get Tab Status
+activeTab = ''
+if ($('ad').hasClass('active')) {
+  activeTab = 'all';
+} else if ($('doy').hasClass('active')) {
+  activeTab = 'dow';
+}
+
+
 // Set the Date Tab Value
 var setDateTab = function() {
   now = new Date();
@@ -16,81 +25,94 @@ var setDateTab = function() {
 }()
 
 var pathClick = function(pairId, traffic) {
-  var pairData = traffic.pairData[pairId];
-  $('#title').html(pairData.title.slice(0,60)+'...');
-  $('#speed').html(Math.round(pairData.speed));
-  $('#travelTime').html(Math.round(pairData.travelTime/60));
-  var congestionRatio = pairData.speed/pairData.freeFlow;
-  var color;
-  if (congestionRatio > 0.9) {
-    color = 'rgb(142,204,158)';
-    text = 'normal';
-  } else if (congestionRatio > 0.4) {
-    color = 'rgb(250,189,137)';
-    text = 'impacted';
-  } else {
-    color = 'rgb(248,157,154)';
-    text = 'congested';
-  }
-  $('#site-status').css('background-color',color);
-  $('#site-status-text').html(text);
 
-  
-  if (selectedRouteSegment) {
-    selectedRouteSegment.setOptions({strokeColor: roadSegmentStrokeColor});
-  }
-  selectedRouteSegment = pairData.path;
-  selectedRouteSegment.setOptions({strokeColor: selectedRoadSegmentStrokeColor, strokeOpacity: 1.0});
-  
-  // Line Chart
-  pairData.distance = pairData.travelTime/60*pairData.speed
-  seriesData = [];
-  for (key in pairData.percentiles) {
-    percentile = pairData.percentiles[key];
-    percentileLevel = parseInt(key.slice(1));
-    
-    // Fix number formatting
-    for (var i=0; i<percentile.length; i++) {
-      if (isNaN(percentile[i].x)) {
-        hoursAndMinutes = percentile[i].x.split(':');
-        newDate = new Date(1970, 0, 1, hoursAndMinutes[0], hoursAndMinutes[1]);
-        percentile[i].x = newDate.getTime()/1000;
-        percentile[i].y = pairData.distance/(percentile[i].y/60);
-      }
+
+  $.ajax({
+    url: pairId+".json",
+  }).done(function(percentiles) {
+
+    var pairData = traffic.pairData[pairId];
+    $('#title').html(pairData.title.slice(0,60)+'...');
+    $('#speed').html(Math.round(pairData.speed));
+    $('#travelTime').html(Math.round(pairData.travelTime/60));
+    var congestionRatio = pairData.speed/pairData.freeFlow;
+    var color;
+    if (congestionRatio > 0.9) {
+      color = 'rgb(142,204,158)';
+      text = 'normal';
+    } else if (congestionRatio > 0.4) {
+      color = 'rgb(250,189,137)';
+      text = 'impacted';
+    } else {
+      color = 'rgb(248,157,154)';
+      text = 'congested';
     }
-    seriesElement = {};
-    seriesElement.data = percentile;
-    alpha = Math.abs((percentileLevel-50)/85)*-1+0.7;
-    seriesElement.color = 'rgba(70,130,180,'+alpha+')';
-    seriesElement.name = percentileLevel+"th Percentile"
-    seriesData.push(seriesElement);
-  }
-  $("#historicalTravelTimes").empty();
-  var graph = new Rickshaw.Graph({
-  element: document.querySelector("#historicalTravelTimes"),
-    renderer: 'line',
-    series: seriesData
-  });
-  graph.render();
+    $('#site-status').css('background-color',color);
+    $('#site-status-text').html(text);
 
-  var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-    graph: graph
-  } );
-  
-  var xAxis = new Rickshaw.Graph.Axis.Time({
+    
+    if (selectedRouteSegment) {
+      selectedRouteSegment.setOptions({strokeColor: roadSegmentStrokeColor});
+    }
+    selectedRouteSegment = pairData.path;
+    selectedRouteSegment.setOptions({strokeColor: selectedRoadSegmentStrokeColor, strokeOpacity: 1.0});
+    
+    // Line Chart
+    pairData.distance = pairData.travelTime/60*pairData.speed
+    seriesData = [];
+    if (activeTab === 'dow') {
+      chosenPercentiles = percentiles.percentiles.dow[dow]
+    } else {
+      chosenPercentiles = percentiles.percentiles.all
+    }
+    
+    for (key in chosenPercentiles) {
+      percentile = chosenPercentiles[key];
+      percentileLevel = parseInt(key.slice(1));
+      
+      // Fix number formatting
+      for (var i=0; i<percentile.length; i++) {
+        if (isNaN(percentile[i].x)) {
+          hoursAndMinutes = percentile[i].x.split(':');
+          newDate = new Date(1970, 0, 1, hoursAndMinutes[0], hoursAndMinutes[1]);
+          percentile[i].x = newDate.getTime()/1000;
+          percentile[i].y = pairData.distance/(percentile[i].y/60);
+        }
+      }
+      seriesElement = {};
+      seriesElement.data = percentile;
+      alpha = Math.abs((percentileLevel-50)/85)*-1+0.7;
+      seriesElement.color = 'rgba(70,130,180,'+alpha+')';
+      seriesElement.name = percentileLevel+"th Percentile"
+      seriesData.push(seriesElement);
+    }
+    $("#historicalTravelTimes").empty();
+    var graph = new Rickshaw.Graph({
+    element: document.querySelector("#historicalTravelTimes"),
+      renderer: 'line',
+      series: seriesData
+    });
+    graph.render();
+
+    var hoverDetail = new Rickshaw.Graph.HoverDetail( {
       graph: graph
-  });
+    } );
+    
+    var xAxis = new Rickshaw.Graph.Axis.Time({
+        graph: graph
+    });
 
-  xAxis.render();
-  var yAxis = new Rickshaw.Graph.Axis.Y({
-      graph: graph
-  });
+    xAxis.render();
+    var yAxis = new Rickshaw.Graph.Axis.Y({
+        graph: graph
+    });
 
-  yAxis.render();
-  
-  // Render Current Location
-  var charts = $('#charts')
-  charts.fadeIn(200);
+    yAxis.render();
+    
+    // Render Current Location
+    var charts = $('#charts')
+    charts.fadeIn(200);
+  });
 };
 
 function pathMouseover(path) {
@@ -210,7 +232,6 @@ function getTraffic() {
 }
 
 getTraffic();
-
 
 /*
 var graph = new Rickshaw.Graph({
