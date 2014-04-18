@@ -7,6 +7,35 @@ var selectedRouteSegment = null;
 var highlightedRouteSegment = null;
 var currentData;
 
+
+// Utilities
+var renderMiseryIndex = function (traffic) {
+  miseryIndex = getMiseryIndex(traffic);
+  console.log(miseryIndex);
+  
+}
+var getMiseryIndex = function(traffic) {
+  var denominator = 0;
+  var numerator = 0;
+  for (var pairId in traffic.pairData) {
+    pair = traffic.pairData[pairId];
+    
+    speed = pair.speed;
+    freeFlow = pair.freeFlow;
+    travelTime = pair.travelTime;
+    
+    if (!isNaN(speed) && !isNaN(travelTime) && !isNaN(freeFlow)) {
+      distance = travelTime/60*speed
+      denominator += distance
+      speedBelowFreeflow = freeFlow-speed
+      if (speedBelowFreeflow > 0) {
+        numerator += speedBelowFreeflow*distance
+      }
+    }
+  }
+  return numerator/denominator
+}
+
 // Get Tab Status
 activeTab = ''
 if ($('ad').hasClass('active')) {
@@ -14,7 +43,6 @@ if ($('ad').hasClass('active')) {
 } else if ($('doy').hasClass('active')) {
   activeTab = 'dow';
 }
-
 
 // Set the Date Tab Value
 var setDateTab = function() {
@@ -28,17 +56,23 @@ var setDateTab = function() {
   
 }()
 
+// Handle when the path is clicked or when an item is pulled from the drop-down
 var pathClick = function(pairId, traffic) {
 
-
+  // Pull the historical data for the pair id
   $.ajax({
     url: 'data/'+pairId+".json",
   }).done(function(percentiles) {
-
     var pairData = traffic.pairData[pairId];
+    
+    // Show the PairId Title (Name)
     $('#title').html(pairData.title.slice(0,60)+'...');
+    
+    // Show the Speed and Travel Time
     $('#speed').html(Math.round(pairData.speed));
     $('#travelTime').html(Math.round(pairData.travelTime/60));
+    
+    // Show the Congestion Ratio
     var congestionRatio = pairData.speed/pairData.freeFlow;
     var color;
     if (congestionRatio > 0.9) {
@@ -55,6 +89,7 @@ var pathClick = function(pairId, traffic) {
     $('#site-status-text').html(text);
 
     
+    // Color the Selected Route Segment
     if (selectedRouteSegment) {
       selectedRouteSegment.setOptions({strokeColor: roadSegmentStrokeColor});
     }
@@ -230,24 +265,10 @@ function getTraffic() {
   $.ajax({
     url: "current.json",
   }).done(function(traffic) {
+    renderMiseryIndex(traffic);
     initializeTypeahead(traffic);
     initializeMap(traffic);
   });
 }
 
 getTraffic();
-
-/*
-var graph = new Rickshaw.Graph({
-  element: document.querySelector("#historicalTravelTimes"),
-    renderer: 'line',
-    series: [{
-      data: [ { x: 0, y: 40 }, { x: 1, y: 49 }, { x: 2, y: 54 }, { x: 3, y: 60 } ],
-      color: 'steelblue'
-    }, {
-      data: [ { x: 0, y: 20 }, { x: 1, y: 23 }, { x: 2, y: 28 }, { x: 3, y: 36 } ],
-      color: 'lightblue'
-    }]
-  });
-graph.render();
-*/
