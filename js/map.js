@@ -20,15 +20,19 @@ if ($('ad').hasClass('active')) {
 var setDateTab = function() {
   now = new Date();
   var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  day = 'Previous '+days[now.getDay()]+'s';
+  dow = now.getDay();
+  
+  // Set Day
+  day = 'Previous '+days[dow]+'s';
   $('#doy').html(day);
+  
 }()
 
 var pathClick = function(pairId, traffic) {
 
 
   $.ajax({
-    url: pairId+".json",
+    url: 'data/'+pairId+".json",
   }).done(function(percentiles) {
 
     var pairData = traffic.pairData[pairId];
