@@ -6,6 +6,7 @@ var highlightedRouteSegment;
 var selectedRouteSegment = null;
 var highlightedRouteSegment = null;
 var currentData;
+var activePairId;
 
 // Events
 function initializeEvents() {
@@ -19,8 +20,9 @@ function initializePercentileTabsEvents() {
     $(tabs[i]).on("click", function() {
       selectedTab = $(this);
       if (!selectedTab.hasClass('active')) {
-        selectedTab.addClass('active')
-        var tabs = $('.percentile-graphs').children()
+        selectedTab.addClass('active');
+        updateGraph(selectedTab.attr('id'));
+        var tabs = $('.percentile-graphs').children();
         for (i = 0; i < tabs.length; i++) {
           currentTab = $(tabs[i]);
           if (currentTab.hasClass('active') && currentTab.attr('id') !== selectedTab.attr('id')) {
@@ -32,8 +34,27 @@ function initializePercentileTabsEvents() {
   }
 }
 
+// Renderers
+function setPercentileTabDateLabel() {
+  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  dow = getDayOfWeek();
+  day = 'Previous '+days[dow]+'s';
+  $('#dow').children().first().html(day);
+}
+
+upda
+
 // Utilities
-var renderMiseryIndex = function (traffic) {
+function getActivePercentileTab() {
+  return $('.percentile-graphs').children('.active').attr('id');
+}
+
+function getDayOfWeek() {
+  now = new Date();
+  return now.getDay();
+}
+
+function getMiseryIndex(traffic) {
   var denominator = 0;
   var numerator = 0;
   
@@ -54,29 +75,9 @@ var renderMiseryIndex = function (traffic) {
     }
   }
   miseryIndex = numerator/denominator;
-  return miseryIndex;
-  
+  return miseryIndex;  
 }
 
-// Get Tab Status
-activeTab = ''
-if ($('ad').hasClass('active')) {
-  activeTab = 'all';
-} else if ($('doy').hasClass('active')) {
-  activeTab = 'dow';
-}
-
-// Set the Date Tab Value
-var setDateTab = function() {
-  now = new Date();
-  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  dow = now.getDay();
-  
-  // Set Day
-  day = 'Previous '+days[dow]+'s';
-  $('#doy').html(day);
-  
-}()
 
 // Handle when the path is clicked or when an item is pulled from the drop-down
 var pathClick = function(pairId, traffic) {
@@ -125,10 +126,12 @@ var pathClick = function(pairId, traffic) {
     // Line Chart
     pairData.distance = pairData.travelTime/60*pairData.speed
     seriesData = [];
+    var activeTab = getActivePercentileTab();
     if (activeTab === 'dow') {
-      chosenPercentiles = percentiles.percentiles.dow[dow]
+      dow = getDayOfWeek();
+      chosenPercentiles = percentiles.percentiles[activeTab][dow];
     } else {
-      chosenPercentiles = percentiles.percentiles.all
+      chosenPercentiles = percentiles.percentiles[activeTab];
     }
     
     for (key in chosenPercentiles) {
@@ -299,3 +302,4 @@ function getTraffic() {
 
 getTraffic();
 initializeEvents();
+setPercentileTabDateLabel();
