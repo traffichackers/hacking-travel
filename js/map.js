@@ -7,16 +7,36 @@ var selectedRouteSegment = null;
 var highlightedRouteSegment = null;
 var currentData;
 
+// Events
+function initializeEvents() {
+  initializePercentileTabsEvents();
+}
+
+function initializePercentileTabsEvents() {
+  var i = 0;
+  var tabs = $('.percentile-graphs').children();
+  for (i = 0; i < tabs.length; i++) {
+    $(tabs[i]).on("click", function() {
+      selectedTab = $(this);
+      if (!selectedTab.hasClass('active')) {
+        selectedTab.addClass('active')
+        var tabs = $('.percentile-graphs').children()
+        for (i = 0; i < tabs.length; i++) {
+          currentTab = $(tabs[i]);
+          if (currentTab.hasClass('active') && currentTab.attr('id') !== selectedTab.attr('id')) {
+            currentTab.removeClass('active');
+          }
+        }
+      }
+    });
+  }
+}
 
 // Utilities
 var renderMiseryIndex = function (traffic) {
-  miseryIndex = getMiseryIndex(traffic);
-  console.log(miseryIndex);
-  
-}
-var getMiseryIndex = function(traffic) {
   var denominator = 0;
   var numerator = 0;
+  
   for (var pairId in traffic.pairData) {
     pair = traffic.pairData[pairId];
     
@@ -25,15 +45,17 @@ var getMiseryIndex = function(traffic) {
     travelTime = pair.travelTime;
     
     if (!isNaN(speed) && !isNaN(travelTime) && !isNaN(freeFlow)) {
-      distance = travelTime/60*speed
-      denominator += distance
-      speedBelowFreeflow = freeFlow-speed
+      distance = travelTime/60*speed;
+      denominator += distance;
+      speedBelowFreeflow = freeFlow-speed;
       if (speedBelowFreeflow > 0) {
-        numerator += speedBelowFreeflow*distance
+        numerator += speedBelowFreeflow*distance;
       }
     }
   }
-  return numerator/denominator
+  miseryIndex = numerator/denominator;
+  return miseryIndex;
+  
 }
 
 // Get Tab Status
@@ -66,7 +88,11 @@ var pathClick = function(pairId, traffic) {
     var pairData = traffic.pairData[pairId];
     
     // Show the PairId Title (Name)
-    $('#title').html(pairData.title.slice(0,60)+'...');
+    title = pairData.title.slice(0,60);
+    if (pairData.title.length > 60) {
+      title += '...';
+    }
+    $('#title').html(title);
     
     // Show the Speed and Travel Time
     $('#speed').html(Math.round(pairData.speed));
@@ -272,3 +298,4 @@ function getTraffic() {
 }
 
 getTraffic();
+initializeEvents();

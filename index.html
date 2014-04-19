@@ -36,8 +36,10 @@
   </div>
   <div class="container hundred-height">
     <div class="row hundred-height">
+      
       <!-- Map -->
       <div class="col-xs-6 .hidden-xs .hidden-sm" id="map-canvas" style="height: 80%"></div>
+      
       <!-- Metadata -->
       <div class="col-xs-6" id="charts">
         <div class="row">
@@ -62,10 +64,10 @@
         </div>
         <div class="row">
           <ul class="nav nav-tabs percentile-graphs">
-            <li class="active"><a id="ad" href="#">All Days</a></li>
-            <li class=""><a id="sd" href="#">Similar Days of the Week</a></li>
-            <li class=""><a id="wd" href="#">Weekdays</a></li>
-            <li class=""><a id="we" href="#">Weekends</a></li>
+            <li id="ad" class="active"><a href="#">All Days</a></li>
+            <li id="sd" class=""><a href="#">Similar Days of the Week</a></li>
+            <li id="wd" class=""><a href="#">Weekdays</a></li>
+            <li id="we" class=""><a href="#">Weekends</a></li>
           </ul>
           <div id='historicalTravelTimes'></div>
         </div>
