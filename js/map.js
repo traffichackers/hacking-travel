@@ -6,7 +6,9 @@ var highlightedRouteSegment;
 var selectedRouteSegment = null;
 var highlightedRouteSegment = null;
 var currentData;
+var activeDistance;
 var activePairId;
+var activePercentiles;
 
 // Events
 function initializeEvents() {
@@ -21,7 +23,7 @@ function initializePercentileTabsEvents() {
       selectedTab = $(this);
       if (!selectedTab.hasClass('active')) {
         selectedTab.addClass('active');
-        updateGraph(selectedTab.attr('id'));
+        renderGraph(activeDistance, activePercentiles, selectedTab.attr('id'));
         var tabs = $('.percentile-graphs').children();
         for (i = 0; i < tabs.length; i++) {
           currentTab = $(tabs[i]);
@@ -47,6 +49,62 @@ function renderMiseryIndex(traffic) {
   console.log(miseryIndex);
 }
 
+function renderGraph(distance,percentiles,type) {
+  
+  seriesData = [];
+  var activeTab = getActivePercentileTab();
+  if (activeTab === 'dow') {
+    dow = getDayOfWeek();
+    chosenPercentiles = percentiles.percentiles[activeTab];
+  } else {
+    chosenPercentiles = percentiles.percentiles[activeTab];
+  }
+
+  for (key in chosenPercentiles) {
+    percentile = chosenPercentiles[key];
+    percentileLevel = parseInt(key.slice(1));
+
+    // Fix number formatting
+    for (var i=0; i<percentile.length; i++) {
+      if (isNaN(percentile[i].x)) {
+        hoursAndMinutes = percentile[i].x.split(':');
+        newDate = new Date(1970, 0, 1, hoursAndMinutes[0], hoursAndMinutes[1]);
+        percentile[i].x = newDate.getTime()/1000;
+        percentile[i].y = distance/(percentile[i].y/60);
+      }
+    }
+    seriesElement = {};
+    seriesElement.data = percentile;
+    alpha = Math.abs((percentileLevel-50)/85)*-1+0.7;
+    seriesElement.color = 'rgba(70,130,180,'+alpha+')';
+    seriesElement.name = percentileLevel+"th Percentile"
+    seriesData.push(seriesElement);
+  }
+  $("#historicalTravelTimes").empty();
+  var graph = new Rickshaw.Graph({
+  element: document.querySelector("#historicalTravelTimes"),
+    renderer: 'line',
+    series: seriesData
+  });
+  graph.render();
+
+  var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+    graph: graph
+  } );
+
+  var xAxis = new Rickshaw.Graph.Axis.Time({
+      graph: graph
+  });
+
+  xAxis.render();
+  var yAxis = new Rickshaw.Graph.Axis.Y({
+      graph: graph
+  });
+
+  yAxis.render();
+    
+}
+
 // Utilities
 function getActivePercentileTab() {
   return $('.percentile-graphs').children('.active').attr('id');
@@ -70,6 +128,7 @@ function getMiseryIndex(traffic) {
     
     if (!isNaN(speed) && !isNaN(travelTime) && !isNaN(freeFlow)) {
       distance = travelTime/60*speed;
+      activeDistance = distance;
       denominator += distance;
       speedBelowFreeflow = freeFlow-speed;
       if (speedBelowFreeflow > 0) {
@@ -84,11 +143,13 @@ function getMiseryIndex(traffic) {
 
 // Handle when the path is clicked or when an item is pulled from the drop-down
 var pathClick = function(pairId, traffic) {
-
+  activePairId = pairId;
+  
   // Pull the historical data for the pair id
   $.ajax({
     url: 'data/'+pairId+".json",
   }).done(function(percentiles) {
+    activePercentiles = percentiles;
     var pairData = traffic.pairData[pairId];
     
     // Show the PairId Title (Name)
@@ -126,59 +187,8 @@ var pathClick = function(pairId, traffic) {
     selectedRouteSegment = pairData.path;
     selectedRouteSegment.setOptions({strokeColor: selectedRoadSegmentStrokeColor, strokeOpacity: 1.0});
     
-    // Line Chart
-    pairData.distance = pairData.travelTime/60*pairData.speed
-    seriesData = [];
-    var activeTab = getActivePercentileTab();
-    if (activeTab === 'dow') {
-      dow = getDayOfWeek();
-      chosenPercentiles = percentiles.percentiles[activeTab][dow];
-    } else {
-      chosenPercentiles = percentiles.percentiles[activeTab];
-    }
-    
-    for (key in chosenPercentiles) {
-      percentile = chosenPercentiles[key];
-      percentileLevel = parseInt(key.slice(1));
-      
-      // Fix number formatting
-      for (var i=0; i<percentile.length; i++) {
-        if (isNaN(percentile[i].x)) {
-          hoursAndMinutes = percentile[i].x.split(':');
-          newDate = new Date(1970, 0, 1, hoursAndMinutes[0], hoursAndMinutes[1]);
-          percentile[i].x = newDate.getTime()/1000;
-          percentile[i].y = pairData.distance/(percentile[i].y/60);
-        }
-      }
-      seriesElement = {};
-      seriesElement.data = percentile;
-      alpha = Math.abs((percentileLevel-50)/85)*-1+0.7;
-      seriesElement.color = 'rgba(70,130,180,'+alpha+')';
-      seriesElement.name = percentileLevel+"th Percentile"
-      seriesData.push(seriesElement);
-    }
-    $("#historicalTravelTimes").empty();
-    var graph = new Rickshaw.Graph({
-    element: document.querySelector("#historicalTravelTimes"),
-      renderer: 'line',
-      series: seriesData
-    });
-    graph.render();
-
-    var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-      graph: graph
-    } );
-    
-    var xAxis = new Rickshaw.Graph.Axis.Time({
-        graph: graph
-    });
-
-    xAxis.render();
-    var yAxis = new Rickshaw.Graph.Axis.Y({
-        graph: graph
-    });
-
-    yAxis.render();
+    distance = pairData.travelTime/60*pairData.speed;
+    renderGraph(distance,percentiles,'all');
     
     // Render Current Location
     var charts = $('#charts')
