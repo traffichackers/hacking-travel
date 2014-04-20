@@ -50,7 +50,7 @@ function renderMiseryIndex(traffic) {
 }
 
 function renderGraph(distance,percentiles,type) {
-  
+  console.log(distance);
   seriesData = [];
   var activeTab = getActivePercentileTab();
   if (activeTab === 'dow') {
@@ -68,7 +68,9 @@ function renderGraph(distance,percentiles,type) {
     for (var i=0; i<percentile.length; i++) {
       if (isNaN(percentile[i].x)) {
         hoursAndMinutes = percentile[i].x.split(':');
-        newDate = new Date(1970, 0, 1, hoursAndMinutes[0], hoursAndMinutes[1]);
+        today = new Date();
+        newDate = new Date(Date.UTC(1900+today.getYear(), today.getMonth(), today.getDay(), hoursAndMinutes[0], hoursAndMinutes[1]));
+        newDate.setHours(newDate.getHours() - 4);
         percentile[i].x = newDate.getTime()/1000;
         percentile[i].y = distance/(percentile[i].y/60);
       }
@@ -128,7 +130,6 @@ function getMiseryIndex(traffic) {
     
     if (!isNaN(speed) && !isNaN(travelTime) && !isNaN(freeFlow)) {
       distance = travelTime/60*speed;
-      activeDistance = distance;
       denominator += distance;
       speedBelowFreeflow = freeFlow-speed;
       if (speedBelowFreeflow > 0) {
@@ -188,6 +189,7 @@ var pathClick = function(pairId, traffic) {
     selectedRouteSegment.setOptions({strokeColor: selectedRoadSegmentStrokeColor, strokeOpacity: 1.0});
     
     distance = pairData.travelTime/60*pairData.speed;
+    activeDistance = distance;
     renderGraph(distance,percentiles,'all');
     
     // Render Current Location
