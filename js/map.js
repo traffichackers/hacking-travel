@@ -50,8 +50,9 @@ function renderMiseryIndex(traffic) {
 }
 
 function renderGraph(distance,percentiles,type) {
-  console.log(distance);
   seriesData = [];
+  
+  // Select the proper percentile
   var activeTab = getActivePercentileTab();
   if (activeTab === 'dow') {
     dow = getDayOfWeek();
@@ -60,6 +61,7 @@ function renderGraph(distance,percentiles,type) {
     chosenPercentiles = percentiles.percentiles[activeTab];
   }
 
+  // Prepare each percentile
   for (key in chosenPercentiles) {
     percentile = chosenPercentiles[key];
     percentileLevel = parseInt(key.slice(1));
@@ -75,6 +77,8 @@ function renderGraph(distance,percentiles,type) {
         percentile[i].y = distance/(percentile[i].y/60);
       }
     }
+    
+    // Push each percentile for rendering
     seriesElement = {};
     seriesElement.data = percentile;
     alpha = Math.abs((percentileLevel-50)/85)*-1+0.7;
@@ -82,6 +86,8 @@ function renderGraph(distance,percentiles,type) {
     seriesElement.name = percentileLevel+"th Percentile"
     seriesData.push(seriesElement);
   }
+  
+  // Erase the previous graph (if any) and render the new graph
   $("#historicalTravelTimes").empty();
   var graph = new Rickshaw.Graph({
   element: document.querySelector("#historicalTravelTimes"),
@@ -90,19 +96,11 @@ function renderGraph(distance,percentiles,type) {
   });
   graph.render();
 
-  var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-    graph: graph
-  } );
-
-  var xAxis = new Rickshaw.Graph.Axis.Time({
-      graph: graph
-  });
-
+  // Activate the hover effect and show the axes
+  var hoverDetail = new Rickshaw.Graph.HoverDetail( { graph: graph });
+  var xAxis = new Rickshaw.Graph.Axis.Time({ graph: graph });
   xAxis.render();
-  var yAxis = new Rickshaw.Graph.Axis.Y({
-      graph: graph
-  });
-
+  var yAxis = new Rickshaw.Graph.Axis.Y({ graph: graph });
   yAxis.render();
     
 }
