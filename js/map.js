@@ -23,7 +23,6 @@ function initializePercentileTabsEvents() {
       selectedTab = $(this);
       if (!selectedTab.hasClass('active')) {
         selectedTab.addClass('active');
-        renderGraph(activeDistance, activePercentiles, selectedTab.attr('id'));
         var tabs = $('.percentile-graphs').children();
         for (i = 0; i < tabs.length; i++) {
           currentTab = $(tabs[i]);
@@ -31,6 +30,7 @@ function initializePercentileTabsEvents() {
             currentTab.removeClass('active');
           }
         }
+        renderGraph(activeDistance, activePercentiles, selectedTab.attr('id'));
       }
     });
   }
@@ -55,7 +55,7 @@ function renderGraph(distance,percentiles,type) {
   var activeTab = getActivePercentileTab();
   if (activeTab === 'dow') {
     dow = getDayOfWeek();
-    chosenPercentiles = percentiles.percentiles[activeTab];
+    chosenPercentiles = percentiles.percentiles[activeTab][dow];
   } else {
     chosenPercentiles = percentiles.percentiles[activeTab];
   }
