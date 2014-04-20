@@ -42,7 +42,10 @@ function setPercentileTabDateLabel() {
   $('#dow').children().first().html(day);
 }
 
-upda
+function renderMiseryIndex(traffic) {
+  miseryIndex = getMiseryIndex(traffic);
+  console.log(miseryIndex);
+}
 
 // Utilities
 function getActivePercentileTab() {
@@ -231,6 +234,16 @@ function initializeTypeahead(traffic) {
 var addSegment = function(pairId,segmentData,i,traffic) {
   var paths = segmentData[1];
 
+  // Flip paths, if necessary
+  if (paths[0][0] < 0) {
+      for (var i = 0; i < paths.length; i++) {
+          yComponent = paths[i][0];
+          xComponent = paths[i][1];
+          paths[i][1] = yComponent;
+          paths[i][0] = xComponent;
+      }
+  }
+                   
   // eg: [5490.0, [[42.71946, -71.20996], [42.71941, -71.20972], ...]
   var x1 = paths[0][0];
   var y1 = paths[0][1];
