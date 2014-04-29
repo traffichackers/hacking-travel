@@ -7,6 +7,7 @@ body {
   padding: 0;
   font-family: Tahoma;
 }
+
 #map-canvas {
   height: 100%;
   width: 50%;
@@ -25,6 +26,12 @@ body {
   border-radius:2em;"
 }
 
+/* Detail Pane Indent */
+.detail-pane-rows {
+  padding: 0em 2em 0em 2em;
+}
+
+/* Typeahead CSS */
 .tt-dropdown-menu,
 .gist {
   text-align: left;
