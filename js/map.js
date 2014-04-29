@@ -5,7 +5,7 @@ var highlightedRoadSegmentStrokeColor = 'rgb(232,186,180)';
 var highlightedRouteSegment;
 var selectedRouteSegment = null;
 var highlightedRouteSegment = null;
-var currentData;
+var activeTraffic;
 var activeDistance;
 var activePairId;
 var activePercentiles;
@@ -30,7 +30,7 @@ function initializePercentileTabsEvents() {
             currentTab.removeClass('active');
           }
         }
-        renderGraph(activeDistance, activePercentiles, selectedTab.attr('id'));
+        renderGraph(activeTraffic, activePercentiles, activeDistance);
       }
     });
   }
@@ -49,9 +49,9 @@ function renderMiseryIndex(traffic) {
   console.log(miseryIndex);
 }
 
-function renderGraph(distance,percentiles,type) {
+function renderGraph(traffic, percentiles, distance) {
   seriesData = [];
-  
+
   // Select the proper percentile
   var activeTab = getActivePercentileTab();
   if (activeTab === 'dow') {
@@ -77,7 +77,7 @@ function renderGraph(distance,percentiles,type) {
         percentile[i].y = distance/(percentile[i].y/60);
       }
     }
-    
+
     // Push each percentile for rendering
     seriesElement = {};
     seriesElement.data = percentile;
@@ -86,7 +86,7 @@ function renderGraph(distance,percentiles,type) {
     seriesElement.name = percentileLevel+"th Percentile"
     seriesData.push(seriesElement);
   }
-  
+
   // Erase the previous graph (if any) and render the new graph
   $("#historicalTravelTimes").empty();
   var graph = new Rickshaw.Graph({
@@ -102,7 +102,7 @@ function renderGraph(distance,percentiles,type) {
   xAxis.render();
   var yAxis = new Rickshaw.Graph.Axis.Y({ graph: graph });
   yAxis.render();
-    
+
 }
 
 // Utilities
@@ -118,14 +118,14 @@ function getDayOfWeek() {
 function getMiseryIndex(traffic) {
   var denominator = 0;
   var numerator = 0;
-  
+
   for (var pairId in traffic.pairData) {
     pair = traffic.pairData[pairId];
-    
+
     speed = pair.speed;
     freeFlow = pair.freeFlow;
     travelTime = pair.travelTime;
-    
+
     if (!isNaN(speed) && !isNaN(travelTime) && !isNaN(freeFlow)) {
       distance = travelTime/60*speed;
       denominator += distance;
@@ -136,32 +136,32 @@ function getMiseryIndex(traffic) {
     }
   }
   miseryIndex = numerator/denominator;
-  return miseryIndex;  
+  return miseryIndex;
 }
 
 
 // Handle when the path is clicked or when an item is pulled from the drop-down
 var pathClick = function(pairId, traffic) {
   activePairId = pairId;
-  
+
   // Pull the historical data for the pair id
   $.ajax({
     url: 'data/'+pairId+".json",
   }).done(function(percentiles) {
     activePercentiles = percentiles;
     var pairData = traffic.pairData[pairId];
-    
+
     // Show the PairId Title (Name)
     title = pairData.title.slice(0,60);
     if (pairData.title.length > 60) {
       title += '...';
     }
     $('#title').html(title);
-    
+
     // Show the Speed and Travel Time
     $('#speed').html(Math.round(pairData.speed));
     $('#travelTime').html(Math.round(pairData.travelTime/60));
-    
+
     // Show the Congestion Ratio
     var congestionRatio = pairData.speed/pairData.freeFlow;
     var color;
@@ -178,18 +178,18 @@ var pathClick = function(pairId, traffic) {
     $('#site-status').css('background-color',color);
     $('#site-status-text').html(text);
 
-    
+
     // Color the Selected Route Segment
     if (selectedRouteSegment) {
       selectedRouteSegment.setOptions({strokeColor: roadSegmentStrokeColor});
     }
     selectedRouteSegment = pairData.path;
     selectedRouteSegment.setOptions({strokeColor: selectedRoadSegmentStrokeColor, strokeOpacity: 1.0});
-    
+
     distance = pairData.travelTime/60*pairData.speed;
     activeDistance = distance;
-    renderGraph(distance,percentiles,'all');
-    
+    renderGraph(traffic,percentiles,distance);
+
     // Render Current Location
     var charts = $('#charts')
     charts.fadeIn(200);
@@ -230,7 +230,7 @@ function initializeTypeahead(traffic) {
     local: typeaheadData
   });
   numbers.initialize();
-   
+
   // Instantiate the typeahead UI
   $('.example-numbers').typeahead(null, {
     displayKey: 'pairName',
@@ -253,7 +253,7 @@ var addSegment = function(pairId,segmentData,i,traffic) {
           paths[i][0] = xComponent;
       }
   }
-                   
+
   // eg: [5490.0, [[42.71946, -71.20996], [42.71941, -71.20972], ...]
   var x1 = paths[0][0];
   var y1 = paths[0][1];
@@ -317,6 +317,7 @@ function getTraffic() {
   $.ajax({
     url: "current.json",
   }).done(function(traffic) {
+    activeTraffic = traffic
     renderMiseryIndex(traffic);
     initializeTypeahead(traffic);
     initializeMap(traffic);
