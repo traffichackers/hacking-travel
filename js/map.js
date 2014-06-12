@@ -30,7 +30,7 @@ function initializePercentileTabsEvents() {
             currentTab.removeClass('active');
           }
         }
-        renderGraph(activeTraffic, activePercentiles, activeDistance);
+        renderGraph(activeTraffic.pairData[activePairId].today, activePercentiles, activeDistance);
       }
     });
   }
@@ -49,7 +49,7 @@ function renderMiseryIndex(traffic) {
   console.log(miseryIndex);
 }
 
-function renderGraph(traffic, percentiles, distance) {
+function renderGraph(today, percentiles, distance) {
   seriesData = [];
 
   // Select the proper percentile
@@ -67,25 +67,24 @@ function renderGraph(traffic, percentiles, distance) {
     percentileLevel = parseInt(key.slice(1));
 
     // Fix number formatting
-    for (var i=0; i<percentile.length; i++) {
-      if (isNaN(percentile[i].x)) {
-        hoursAndMinutes = percentile[i].x.split(':');
-        today = new Date();
-        newDate = new Date(Date.UTC(1900+today.getYear(), today.getMonth(), today.getDay(), hoursAndMinutes[0], hoursAndMinutes[1]));
-        newDate.setHours(newDate.getHours() - 4);
-        percentile[i].x = newDate.getTime()/1000;
-        percentile[i].y = distance/(percentile[i].y/60);
-      }
-    }
+    percentile = fixFormatting(percentile, distance)
 
     // Push each percentile for rendering
     seriesElement = {};
     seriesElement.data = percentile;
-    alpha = Math.abs((percentileLevel-50)/85)*-1+0.7;
+    alpha = (1-Math.abs(percentileLevel-50)/50)*0.4;
     seriesElement.color = 'rgba(70,130,180,'+alpha+')';
     seriesElement.name = percentileLevel+"th Percentile"
     seriesData.push(seriesElement);
   }
+
+  // Add the Data for Today
+  today = fixFormatting(today, distance)
+  seriesElement = {};
+  seriesElement.data = today;
+  seriesElement.color = 'rgba(70,130,180,0.7)';
+  seriesElement.name = "Today";
+  seriesData.push(seriesElement);
 
   // Erase the previous graph (if any) and render the new graph
   $("#historicalTravelTimes").empty();
@@ -106,6 +105,21 @@ function renderGraph(traffic, percentiles, distance) {
 }
 
 // Utilities
+function fixFormatting(percentile, distance) {
+  for (var i=0; i<percentile.length; i++) {
+    if (isNaN(percentile[i].x)) {
+      hoursAndMinutes = percentile[i].x.split(':');
+      today = new Date();
+      newDate = new Date(Date.UTC(1900+today.getYear(), today.getMonth(), today.getDay(), hoursAndMinutes[0], hoursAndMinutes[1]));
+      newDate.setHours(newDate.getHours() - 4);
+      percentile[i].x = newDate.getTime()/1000;
+      percentile[i].y = distance/(percentile[i].y/60);
+    }
+  }
+  return percentile;
+}
+
+
 function getActivePercentileTab() {
   return $('.percentile-graphs').children('.active').attr('id');
 }
@@ -188,7 +202,7 @@ var pathClick = function(pairId, traffic) {
 
     distance = pairData.travelTime/60*pairData.speed;
     activeDistance = distance;
-    renderGraph(traffic,percentiles,distance);
+    renderGraph(pairData.today,percentiles,distance);
 
     // Render Current Location
     var charts = $('#charts')
