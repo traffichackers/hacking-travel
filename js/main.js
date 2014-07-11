@@ -1,4 +1,3 @@
-var map;
 var roadSegmentStrokeColor = 'rgb(99,76,124)';
 var selectedRoadSegmentStrokeColor = 'rgb(197,253,115)';
 var highlightedRoadSegmentStrokeColor = 'rgb(232,186,180)';
@@ -46,7 +45,6 @@ function setPercentileTabDateLabel() {
 
 function renderMiseryIndex(traffic) {
   miseryIndex = getMiseryIndex(traffic);
-  console.log(miseryIndex);
 }
 
 function renderGraph(today, percentiles, distance) {
@@ -255,89 +253,63 @@ function initializeTypeahead(traffic) {
   });
 }
 
-var addSegment = function(pairId,segmentData,i,traffic) {
-  var paths = segmentData[1];
+function renderRoads(roads, idMap) {
 
-  // Flip paths, if necessary
-  if (paths[0][0] < 0) {
-      for (var i = 0; i < paths.length; i++) {
-          yComponent = paths[i][0];
-          xComponent = paths[i][1];
-          paths[i][1] = yComponent;
-          paths[i][0] = xComponent;
+  var width = 700,
+    height = 700;
+
+  var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  var projection = d3.geo.albers()
+    .center([-71.08, 42.36])
+    .parallels([38,46])
+    .rotate([0, 0])
+    .scale(24000)
+    .translate([width / 2, height / 2]);
+
+  svg.selectAll("path")
+    .data(roads.features)
+    .enter().append("path")
+    .attr("d", d3.geo.path().projection(projection))
+    .attr('style','fill:none; stroke:black; strokeColor:roadSegmentStrokeColor; strokeOpacity:0.5, strokeWeight:2')
+    .on('mouseover',function(testArg) {
+      console.log(testArg);
+      pathMouseover(path);
+    })
+    .on('mouseout',function(testArg) {
+      removePathMouseover();
+    })
+    .on('click',function(testArg) {
+      pathClick(pairId,traffic);
+    })
+    .each( function(d, i) {
+      var pairId = idMap[d.properties.UniqueId]
+      if (traffic.pairData.hasOwnProperty(pairId)) {
+        traffic.pairData[pairId]['path'] = path;
       }
-  }
-
-  // eg: [5490.0, [[42.71946, -71.20996], [42.71941, -71.20972], ...]
-  var x1 = paths[0][0];
-  var y1 = paths[0][1];
-  var x2 = paths[1][0];
-  var y2 = paths[1][1];
-  var dx = x1-x2;
-  var dy = y1-y2;
-  var dist = Math.sqrt(dx*dx + dy*dy);
-  dx = dx/dist;
-  dy = dy/dist;
-  var offset = 0.0;
-  x3 = x1 + offset * dy;
-  y3 = y1 - offset * dx;
-  x4 = x1 - offset * dy;
-  y4 = y1 + offset * dx;
-
-  var segment = paths.map(function(point) {
-    return new google.maps.LatLng(point[0] + (offset * dy), point[1] - (offset * dx));
-  });
-
-  var path = new google.maps.Polyline({
-    path: segment,
-    geodesic: true,
-    strokeColor: roadSegmentStrokeColor,
-    strokeOpacity: 0.5,
-    strokeWeight: 2,
-    pairId: segmentData[0],
-    pathIndex: i
-  });
-  google.maps.event.addListener(path, 'mouseover', function() {
-    pathMouseover(path);
-  });
-  google.maps.event.addListener(path, 'mouseout', function() {
-    removePathMouseover();
-  });
-  google.maps.event.addListener(path, 'click', function() {
-    pathClick(pairId,traffic);
-  });
-  traffic.pairData[pairId]['path'] = path;
-  path.setMap(map);
-  return path
+    });
 };
 
-function initializeMap(traffic) {
-  var mapOptions = {
-    center: new google.maps.LatLng(42.358056, -71.063611),
-    zoom: 9
-  };
-  map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
 
-  for (var i=0; i<segments.length; i++) {
-    var pairId = segments[i][0].toString();
-    if (traffic.pairData.hasOwnProperty(pairId)) {
-      addSegment(pairId,segments[i],i,traffic);
-    }
-  }
-}
+// Data Retrieval
+function getData() {
 
-// Load the Current Dataset
-function getTraffic() {
-  $.ajax({
-    url: "current.json",
-  }).done(function(traffic) {
+  // Get Traffic
+  $.ajax({ url: "current.json" }).done( function(traffic) {
     activeTraffic = traffic
     renderMiseryIndex(traffic);
     initializeTypeahead(traffic);
-    initializeMap(traffic);
   });
+
+  // Get Roadway Layout and ID Map
+  $.when( $.getJSON("data/id.json"), $.getJSON("data/roads.json") ).then(function( roads, idMap ) {
+    renderRoads(roads, idMap);
+  });
+
 }
 
-getTraffic();
+getData();
 initializeEvents();
 setPercentileTabDateLabel();
