@@ -49,7 +49,7 @@ function renderMiseryIndex(traffic) {
   console.log(miseryIndex);
 }
 
-function renderGraph(today, percentiles, distance) {
+function renderGraph(today, predictions, percentiles, distance) {
   seriesData = [];
 
   // Select the proper percentile
@@ -84,6 +84,23 @@ function renderGraph(today, percentiles, distance) {
   seriesElement.data = today;
   seriesElement.color = 'rgba(70,130,180,0.7)';
   seriesElement.name = "Today";
+  seriesData.push(seriesElement);
+
+  // Add the Percentile Data
+  var seriesElement = {};
+  var formattedPredictions = [];
+  var formattedPrediction;
+  var currentTime = new Date('1/1/1970');
+  currentTime = new Date(currentTime.getTime() - 5*60*60000);
+  for (var i=0; i<predictions.length; i++) {
+    formattedPrediction = {'x':currentTime.toJSON().substr(11,5),'y':predictions[i]};
+    formattedPredictions.push(formattedPrediction);
+    currentTime = new Date(currentTime.getTime() + 5*60000);
+  }
+  formattedPredictions = fixFormatting(formattedPredictions, distance);
+  seriesElement.data = formattedPredictions;
+  seriesElement.color = 'rgba(241,82,86,0.7)';
+  seriesElement.name = "Predictions";
   seriesData.push(seriesElement);
 
   // Erase the previous graph (if any) and render the new graph
@@ -193,16 +210,17 @@ var pathClick = function(pairId, traffic) {
     $('#site-status-text').html(text);
 
 
-    // Color the Selected Route Segment
+    // Show Highlighted Path
     if (selectedRouteSegment) {
       selectedRouteSegment.setOptions({strokeColor: roadSegmentStrokeColor});
     }
     selectedRouteSegment = pairData.path;
     selectedRouteSegment.setOptions({strokeColor: selectedRoadSegmentStrokeColor, strokeOpacity: 1.0});
 
+    // Render Graph
     distance = pairData.travelTime/60*pairData.speed;
     activeDistance = distance;
-    renderGraph(pairData.today,percentiles,distance);
+    renderGraph(pairData.today,pairData.predictions,percentiles,distance);
 
     // Render Current Location
     var charts = $('#charts')
