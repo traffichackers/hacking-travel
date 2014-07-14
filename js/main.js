@@ -29,7 +29,7 @@ function initializePercentileTabsEvents() {
             currentTab.removeClass('active');
           }
         }
-        renderGraph(activeTraffic.pairData[activePairId].today, activePercentiles, activeDistance);
+        renderGraph(activeTraffic.pairData[activePairId].today, activePredictions, activePercentiles, activeDistance);
       }
     });
   }
@@ -47,7 +47,15 @@ function renderMiseryIndex(traffic) {
   miseryIndex = getMiseryIndex(traffic);
 }
 
-function renderGraph(today, percentiles, distance) {
+function prepareGraphSeries(data, color, name) {
+  seriesElement = {};
+  seriesElement.data = data;
+  seriesElement.color = color;
+  seriesElement.name = name;
+  return seriesElement;
+}
+
+function renderGraph(today, predictions, percentiles, distance) {
   seriesData = [];
 
   // Select the proper percentile
@@ -62,26 +70,31 @@ function renderGraph(today, percentiles, distance) {
   // Prepare each percentile
   for (key in chosenPercentiles) {
     percentile = chosenPercentiles[key];
+    percentile = fixFormatting(percentile, distance)  // Fix number formatting
     percentileLevel = parseInt(key.slice(1));
-
-    // Fix number formatting
-    percentile = fixFormatting(percentile, distance)
-
-    // Push each percentile for rendering
-    seriesElement = {};
-    seriesElement.data = percentile;
-    alpha = (1-Math.abs(percentileLevel-50)/50)*0.4;
-    seriesElement.color = 'rgba(70,130,180,'+alpha+')';
-    seriesElement.name = percentileLevel+"th Percentile"
-    seriesData.push(seriesElement);
+    alpha = (1-Math.abs(percentileLevel-50)/50)*0.4;  // Set Color
+    var seriesElement = prepareGraphSeries(percentile, 'rgba(70,130,180,'+alpha+')', percentileLevel+"th Percentile")
+    seriesData.push();
   }
-
+  /*
   // Add the Data for Today
   today = fixFormatting(today, distance)
-  seriesElement = {};
-  seriesElement.data = today;
-  seriesElement.color = 'rgba(70,130,180,0.7)';
-  seriesElement.name = "Today";
+  var seriesElement = prepareGraphSeries(today, 'rgba(70,130,180,0.7)', 'Today')
+  seriesData.push(seriesElement);
+  */
+  // Add the Predictions
+  var seriesElement = {};
+  var formattedPredictions = [];
+  var formattedPrediction;
+  var currentTime = new Date('1/1/1970');
+  currentTime = new Date(currentTime.getTime() - 5*60*60000);
+  for (var i=0; i<predictions.length; i++) {
+    formattedPrediction = {'x':currentTime.toJSON().substr(11,5),'y':predictions[i]};
+    formattedPredictions.push(formattedPrediction);
+    currentTime = new Date(currentTime.getTime() + 5*60000);
+  }
+  formattedPredictions = fixFormatting(formattedPredictions, distance);
+  var seriesElement = prepareGraphSeries(formattedPredictions, 'rgba(241,82,86,0.7)', 'Predictions')
   seriesData.push(seriesElement);
 
   // Erase the previous graph (if any) and render the new graph
@@ -191,16 +204,13 @@ var pathClick = function(pairId, traffic) {
     $('#site-status-text').html(text);
 
 
-    // Color the Selected Route Segment
-    if (selectedRouteSegment) {
-      selectedRouteSegment.setOptions({strokeColor: roadSegmentStrokeColor});
-    }
-    selectedRouteSegment = pairData.path;
-    selectedRouteSegment.setOptions({strokeColor: selectedRoadSegmentStrokeColor, strokeOpacity: 1.0});
+    d3.select('.segment-selected').classed('segment-selected', false);  // Remove Existing Value
+    d3.select('#svg-pairid-'+pairId).classed('segment-selected', true);
+    activePairId = pairId;
 
     distance = pairData.travelTime/60*pairData.speed;
     activeDistance = distance;
-    renderGraph(pairData.today,percentiles,distance);
+    renderGraph(pairData.today,pairData.predictions,percentiles,distance);
 
     // Render Current Location
     var charts = $('#charts')
@@ -253,59 +263,68 @@ function initializeTypeahead(traffic) {
   });
 }
 
-function renderRoads(roads, idMap) {
+function renderRoads(traffic, roads, idMap) {
+  mapElement = $("#map-canvas");
 
-  var width = 700,
-    height = 700;
+  var width = mapElement.width(),
+    height = mapElement.height();
 
-  var svg = d3.select("body").append("svg")
+  var svg = d3.select("#map-canvas").append("svg")
     .attr("width", width)
     .attr("height", height);
 
   var projection = d3.geo.albers()
-    .center([-71.08, 42.36])
+    .center([-70.95, 41.95])
     .parallels([38,46])
     .rotate([0, 0])
-    .scale(24000)
+    .scale(23000)
     .translate([width / 2, height / 2]);
 
-  svg.selectAll("path")
+  var zoom = d3.behavior.zoom()
+    .translate([0, 0])
+    .scale(1)
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
+
+  var roadFeature = svg.selectAll("path")
     .data(roads.features)
     .enter().append("path")
     .attr("d", d3.geo.path().projection(projection))
-    .attr('style','fill:none; stroke:black; strokeColor:roadSegmentStrokeColor; strokeOpacity:0.5, strokeWeight:2')
-    .on('mouseover',function(testArg) {
-      console.log(testArg);
-      pathMouseover(path);
+    .attr('id', function(d, i) {
+      return 'svg-pairid-'+idMap[d.properties.UniqueID];
     })
-    .on('mouseout',function(testArg) {
-      removePathMouseover();
+    .attr('class','segment')
+    .on('click',function(d, i) {
+      pathClick(idMap[d.properties.UniqueID], traffic);
     })
-    .on('click',function(testArg) {
-      pathClick(pairId,traffic);
-    })
-    .each( function(d, i) {
-      var pairId = idMap[d.properties.UniqueId]
-      if (traffic.pairData.hasOwnProperty(pairId)) {
-        traffic.pairData[pairId]['path'] = path;
-      }
-    });
+  svg.call(zoom);
+
+  function zoomed() {
+    roadFeature.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    roadFeature.style("stroke-width", 1.2 / zoom.scale());
+  }
+
 };
 
 
 // Data Retrieval
 function getData() {
 
-  // Get Traffic
-  $.ajax({ url: "current.json" }).done( function(traffic) {
+  // Get Traffic, ID Map, and Get Roadway Layout
+  $.when(
+    $.getJSON("current.json"),
+    $.getJSON("data/idMap.json"),
+    $.getJSON("data/roads.json")
+  ).then( function (trafficResults, idMapResults, roadsResults) {
+
+    var traffic = trafficResults[0];
+    var roads = roadsResults[0];
+    var idMap = idMapResults[0];
+
     activeTraffic = traffic
     renderMiseryIndex(traffic);
     initializeTypeahead(traffic);
-  });
-
-  // Get Roadway Layout and ID Map
-  $.when( $.getJSON("data/id.json"), $.getJSON("data/roads.json") ).then(function( roads, idMap ) {
-    renderRoads(roads, idMap);
+    renderRoads(traffic, roads, idMap);
   });
 
 }
