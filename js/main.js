@@ -220,21 +220,6 @@ var pathClick = function(pairId, traffic) {
   };
 };
 
-function pathMouseover(path) {
-  if (highlightedRouteSegment) {
-    removePathMouseover(path);
-  }
-  highlightedRouteSegment = path
-  highlightedRouteSegment.setOptions({strokeColor: highlightedRoadSegmentStrokeColor, strokeOpacity: 1.0});
-};
-
-function removePathMouseover() {
-  if (highlightedRouteSegment) {
-    highlightedRouteSegment.setOptions({strokeColor: (highlightedRouteSegment == selectedRouteSegment ? selectedRoadSegmentStrokeColor : roadSegmentStrokeColor)});
-    highlightedRouteSegment.setOptions({strokeOpacity: (highlightedRouteSegment == selectedRouteSegment ? 1.0 : 0.5)});
-  }
-}
-
 function initializeTypeahead(traffic) {
 
   // Generate the typeahead dataset
