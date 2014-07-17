@@ -74,14 +74,14 @@ function renderGraph(today, predictions, percentiles, distance) {
     percentileLevel = parseInt(key.slice(1));
     alpha = (1-Math.abs(percentileLevel-50)/50)*0.4;  // Set Color
     var seriesElement = prepareGraphSeries(percentile, 'rgba(70,130,180,'+alpha+')', percentileLevel+"th Percentile")
-    seriesData.push();
+    seriesData.push(seriesElement);
   }
-  /*
+
   // Add the Data for Today
   today = fixFormatting(today, distance)
   var seriesElement = prepareGraphSeries(today, 'rgba(70,130,180,0.7)', 'Today')
   seriesData.push(seriesElement);
-  */
+
   // Add the Predictions
   var seriesElement = {};
   var formattedPredictions = [];
@@ -168,54 +168,56 @@ function getMiseryIndex(traffic) {
 // Handle when the path is clicked or when an item is pulled from the drop-down
 var pathClick = function(pairId, traffic) {
   activePairId = pairId;
-
-  // Pull the historical data for the pair id
-  $.ajax({
-    url: 'data/'+pairId+".json",
-  }).done(function(percentiles) {
-    activePercentiles = percentiles;
-    var pairData = traffic.pairData[pairId];
-
-    // Show the PairId Title (Name)
-    title = pairData.title.slice(0,60);
-    if (pairData.title.length > 60) {
-      title += '...';
-    }
-    $('#title').html(title);
-
-    // Show the Speed and Travel Time
-    $('#speed').html(Math.round(pairData.speed));
-    $('#travelTime').html(Math.round(pairData.travelTime/60));
-
-    // Show the Congestion Ratio
-    var congestionRatio = pairData.speed/pairData.freeFlow;
-    var color;
-    if (congestionRatio > 0.9) {
-      color = 'rgb(142,204,158)';
-      text = 'normal';
-    } else if (congestionRatio > 0.4) {
-      color = 'rgb(250,189,137)';
-      text = 'impacted';
-    } else {
-      color = 'rgb(248,157,154)';
-      text = 'congested';
-    }
-    $('#site-status').css('background-color',color);
-    $('#site-status-text').html(text);
+  var pairData = traffic.pairData[pairId];
+  if(pairData) {
+    // Pull the historical data for the pair id
+    $.ajax({
+      url: 'data/'+pairId+".json",
+    }).done(function(percentiles) {
+      activePercentiles = percentiles;
 
 
-    d3.select('.segment-selected').classed('segment-selected', false);  // Remove Existing Value
-    d3.select('#svg-pairid-'+pairId).classed('segment-selected', true);
-    activePairId = pairId;
+      // Show the PairId Title (Name)
+      title = pairData.title.slice(0,60);
+      if (pairData.title.length > 60) {
+        title += '...';
+      }
+      $('#title').html(title);
 
-    distance = pairData.travelTime/60*pairData.speed;
-    activeDistance = distance;
-    renderGraph(pairData.today,pairData.predictions,percentiles,distance);
+      // Show the Speed and Travel Time
+      $('#speed').html(Math.round(pairData.speed));
+      $('#travelTime').html(Math.round(pairData.travelTime/60));
 
-    // Render Current Location
-    var charts = $('#charts')
-    charts.fadeIn(200);
-  });
+      // Show the Congestion Ratio
+      var congestionRatio = pairData.speed/pairData.freeFlow;
+      var color;
+      if (congestionRatio > 0.9) {
+        color = 'rgb(142,204,158)';
+        text = 'normal';
+      } else if (congestionRatio > 0.4) {
+        color = 'rgb(250,189,137)';
+        text = 'impacted';
+      } else {
+        color = 'rgb(248,157,154)';
+        text = 'congested';
+      }
+      $('#site-status').css('background-color',color);
+      $('#site-status-text').html(text);
+
+
+      d3.select('.segment-selected').classed('segment-selected', false);  // Remove Existing Value
+      d3.select('#svg-pairid-'+pairId).classed('segment-selected', true);
+      activePairId = pairId;
+
+      distance = pairData.travelTime/60*pairData.speed;
+      activeDistance = distance;
+      renderGraph(pairData.today,pairData.predictions,percentiles,distance);
+
+      // Render Current Location
+      var charts = $('#charts')
+      charts.fadeIn(200);
+    });
+  };
 };
 
 function pathMouseover(path) {
