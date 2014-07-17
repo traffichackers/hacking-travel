@@ -284,6 +284,18 @@ function renderRoads(traffic, roads, idMap) {
     .on('click',function(d, i) {
       pathClick(idMap[d.properties.UniqueID], traffic);
     })
+    .on('mouseover', function(d, i) {
+      var totalLength = this.getTotalLength();
+      var initialPoint = this.getPointAtLength(0);
+      var terminalPoint = this.getPointAtLength(totalLength);
+
+      var slope = (initialPoint.y-terminalPoint.y)/(initialPoint.x-terminalPoint.x);
+      var normalSlope = slope*-1;
+
+      x = Math.sqrt(totalLength);
+      d3.select(this).attr('transform','translate('+x+','+x*normalSlope+')');
+
+    })
   svg.call(zoom);
 
   function zoomed() {
@@ -292,7 +304,6 @@ function renderRoads(traffic, roads, idMap) {
   }
 
 };
-
 
 // Data Retrieval
 function getData() {
