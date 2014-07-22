@@ -273,7 +273,9 @@ function renderRoads(traffic, roads, idMap) {
     .scaleExtent([1, 8])
     .on("zoom", zoomed);
 
-  var roadFeature = svg.selectAll("path")
+  var roadFeature = svg.append("g");
+
+  var roadFeatures = roadFeature.selectAll("path")
     .data(roads.features)
     .enter().append("path")
     .attr("d", d3.geo.path().projection(projection))
@@ -285,25 +287,120 @@ function renderRoads(traffic, roads, idMap) {
       pathClick(idMap[d.properties.UniqueID], traffic);
     })
     .on('mouseover', function(d, i) {
-      var totalLength = this.getTotalLength();
-      var initialPoint = this.getPointAtLength(0);
-      var terminalPoint = this.getPointAtLength(totalLength);
-
-      var slope = (initialPoint.y-terminalPoint.y)/(initialPoint.x-terminalPoint.x);
-      var normalSlope = slope*-1;
-
-      x = Math.sqrt(totalLength);
-      d3.select(this).attr('transform','translate('+x+','+x*normalSlope+')');
-
+      spotlightSegments(this);
     })
   svg.call(zoom);
 
   function zoomed() {
     roadFeature.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-    roadFeature.style("stroke-width", 1.2 / zoom.scale());
+    var strokeWidth = roadFeature.style("stroke-width");
+    roadFeature.style("stroke-width", strokeWidth / zoom.scale());
   }
 
 };
+
+function calculateDistance(point1, point2) {
+  return Math.sqrt(Math.pow(point1.x-point2.x,2) + Math.pow(point1.y-point2.y,2));
+}
+
+function calculateOffsetVectors(segment, multiplier) {
+  var totalLength = segment.getTotalLength();
+  var initialPoint = segment.getPointAtLength(0);
+  var terminalPoint = segment.getPointAtLength(totalLength);
+  var dx, dy;
+  dx = terminalPoint.x - initialPoint.x;
+  dy = terminalPoint.y - initialPoint.y;
+  //console.log(dx+', '+dy);
+  var length = Math.sqrt(Math.pow(dx,2)+Math.pow(dy,2));
+  //console.log(length);
+  dx = dx/length;
+  dy = dy/length;
+  //console.log(dx+', '+dy);
+  var normalSlope = dx/(-1*dy);
+  var offsetVector = {}
+  multiplier = (1+multiplier)*5
+  offsetVector.x = dy*multiplier;
+  offsetVector.y = -1*dx*multiplier;
+  var offsetVectorNegative = {}
+  offsetVectorNegative.x = -1*dy*offsetVector.y;
+  offsetVectorNegative.y = dx*offsetVector.x;
+  return [offsetVector, offsetVectorNegative];
+}
+
+function spotlightSegments(activeSegment) {
+  var activeSegmentMidpoint = activeSegment.getPointAtLength(activeSegment.getTotalLength()/2);
+  var spotlightRadius = 10;
+
+  // Calculate Centroid
+  var segments = d3.selectAll('.segment')[0];
+  var centroids = [];
+  var cNumeratorX = 0;
+  var cNumeratorY = 0;
+  var cDenominator = 0;
+  for (var i=0; i<segments.length; i++) {
+    var segment = segments[i];
+    var midPoint = segment.getPointAtLength(0);
+    var totalLength = segment.getTotalLength();
+    var epicenterDistance = calculateDistance(activeSegmentMidpoint,midPoint);
+    if (epicenterDistance < spotlightRadius) {
+      var initialPoint = segment.getPointAtLength(0);
+      var terminalPoint = segment.getPointAtLength(totalLength);
+      var centroid = {}
+      centroid.x = 1/3*(initialPoint.x+midPoint.x+terminalPoint.x);
+      centroid.y = 1/3*(initialPoint.y+midPoint.y+terminalPoint.y);
+      centroid.length = totalLength;
+      centroids.push(centroid);
+      cNumeratorX += centroid.x*totalLength;
+      cNumeratorY += centroid.y*totalLength;
+      cDenominator += totalLength
+    }
+  }
+  var com = {'x': cNumeratorX/cDenominator, 'y': cNumeratorY/cDenominator};
+
+  // Calculate Midpoints for All Segments and Compare to Active Segment
+  d3.selectAll('.segment').transition().attr('transform', function(d, i) {
+    currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
+    console.log('com - x: '+com.x+', '+com.y);
+    console.log('currentSegmentMidpoint - x: '+currentSegmentMidpoint.x+', '+currentSegmentMidpoint.y);
+    var epicenterDistance = calculateDistance(activeSegmentMidpoint,com);
+
+    // Apply a Transform Attribute
+    if (epicenterDistance < spotlightRadius) {
+      var offsetVectors = calculateOffsetVectors(this, epicenterDistance);
+      var decisionVector = {};
+
+      for (var i=0; i<offsetVectors.length; i++) {
+        offsetVector = offsetVectors[i];
+        testSegmentMidpoint = currentSegmentMidpoint;
+        testSegmentMidpoint.x += offsetVector.x;
+        testSegmentMidpoint.y += offsetVector.y;
+        offsetVector.distance = calculateDistance(activeSegmentMidpoint,testSegmentMidpoint);
+        if (!("distance" in decisionVector) || (offsetVector.distance < decisionVector.distance)) {
+          decisionVector = offsetVector;
+        }
+      }
+      /*
+      console.log('epicenterDistance: '+epicenterDistance);
+      console.log('spotlightRadius: '+spotlightRadius);
+      console.log('decisionVector: '+decisionVector.x+', '+decisionVector.y);
+      console.log('----')
+      */
+      return 'translate('+decisionVector.x+','+decisionVector.y+')';
+    } else {
+      return '';
+    }
+  });
+
+  d3.selectAll('.segment').attr('style', function(d, i) {
+    currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
+    var epicenterDistance = calculateDistance(activeSegmentMidpoint,currentSegmentMidpoint);
+    if ( epicenterDistance >= spotlightRadius) {
+      return 'stroke: lightgrey';
+    }
+  });
+
+}
+
 
 // Data Retrieval
 function getData() {

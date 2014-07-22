@@ -17,11 +17,12 @@ body {
 .segment {
   stroke: black;
   fill: none;
+  stroke-width: 0.25;
 }
 
 .segment:hover {
   stroke: red;
-  stroke-width: 2;
+  stroke-width: 0.5;
 }
 
 .segment-selected {
