@@ -29,6 +29,12 @@ body {
   stroke: yellow;
 }
 
+.segment-label {
+  font-family: Verdana;
+  font-size: 15;
+  fill: red;
+}
+
 /* Charts/Detail Pane */
 #charts {
   display: none;

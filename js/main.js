@@ -8,6 +8,7 @@ var activeTraffic;
 var activeDistance;
 var activePairId;
 var activePercentiles;
+var svg;
 
 // Events
 function initializeEvents() {
@@ -256,7 +257,7 @@ function renderRoads(traffic, roads, idMap) {
   var width = mapElement.width(),
     height = mapElement.height();
 
-  var svg = d3.select("#map-canvas").append("svg")
+  svg = d3.select("#map-canvas").append("svg")
     .attr("width", width)
     .attr("height", height);
 
@@ -281,6 +282,14 @@ function renderRoads(traffic, roads, idMap) {
     .attr("d", d3.geo.path().projection(projection))
     .attr('id', function(d, i) {
       return 'svg-pairid-'+idMap[d.properties.UniqueID];
+    })
+    .attr('data-title', function(d, i) {
+      try {
+        return traffic.pairData[idMap[d.properties.UniqueID]].title
+      } catch (e) {
+        return ''
+      }
+
     })
     .attr('class','segment')
     .on('click',function(d, i) {
@@ -310,20 +319,20 @@ function calculateOffsetVectors(segment, multiplier) {
   var dx, dy;
   dx = terminalPoint.x - initialPoint.x;
   dy = terminalPoint.y - initialPoint.y;
-  //console.log(dx+', '+dy);
+
   var length = Math.sqrt(Math.pow(dx,2)+Math.pow(dy,2));
-  //console.log(length);
+
   dx = dx/length;
   dy = dy/length;
-  //console.log(dx+', '+dy);
+
   var normalSlope = dx/(-1*dy);
   var offsetVector = {}
-  multiplier = (1+multiplier)*5
+  multiplier = (1+multiplier)*2
   offsetVector.x = dy*multiplier;
   offsetVector.y = -1*dx*multiplier;
   var offsetVectorNegative = {}
-  offsetVectorNegative.x = -1*dy*offsetVector.y;
-  offsetVectorNegative.y = dx*offsetVector.x;
+  offsetVectorNegative.x = -1*dy*multiplier;
+  offsetVectorNegative.y = dx*multiplier;
   return [offsetVector, offsetVectorNegative];
 }
 
@@ -339,8 +348,9 @@ function spotlightSegments(activeSegment) {
   var cDenominator = 0;
   for (var i=0; i<segments.length; i++) {
     var segment = segments[i];
-    var midPoint = segment.getPointAtLength(0);
+
     var totalLength = segment.getTotalLength();
+    var midPoint = segment.getPointAtLength(totalLength/2);
     var epicenterDistance = calculateDistance(activeSegmentMidpoint,midPoint);
     if (epicenterDistance < spotlightRadius) {
       var initialPoint = segment.getPointAtLength(0);
@@ -358,11 +368,10 @@ function spotlightSegments(activeSegment) {
   var com = {'x': cNumeratorX/cDenominator, 'y': cNumeratorY/cDenominator};
 
   // Calculate Midpoints for All Segments and Compare to Active Segment
+  var dataset = [];
   d3.selectAll('.segment').transition().attr('transform', function(d, i) {
     currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
-    console.log('com - x: '+com.x+', '+com.y);
-    console.log('currentSegmentMidpoint - x: '+currentSegmentMidpoint.x+', '+currentSegmentMidpoint.y);
-    var epicenterDistance = calculateDistance(activeSegmentMidpoint,com);
+    var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
 
     // Apply a Transform Attribute
     if (epicenterDistance < spotlightRadius) {
@@ -374,7 +383,7 @@ function spotlightSegments(activeSegment) {
         testSegmentMidpoint = currentSegmentMidpoint;
         testSegmentMidpoint.x += offsetVector.x;
         testSegmentMidpoint.y += offsetVector.y;
-        offsetVector.distance = calculateDistance(activeSegmentMidpoint,testSegmentMidpoint);
+        offsetVector.distance = calculateDistance(com,testSegmentMidpoint);
         if (!("distance" in decisionVector) || (offsetVector.distance < decisionVector.distance)) {
           decisionVector = offsetVector;
         }
@@ -385,12 +394,15 @@ function spotlightSegments(activeSegment) {
       console.log('decisionVector: '+decisionVector.x+', '+decisionVector.y);
       console.log('----')
       */
+      var title = d3.select(this).attr('data-title')
+      dataset.push({'name':title, 'x': testSegmentMidpoint.x+decisionVector.x, 'y': testSegmentMidpoint.y+decisionVector.y })
       return 'translate('+decisionVector.x+','+decisionVector.y+')';
     } else {
       return '';
     }
   });
 
+  // Mark Those Elements Not Selected as Grey
   d3.selectAll('.segment').attr('style', function(d, i) {
     currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
     var epicenterDistance = calculateDistance(activeSegmentMidpoint,currentSegmentMidpoint);
@@ -399,6 +411,19 @@ function spotlightSegments(activeSegment) {
     }
   });
 
+  // Add Labels
+  var texts = svg.selectAll("text").data(dataset).enter();
+  texts.append("text")
+  .text(function(d, i) {
+    return d.name;
+  })
+  .attr('class', '.segment-label')
+  .attr('x', function(d, i) {
+    return d.x;
+  })
+  .attr('y', function(d, i) {
+    return d.y;
+  })
 }
 
 
