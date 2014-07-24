@@ -340,6 +340,9 @@ function spotlightSegments(activeSegment) {
   var activeSegmentMidpoint = activeSegment.getPointAtLength(activeSegment.getTotalLength()/2);
   var spotlightRadius = 10;
 
+  // Remove Existing Labels
+  d3.selectAll('.segment-label').remove();
+
   // Calculate Centroid
   var segments = d3.selectAll('.segment')[0];
   var centroids = [];
@@ -388,16 +391,19 @@ function spotlightSegments(activeSegment) {
           decisionVector = offsetVector;
         }
       }
-      
+
+      // Push Title Data for Transformed Elements
+      currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
       var title = d3.select(this).attr('data-title')
-      dataset.push({'name':title, 'x': testSegmentMidpoint.x+decisionVector.x, 'y': testSegmentMidpoint.y+decisionVector.y })
+      dataset.push({'name':title, 'x': currentSegmentEnd.x+decisionVector.x, 'y': currentSegmentEnd.y+decisionVector.y })
+
       return 'translate('+decisionVector.x+','+decisionVector.y+')';
     } else {
       return '';
     }
   });
 
-  // Mark Those Elements Not Selected as Grey
+  // Mark Those Elements Not Selected as Grey and Remove Labels
   d3.selectAll('.segment').attr('style', function(d, i) {
     currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
     var epicenterDistance = calculateDistance(activeSegmentMidpoint,currentSegmentMidpoint);
@@ -406,13 +412,13 @@ function spotlightSegments(activeSegment) {
     }
   });
 
-  // Add Labels
+  // Add Titles to Transformed Elements
   var texts = svg.selectAll("text").data(dataset).enter();
   texts.append("text")
   .text(function(d, i) {
     return d.name;
   })
-  .attr('class', '.segment-label')
+  .attr('class', 'segment-label')
   .attr('x', function(d, i) {
     return d.x;
   })

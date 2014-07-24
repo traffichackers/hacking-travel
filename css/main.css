@@ -30,9 +30,9 @@ body {
 }
 
 .segment-label {
-  font-family: Verdana;
-  font-size: 15;
-  fill: red;
+  font-family: Tahoma;
+  font-size: 7;
+  fill: black;
 }
 
 /* Charts/Detail Pane */
