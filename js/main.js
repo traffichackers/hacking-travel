@@ -388,12 +388,7 @@ function spotlightSegments(activeSegment) {
           decisionVector = offsetVector;
         }
       }
-      /*
-      console.log('epicenterDistance: '+epicenterDistance);
-      console.log('spotlightRadius: '+spotlightRadius);
-      console.log('decisionVector: '+decisionVector.x+', '+decisionVector.y);
-      console.log('----')
-      */
+      
       var title = d3.select(this).attr('data-title')
       dataset.push({'name':title, 'x': testSegmentMidpoint.x+decisionVector.x, 'y': testSegmentMidpoint.y+decisionVector.y })
       return 'translate('+decisionVector.x+','+decisionVector.y+')';
