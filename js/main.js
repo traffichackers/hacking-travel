@@ -281,11 +281,11 @@ function renderRoads(traffic, roads, idMap) {
     .enter().append("path")
     .attr("d", d3.geo.path().projection(projection))
     .attr('id', function(d, i) {
-      return 'svg-pairid-'+idMap[d.properties.UniqueID];
+      return 'svg-pairid-'+idMap[d.properties.UID];
     })
     .attr('data-title', function(d, i) {
       try {
-        return traffic.pairData[idMap[d.properties.UniqueID]].title
+        return traffic.pairData[idMap[d.properties.UID]].title
       } catch (e) {
         return ''
       }
@@ -293,7 +293,7 @@ function renderRoads(traffic, roads, idMap) {
     })
     .attr('class','segment')
     .on('click',function(d, i) {
-      pathClick(idMap[d.properties.UniqueID], traffic);
+      pathClick(idMap[d.properties.UID], traffic);
     })
     .on('mouseover', function(d, i) {
       spotlightSegments(this);
@@ -434,8 +434,8 @@ function getData() {
   // Get Traffic, ID Map, and Get Roadway Layout
   $.when(
     $.getJSON("current.json"),
-    $.getJSON("data/idMap.json"),
-    $.getJSON("data/roads.json")
+    $.getJSON("idMap.json"),
+    $.getJSON("roads.json")
   ).then( function (trafficResults, idMapResults, roadsResults) {
 
     var traffic = trafficResults[0];
