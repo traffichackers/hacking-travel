@@ -261,10 +261,9 @@ function renderRoads(traffic, roads, idMap) {
     .attr("width", width)
     .attr("height", height);
 
-  var projection = d3.geo.albers()
-    .center([-70.95, 41.95])
-    .parallels([38,46])
+  var projection = d3.geo.mercator()
     .rotate([0, 0])
+    .center([-70.95, 41.95])
     .scale(23000)
     .translate([width / 2, height / 2]);
 
