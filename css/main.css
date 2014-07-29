@@ -10,14 +10,14 @@ body {
 /* Map */
 #map-canvas {
   height: 100%;
-  width: 50%;
+  width: 100%;
   float: left;
 }
 
 .segment {
   stroke: black;
   fill: none;
-  stroke-width: 0.25;
+  stroke-width: 0.5;
 }
 
 .segment:hover {
