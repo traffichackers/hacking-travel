@@ -274,7 +274,7 @@ function renderRoads(traffic, roads, idMap) {
     .on("zoom", zoomed);
 
   var roadFeature = svg.append("g");
-  
+
   var roadFeatures = roadFeature.selectAll("path")
     .data(roads.features)
     .enter().append("path")
@@ -380,6 +380,7 @@ function spotlightSegments(activeSegment) {
       var offsetVectors = calculateOffsetVectors(this, epicenterDistance);
       var decisionVector = {};
 
+      // Test for the Proper Offset Direction
       for (var i=0; i<offsetVectors.length; i++) {
         offsetVector = offsetVectors[i];
         testSegmentMidpoint = currentSegmentMidpoint;
@@ -391,16 +392,22 @@ function spotlightSegments(activeSegment) {
         }
       }
 
-      // Push Title Data for Transformed Elements
+      // Push Title Data for Text Labels
       currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
       var title = d3.select(this).attr('data-title')
       dataset.push({'name':title, 'x': currentSegmentEnd.x+decisionVector.x, 'y': currentSegmentEnd.y+decisionVector.y })
 
+      // Set Hover Formatting
+      d3.select(this).attr('class', 'segment-flyout');
+
+      // Return the Translation
       return 'translate('+decisionVector.x+','+decisionVector.y+')';
+
     } else {
       return '';
     }
   });
+
 
   // Mark Those Elements Not Selected as Grey and Remove Labels
   d3.selectAll('.segment').attr('style', function(d, i) {
@@ -410,6 +417,8 @@ function spotlightSegments(activeSegment) {
       return 'stroke: lightgrey';
     }
   });
+
+
 
   // Add Titles to Transformed Elements
   var texts = svg.selectAll("text").data(dataset).enter();
@@ -424,6 +433,7 @@ function spotlightSegments(activeSegment) {
   .attr('y', function(d, i) {
     return d.y;
   })
+  
 }
 
 
