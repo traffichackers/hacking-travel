@@ -23,16 +23,22 @@ body {
 .segment {
   stroke: lightgrey;
   fill: none;
-  stroke-width: 1.0;
+  stroke-width: 0.5;
 }
 
-.segment-flyout {
+.segment:hover {
   stroke: black;
   stroke-width: 1.0;
 }
 
+
+.segment-flyout {
+  stroke: lightgrey;
+  stroke-width: 1.0;
+}
+
 .segment-selected {
-  stroke: yellow;
+  stroke: black;
 }
 
 .segment-label {
