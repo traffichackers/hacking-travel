@@ -23,7 +23,7 @@ body {
 .segment {
   stroke: lightgrey;
   fill: none;
-  stroke-width: 0.5;
+  stroke-width: 1.0;
 }
 
 .segment-flyout {
@@ -37,7 +37,7 @@ body {
 
 .segment-label {
   font-family: Tahoma;
-  font-size: 7;
+  font-size: 7pt;
   fill: black;
 }
 

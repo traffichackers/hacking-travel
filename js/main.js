@@ -295,7 +295,7 @@ function renderRoads(traffic, roads, idMap) {
       pathClick(idMap[d.properties.UID], traffic);
     })
     .on('mouseover', function(d, i) {
-      spotlightSegments(this);
+      spotlightSegments(this, roadFeature);
     })
   svg.call(zoom);
 
@@ -335,7 +335,7 @@ function calculateOffsetVectors(segment, multiplier) {
   return [offsetVector, offsetVectorNegative];
 }
 
-function spotlightSegments(activeSegment) {
+function spotlightSegments(activeSegment, roadFeature) {
   var activeSegmentMidpoint = activeSegment.getPointAtLength(activeSegment.getTotalLength()/2);
   var spotlightRadius = 10;
 
@@ -422,13 +422,8 @@ function spotlightSegments(activeSegment) {
     }
   });
 
-
-
-
-
-
   // Add Titles to Transformed Elements
-  var texts = svg.selectAll("text").data(dataset).enter();
+  var texts = roadFeature.selectAll("text").data(dataset).enter();
   texts.append("text")
   .text(function(d, i) {
     return d.name;
