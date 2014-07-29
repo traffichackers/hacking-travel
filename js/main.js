@@ -369,6 +369,19 @@ function spotlightSegments(activeSegment) {
   }
   var com = {'x': cNumeratorX/cDenominator, 'y': cNumeratorY/cDenominator};
 
+  // Remove Flyout Formatting for Older Flyouts
+  d3.selectAll('.segment-flyout').attr('class', function(d, i) {
+    var classList = this.classList
+    updatedClasses = ""
+    for (var i=0; i<classList.length; i++) {
+      var className = classList[i];
+      if (className !== 'segment-flyout') {
+        updatedClasses += className;
+      }
+    }
+    return updatedClasses;
+  });
+
   // Calculate Midpoints for All Segments and Compare to Active Segment
   var dataset = [];
   d3.selectAll('.segment').transition().attr('transform', function(d, i) {
@@ -397,8 +410,9 @@ function spotlightSegments(activeSegment) {
       var title = d3.select(this).attr('data-title')
       dataset.push({'name':title, 'x': currentSegmentEnd.x+decisionVector.x, 'y': currentSegmentEnd.y+decisionVector.y })
 
-      // Set Hover Formatting
-      d3.select(this).attr('class', 'segment-flyout');
+      // Set Flyout Formatting
+      var classes = d3.select(this).attr('class')
+      d3.select(this).attr('class', classes + ' segment-flyout');
 
       // Return the Translation
       return 'translate('+decisionVector.x+','+decisionVector.y+')';
@@ -409,14 +423,7 @@ function spotlightSegments(activeSegment) {
   });
 
 
-  // Mark Those Elements Not Selected as Grey and Remove Labels
-  d3.selectAll('.segment').attr('style', function(d, i) {
-    currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
-    var epicenterDistance = calculateDistance(activeSegmentMidpoint,currentSegmentMidpoint);
-    if ( epicenterDistance >= spotlightRadius) {
-      return 'stroke: lightgrey';
-    }
-  });
+
 
 
 
@@ -433,7 +440,7 @@ function spotlightSegments(activeSegment) {
   .attr('y', function(d, i) {
     return d.y;
   })
-  
+
 }
 
 
