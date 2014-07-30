@@ -101,9 +101,11 @@ function renderGraph(today, predictions, percentiles, distance) {
   // Erase the previous graph (if any) and render the new graph
   $("#historicalTravelTimes").empty();
   var graph = new Rickshaw.Graph({
-  element: document.querySelector("#historicalTravelTimes"),
+    element: document.querySelector("#historicalTravelTimes"),
     renderer: 'line',
-    series: seriesData
+    series: seriesData,
+    width: 400,
+    height: 200
   });
   graph.render();
 
@@ -263,8 +265,8 @@ function renderRoads(traffic, roads, idMap) {
 
   var projection = d3.geo.mercator()
     .rotate([0, 0])
-    .center([-70.95, 41.95])
-    .scale(23000)
+    .center([-70.95, 42.00])
+    .scale(20000)
     .translate([width / 2, height / 2]);
 
   var zoom = d3.behavior.zoom()
