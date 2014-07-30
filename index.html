@@ -35,46 +35,44 @@
     </div>
   </div>
   <div class="hundred-height">
-    <div class="hundred-height">
-
-      <!-- Map -->
-      <div id="map-canvas"></div>
-
-      <!-- Metadata -->
-      <div class="col-xs-6" id="charts">
-        <div class="row detail-pane-rows">
-          <div class="col-xs-12">
-            <span class="glyphicon glyphicon-road"></span>
-            <span id='title'></span>
-          </div>
-        </div>
-        <div class="row detail-pane-rows">
-          <div class="col-xs-3">
-            <span style="font-size: 2.5em" id="speed"></span>
-            <span style="font-size: 1em">mph</span>
-          </div>
-          <div class="col-xs-3">
-            <span style="font-size: 2.5em" id="travelTime"></span>
-            <span style="font-size: 1em">min</span>
-          </div>
-          <div class="col-xs-3">
-            <span id="site-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span id="site-status-text" style="font-size: 1em">normal</span>
-          </div>
-        </div>
-        <div class="row detail-pane-rows">
-          <ul class="nav nav-tabs percentile-graphs">
-            <li id="all" class="active"><a href="#">All Days</a></li>
-            <li id="dow" class=""><a href="#">Similar Days of the Week</a></li>
-            <!--
-            <li id="wd" class=""><a href="#">Weekdays</a></li>
-            <li id="we" class=""><a href="#">Weekends</a></li>
-            -->
-          </ul>
-          <div id='historicalTravelTimes'></div>
+    <div id="charts-new">
+      <div class="detail-pane-rows">
+        <div>
+          <span class="glyphicon glyphicon-road"></span>
+          <span id='title'></span>
         </div>
       </div>
+      <div class="detail-pane-rows">
+
+        <span style="font-size: 2.5em" id="speed"></span>
+        <span style="font-size: 1em">mph</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+
+        <span style="font-size: 2.5em" id="travelTime"></span>
+        <span style="font-size: 1em">min</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+
+        <span id="site-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span id="site-status-text" style="font-size: 1em">normal</span>
+
+      </div>
+      <div class="detail-pane-rows">
+        <ul class="nav nav-tabs percentile-graphs">
+          <li id="all" class="active"><a href="#">All Days</a></li>
+          <li id="dow" class=""><a href="#">Similar Days of the Week</a></li>
+          <!--
+          <li id="wd" class=""><a href="#">Weekdays</a></li>
+          <li id="we" class=""><a href="#">Weekends</a></li>
+          -->
+        </ul>
+        <div id='historicalTravelTimes'></div>
+      </div>
     </div>
+
+    <!-- Map -->
+    <div id="map-canvas">
+    </div>
+
   </div>
 </body>
 </html>

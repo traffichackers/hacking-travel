@@ -31,7 +31,6 @@ body {
   stroke-width: 1.0;
 }
 
-
 .segment-flyout {
   stroke: lightgrey;
   stroke-width: 1.0;
@@ -50,6 +49,11 @@ body {
 /* Charts/Detail Pane */
 #charts {
   display: none;
+}
+#charts-new {
+  position: absolute;
+  right: 10px;
+  width: 28em;
 }
 .hundred-height {
   height: 100%;
