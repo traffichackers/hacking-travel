@@ -94,7 +94,7 @@ var pathSelect = function(pairId, traffic) {
 
       // Show the Congestion Ratio
       var congestionRatio = pairData.speed/pairData.freeFlow;
-      var color;
+
       if (congestionRatio > 0.9) {
         color = 'rgb(142,204,158)';
         text = 'normal';
@@ -450,21 +450,15 @@ function spotlightSegments(activeSegment, roadFeature) {
 
 }
 
-// Get Traffic, ID Map, and Get Roadway Layout
+// Get Data and Initialize
 $.when(
   $.getJSON("current.json"),
   $.getJSON("idMap.json"),
   $.getJSON("roads.json"),
   $.getJSON("topo/background_roads.json")
 ).then( function (trafficResults, idMapResults, roadsResults, backgroundRoads) {
-
-  var traffic = trafficResults[0];
-  var roads = roadsResults[0];
-  var backgroundRoads = backgroundRoads[0];
-  var idMap = idMapResults[0];
-
-  activeTraffic = traffic
-  initializeEvents(traffic);
-  renderMiseryIndex(traffic);
-  renderRoads(traffic, roads, backgroundRoads, idMap);
+  activeTraffic = trafficResults[0]
+  initializeEvents(activeTraffic);
+  renderMiseryIndex(activeTraffic);
+  renderRoads(traffic, roadsResults[0], backgroundRoads[0], idMapResults[0]);
 });
