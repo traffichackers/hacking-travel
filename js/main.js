@@ -34,11 +34,11 @@ function initializeTypeahead(pairData) {
   pairDataEngine.initialize();
 
   // Instantiate the typeahead UI
-  $('.segment-autocomplete').typeahead(null, {
+  $('#segment-autocomplete').typeahead(null, {
     displayKey: 'pairName',
     source: pairDataEngine.ttAdapter()
   });
-  $('.segment-autocomplete').bind('typeahead:selected', function (event, suggestion, dataSet) {
+  $('#segment-autocomplete').bind('typeahead:selected', function (event, suggestion, dataSet) {
     pathSelect(suggestion.pairId, traffic.pairData);
   });
 }
@@ -49,34 +49,30 @@ var pathSelect = function(pairId, pairData) {
   pairDatum = pairData[pairId];
   if(pairDatum) {
 
-    // Pull the historical data for the pair id
+    // Pull the historical percentiles for the pair id
     setPercentileTabDowLabel();
     $.ajax({
       url: 'data/'+pairId+".json",
     }).done(function(percentiles) {
 
-
-      // Show the title, speed, and travel time
-      $('#title').html(formatting.formatSegmentTitle(title));
+      // Show speed, and travel time
       $('#speed').html(Math.round(pairDatum.speed));
       $('#travelTime').html(Math.round(pairDatum.travelTime/60));
 
       // Show the Congestion Ratio
-      var congestionRatioText = getCongestionRatioText(pairDatum)
+      var congestionRatioText = util.getCongestionRatioText(pairDatum)
       $('#site-status').addClass('.site-status-'+congestionRatioText);
       $('#site-status-text').html(congestionRatioText);
 
-
-
-      d3.select('.segment-selected').classed('segment-selected', false);  // Remove Existing Value
+      // Remove segment highlighting on the previous segment (if any) and add to the ne segment
+      d3.select('.segment-selected').classed('segment-selected', false);
       d3.select('#svg-pairid-'+pairId).classed('segment-selected', true);
 
-      distance = pairDatum.travelTime/60*pairDatum.speed;
-      renderGraph(pairDatum.today,pairDatum.predictions,percentiles,distance);
+      // Draw the graph
+      renderGraph(pairDatum, percentiles);
 
-      // Render Current Location
-      var charts = $('#charts')
-      charts.fadeIn(200);
+      // Show the result
+      $('#charts').fadeIn(100);
     });
   };
 };
@@ -103,8 +99,13 @@ function prepareGraphSeries(data, color, name) {
   return seriesElement;
 }
 
-function renderGraph(today, predictions, percentiles, distance) {
-  seriesData = [];
+function renderGraph(pairDatum, percentiles) {
+
+  var today = pairDatum.today
+  var predictions = pairDatum.predictions
+  var distance = pairDatum.travelTime/60*pairDatum.speed;
+
+  var seriesData = [];
 
   // Select the proper percentile
   var activeTab = getActivePercentileTab();
@@ -192,9 +193,10 @@ function fixFormatting(percentile, distance) {
 
 // Utilities
 var util = {
-  getCongestionRatioText: function(datum) {
-    var congestionRatio = pairData.speed/pairData.freeFlow;
 
+  // Get a text description of the current congestion
+  getCongestionRatioText: function(pairDatum) {
+    var congestionRatio = pairDatum.speed/pairDatum.freeFlow;
     if (congestionRatio > 0.9) {
       return 'normal';
     } else if (congestionRatio > 0.4) {
