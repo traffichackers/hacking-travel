@@ -1,22 +1,14 @@
-var roadSegmentStrokeColor = 'rgb(99,76,124)';
-var selectedRoadSegmentStrokeColor = 'rgb(197,253,115)';
-var highlightedRoadSegmentStrokeColor = 'rgb(232,186,180)';
-var highlightedRouteSegment;
-var selectedRouteSegment = null;
-var highlightedRouteSegment = null;
-var activeTraffic;
 var activeDistance;
 var activePairId;
 var activePercentiles;
-var svg;
 
 // Events
 function initializeEvents(traffic) {
   initializeTypeahead(traffic);
-  initializePercentileTabsEvents();
+  initializePercentileTabsEvents(traffic);
 }
 
-function initializePercentileTabsEvents() {
+function initializePercentileTabsEvents(traffic) {
   var i = 0;
   var tabs = $('.percentile-graphs').children();
   for (i = 0; i < tabs.length; i++) {
@@ -31,7 +23,7 @@ function initializePercentileTabsEvents() {
             currentTab.removeClass('active');
           }
         }
-        renderGraph(activeTraffic.pairData[activePairId].today, activePredictions, activePercentiles, activeDistance);
+        renderGraph(traffic.pairData[activePairId].today, activePredictions, activePercentiles, activeDistance);
       }
     });
   }
@@ -457,8 +449,8 @@ $.when(
   $.getJSON("roads.json"),
   $.getJSON("topo/background_roads.json")
 ).then( function (trafficResults, idMapResults, roadsResults, backgroundRoads) {
-  activeTraffic = trafficResults[0]
-  initializeEvents(activeTraffic);
-  renderMiseryIndex(activeTraffic);
+  traffic = trafficResults[0]
+  initializeEvents(traffic);
+  renderMiseryIndex(traffic);
   renderRoads(traffic, roadsResults[0], backgroundRoads[0], idMapResults[0]);
 });
