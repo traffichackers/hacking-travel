@@ -20,6 +20,14 @@ body {
   float: left;
 }
 
+/* Road */
+.road {
+  stroke: rgb(225,225,225);
+  fill: none;
+  strok-width: 0.5;
+}
+
+/* Segment */
 .segment {
   stroke: lightgrey;
   fill: none;
@@ -52,6 +60,8 @@ body {
   position: absolute;
   right: 10px;
   width: 35em;
+  background-color: white;
+  opacity: 0.98;
 }
 .hundred-height {
   height: 100%;
@@ -61,9 +71,6 @@ body {
   background-color: rgb(1,1,1);
   border:solid 1px darkgray;
   border-radius:2em;"
-}
-.detail-pane-rows {
-  padding: 0em 2em 0em 2em;
 }
 
 /* Typeahead CSS */

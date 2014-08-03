@@ -11,7 +11,8 @@ var activePercentiles;
 var svg;
 
 // Events
-function initializeEvents() {
+function initializeEvents(traffic) {
+  initializeTypeahead(traffic);
   initializePercentileTabsEvents();
 }
 
@@ -36,8 +37,96 @@ function initializePercentileTabsEvents() {
   }
 }
 
+function initializeTypeahead(traffic) {
+
+  // Generate the typeahead dataset
+  var pairs = traffic.pairData
+  typeaheadData = []
+  for (pairId in pairs) {
+    typeaheadDatum = {};
+    typeaheadDatum['pairName'] = pairs[pairId].title.slice(0,60);
+    typeaheadDatum['pairId'] = pairId;
+    typeaheadData.push(typeaheadDatum);
+  }
+
+  // Initialize the bloodhound suggestion engine
+  var numbers = new Bloodhound({
+    datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.pairName); },
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    local: typeaheadData
+  });
+  numbers.initialize();
+
+  // Instantiate the typeahead UI
+  $('.example-numbers').typeahead(null, {
+    displayKey: 'pairName',
+    source: numbers.ttAdapter()
+  });
+  $('.example-numbers').bind('typeahead:selected', function (event, suggestion, dataSet) {
+    pathSelect(suggestion.pairId, traffic);
+  });
+}
+
+
+// Handle when the path is clicked or when an item is pulled from the drop-down
+var pathSelect = function(pairId, traffic) {
+  activePairId = pairId;
+  var pairData = traffic.pairData[pairId];
+  if(pairData) {
+    // Pull the historical data for the pair id
+    setPercentileTabDowLabel();
+    $.ajax({
+      url: 'data/'+pairId+".json",
+    }).done(function(percentiles) {
+      activePercentiles = percentiles;
+
+
+      // Show the PairId Title (Name)
+      title = pairData.title.slice(0,60);
+      if (pairData.title.length > 60) {
+        title += '...';
+      }
+      $('#title').html(title);
+
+      // Show the Speed and Travel Time
+      $('#speed').html(Math.round(pairData.speed));
+      $('#travelTime').html(Math.round(pairData.travelTime/60));
+
+      // Show the Congestion Ratio
+      var congestionRatio = pairData.speed/pairData.freeFlow;
+      var color;
+      if (congestionRatio > 0.9) {
+        color = 'rgb(142,204,158)';
+        text = 'normal';
+      } else if (congestionRatio > 0.4) {
+        color = 'rgb(250,189,137)';
+        text = 'impacted';
+      } else {
+        color = 'rgb(248,157,154)';
+        text = 'congested';
+      }
+      $('#site-status').css('background-color',color);
+      $('#site-status-text').html(text);
+
+
+      d3.select('.segment-selected').classed('segment-selected', false);  // Remove Existing Value
+      d3.select('#svg-pairid-'+pairId).classed('segment-selected', true);
+      activePairId = pairId;
+
+      distance = pairData.travelTime/60*pairData.speed;
+      activeDistance = distance;
+      renderGraph(pairData.today,pairData.predictions,percentiles,distance);
+
+      // Render Current Location
+      var charts = $('#charts')
+      charts.fadeIn(200);
+    });
+  };
+};
+
+
 // Renderers
-function setPercentileTabDateLabel() {
+function setPercentileTabDowLabel() {
   var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   dow = getDayOfWeek();
   day = 'Previous '+days[dow]+'s';
@@ -46,6 +135,7 @@ function setPercentileTabDateLabel() {
 
 function renderMiseryIndex(traffic) {
   miseryIndex = getMiseryIndex(traffic);
+
 }
 
 function prepareGraphSeries(data, color, name) {
@@ -167,93 +257,7 @@ function getMiseryIndex(traffic) {
   return miseryIndex;
 }
 
-
-// Handle when the path is clicked or when an item is pulled from the drop-down
-var pathClick = function(pairId, traffic) {
-  activePairId = pairId;
-  var pairData = traffic.pairData[pairId];
-  if(pairData) {
-    // Pull the historical data for the pair id
-    $.ajax({
-      url: 'data/'+pairId+".json",
-    }).done(function(percentiles) {
-      activePercentiles = percentiles;
-
-
-      // Show the PairId Title (Name)
-      title = pairData.title.slice(0,60);
-      if (pairData.title.length > 60) {
-        title += '...';
-      }
-      $('#title').html(title);
-
-      // Show the Speed and Travel Time
-      $('#speed').html(Math.round(pairData.speed));
-      $('#travelTime').html(Math.round(pairData.travelTime/60));
-
-      // Show the Congestion Ratio
-      var congestionRatio = pairData.speed/pairData.freeFlow;
-      var color;
-      if (congestionRatio > 0.9) {
-        color = 'rgb(142,204,158)';
-        text = 'normal';
-      } else if (congestionRatio > 0.4) {
-        color = 'rgb(250,189,137)';
-        text = 'impacted';
-      } else {
-        color = 'rgb(248,157,154)';
-        text = 'congested';
-      }
-      $('#site-status').css('background-color',color);
-      $('#site-status-text').html(text);
-
-
-      d3.select('.segment-selected').classed('segment-selected', false);  // Remove Existing Value
-      d3.select('#svg-pairid-'+pairId).classed('segment-selected', true);
-      activePairId = pairId;
-
-      distance = pairData.travelTime/60*pairData.speed;
-      activeDistance = distance;
-      renderGraph(pairData.today,pairData.predictions,percentiles,distance);
-
-      // Render Current Location
-      var charts = $('#charts')
-      charts.fadeIn(200);
-    });
-  };
-};
-
-function initializeTypeahead(traffic) {
-
-  // Generate the typeahead dataset
-  var pairs = traffic.pairData
-  typeaheadData = []
-  for (pairId in pairs) {
-    typeaheadDatum = {};
-    typeaheadDatum['pairName'] = pairs[pairId].title.slice(0,60);
-    typeaheadDatum['pairId'] = pairId;
-    typeaheadData.push(typeaheadDatum);
-  }
-
-  // Initialize the bloodhound suggestion engine
-  var numbers = new Bloodhound({
-    datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.pairName); },
-    queryTokenizer: Bloodhound.tokenizers.whitespace,
-    local: typeaheadData
-  });
-  numbers.initialize();
-
-  // Instantiate the typeahead UI
-  $('.example-numbers').typeahead(null, {
-    displayKey: 'pairName',
-    source: numbers.ttAdapter()
-  });
-  $('.example-numbers').bind('typeahead:selected', function (event, suggestion, dataSet) {
-    pathClick(suggestion.pairId, traffic);
-  });
-}
-
-function renderRoads(traffic, roads, idMap) {
+function renderRoads(traffic, roads, backgroundRoads, idMap) {
   mapElement = $("#map-canvas");
 
   var width = mapElement.width(),
@@ -269,6 +273,7 @@ function renderRoads(traffic, roads, idMap) {
     .scale(20000)
     .translate([width / 2, height / 2]);
 
+
   var zoom = d3.behavior.zoom()
     .translate([0, 0])
     .scale(1)
@@ -276,6 +281,11 @@ function renderRoads(traffic, roads, idMap) {
     .on("zoom", zoomed);
 
   var roadFeature = svg.append("g");
+
+  roadFeature.append("path")
+    .datum(topojson.feature(backgroundRoads, backgroundRoads.objects.roads))
+    .attr("d", d3.geo.path().projection(projection))
+    .attr('class','road')
 
   var roadFeatures = roadFeature.selectAll("path")
     .data(roads.features)
@@ -294,7 +304,7 @@ function renderRoads(traffic, roads, idMap) {
     })
     .attr('class','segment')
     .on('click',function(d, i) {
-      pathClick(idMap[d.properties.UID], traffic);
+      pathSelect(idMap[d.properties.UID], traffic);
     })
     .on('mouseover', function(d, i) {
       spotlightSegments(this, roadFeature);
@@ -440,29 +450,21 @@ function spotlightSegments(activeSegment, roadFeature) {
 
 }
 
+// Get Traffic, ID Map, and Get Roadway Layout
+$.when(
+  $.getJSON("current.json"),
+  $.getJSON("idMap.json"),
+  $.getJSON("roads.json"),
+  $.getJSON("topo/background_roads.json")
+).then( function (trafficResults, idMapResults, roadsResults, backgroundRoads) {
 
-// Data Retrieval
-function getData() {
+  var traffic = trafficResults[0];
+  var roads = roadsResults[0];
+  var backgroundRoads = backgroundRoads[0];
+  var idMap = idMapResults[0];
 
-  // Get Traffic, ID Map, and Get Roadway Layout
-  $.when(
-    $.getJSON("current.json"),
-    $.getJSON("idMap.json"),
-    $.getJSON("roads.json")
-  ).then( function (trafficResults, idMapResults, roadsResults) {
-
-    var traffic = trafficResults[0];
-    var roads = roadsResults[0];
-    var idMap = idMapResults[0];
-
-    activeTraffic = traffic
-    renderMiseryIndex(traffic);
-    initializeTypeahead(traffic);
-    renderRoads(traffic, roads, idMap);
-  });
-
-}
-
-getData();
-initializeEvents();
-setPercentileTabDateLabel();
+  activeTraffic = traffic
+  initializeEvents(traffic);
+  renderMiseryIndex(traffic);
+  renderRoads(traffic, roads, backgroundRoads, idMap);
+});
