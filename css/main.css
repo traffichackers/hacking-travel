@@ -8,6 +8,10 @@ body {
   font-family: Tahoma;
 }
 
+.hundred-height {
+  height: 100%;
+}
+
 /* Navigation */
 .navbar {
   margin-bottom: 0px;
@@ -29,7 +33,7 @@ body {
 
 /* Segment */
 .segment {
-  stroke: lightgrey;
+  stroke: rgb(0,0,0);
   fill: none;
   stroke-width: 0.5;
 }
@@ -54,7 +58,7 @@ body {
   fill: black;
 }
 
-/* Charts/Detail Pane */
+/* Charts and Detail Pane */
 #charts {
   display: none;
   position: absolute;
@@ -63,15 +67,26 @@ body {
   background-color: white;
   opacity: 0.98;
 }
-.hundred-height {
-  height: 100%;
-}
+
 #site-status {
   font-size: 2.5em;
   background-color: rgb(1,1,1);
   border:solid 1px darkgray;
   border-radius:2em;"
 }
+
+.site-status-normal {
+  background-color = rgb(142,204,158);
+}
+
+.site-status-impacted {
+  background-color = rgb(250,189,137);
+}
+
+.site-status-congested {
+  background-color = 'rgb(248,157,154)';
+}
+
 
 /* Typeahead CSS */
 .tt-dropdown-menu,

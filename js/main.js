@@ -1,6 +1,6 @@
 // Events
 function initializeEvents(traffic) {
-  initializeTypeahead(traffic);
+  initializeTypeahead(traffic.pairData);
   //initializePercentileTabsEvents();
 }
 
@@ -17,42 +17,38 @@ function initializePercentileTabsEvents() {
   }
 }
 
-function initializeTypeahead(traffic) {
+function initializeTypeahead(pairData) {
 
   // Generate the typeahead dataset
-  var pairs = traffic.pairData
   typeaheadData = []
-  for (pairId in pairs) {
-    typeaheadDatum = {};
-    typeaheadDatum['pairName'] = pairs[pairId].title.slice(0,60);
-    typeaheadDatum['pairId'] = pairId;
-    typeaheadData.push(typeaheadDatum);
+  for (pairId in pairData) {
+    typeaheadData.push( {'pairName': formatting.formatSegmentTitle(pairData[pairId].title), 'pairId': pairId } );
   }
 
   // Initialize the bloodhound suggestion engine
-  var numbers = new Bloodhound({
+  var pairDataEngine = new Bloodhound({
     datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.pairName); },
     queryTokenizer: Bloodhound.tokenizers.whitespace,
     local: typeaheadData
   });
-  numbers.initialize();
+  pairDataEngine.initialize();
 
   // Instantiate the typeahead UI
-  $('.example-numbers').typeahead(null, {
+  $('.segment-autocomplete').typeahead(null, {
     displayKey: 'pairName',
-    source: numbers.ttAdapter()
+    source: pairDataEngine.ttAdapter()
   });
-  $('.example-numbers').bind('typeahead:selected', function (event, suggestion, dataSet) {
-    pathSelect(suggestion.pairId, traffic);
+  $('.segment-autocomplete').bind('typeahead:selected', function (event, suggestion, dataSet) {
+    pathSelect(suggestion.pairId, traffic.pairData);
   });
 }
 
 
 // Handle when the path is clicked or when an item is pulled from the drop-down
-var pathSelect = function(pairId, traffic) {
+var pathSelect = function(pairId, pairData) {
+  pairDatum = pairData[pairId];
+  if(pairDatum) {
 
-  var pairData = traffic.pairData[pairId];
-  if(pairData) {
     // Pull the historical data for the pair id
     setPercentileTabDowLabel();
     $.ajax({
@@ -60,39 +56,23 @@ var pathSelect = function(pairId, traffic) {
     }).done(function(percentiles) {
 
 
-      // Show the PairId Title (Name)
-      title = pairData.title.slice(0,60);
-      if (pairData.title.length > 60) {
-        title += '...';
-      }
-      $('#title').html(title);
-
-      // Show the Speed and Travel Time
-      $('#speed').html(Math.round(pairData.speed));
-      $('#travelTime').html(Math.round(pairData.travelTime/60));
+      // Show the title, speed, and travel time
+      $('#title').html(formatting.formatSegmentTitle(title));
+      $('#speed').html(Math.round(pairDatum.speed));
+      $('#travelTime').html(Math.round(pairDatum.travelTime/60));
 
       // Show the Congestion Ratio
-      var congestionRatio = pairData.speed/pairData.freeFlow;
+      var congestionRatioText = getCongestionRatioText(pairDatum)
+      $('#site-status').addClass('.site-status-'+congestionRatioText);
+      $('#site-status-text').html(congestionRatioText);
 
-      if (congestionRatio > 0.9) {
-        color = 'rgb(142,204,158)';
-        text = 'normal';
-      } else if (congestionRatio > 0.4) {
-        color = 'rgb(250,189,137)';
-        text = 'impacted';
-      } else {
-        color = 'rgb(248,157,154)';
-        text = 'congested';
-      }
-      $('#site-status').css('background-color',color);
-      $('#site-status-text').html(text);
 
 
       d3.select('.segment-selected').classed('segment-selected', false);  // Remove Existing Value
       d3.select('#svg-pairid-'+pairId).classed('segment-selected', true);
 
-      distance = pairData.travelTime/60*pairData.speed;
-      renderGraph(pairData.today,pairData.predictions,percentiles,distance);
+      distance = pairDatum.travelTime/60*pairDatum.speed;
+      renderGraph(pairDatum.today,pairDatum.predictions,percentiles,distance);
 
       // Render Current Location
       var charts = $('#charts')
@@ -185,7 +165,17 @@ function renderGraph(today, predictions, percentiles, distance) {
 
 }
 
-// Utilities
+
+// Formatting
+var formatting = {
+  formatSegmentTitle: function(title) {
+    if (title.length > 60) {
+      title = title.slice(0,60) + '...';
+    }
+    return title
+  }
+}
+
 function fixFormatting(percentile, distance) {
   for (var i=0; i<percentile.length; i++) {
     if (isNaN(percentile[i].x)) {
@@ -200,6 +190,20 @@ function fixFormatting(percentile, distance) {
   return percentile;
 }
 
+// Utilities
+var util = {
+  getCongestionRatioText: function(datum) {
+    var congestionRatio = pairData.speed/pairData.freeFlow;
+
+    if (congestionRatio > 0.9) {
+      return 'normal';
+    } else if (congestionRatio > 0.4) {
+      return 'impacted';
+    } else {
+      return 'congested';
+    }
+  }
+}
 
 function getActivePercentileTab() {
   return $('.percentile-graphs').children('.active').attr('id');
@@ -281,7 +285,7 @@ function renderRoads(traffic, roads, backgroundRoads, idMap) {
     })
     .attr('class','segment')
     .on('click',function(d, i) {
-      pathSelect(idMap[d.properties.UID], traffic);
+      pathSelect(idMap[d.properties.UID], traffic.pairData);
     })
     .on('mouseover', function(d, i) {
       spotlightSegments(this, roadFeature);
