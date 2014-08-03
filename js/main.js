@@ -1,14 +1,10 @@
-var activeDistance;
-var activePairId;
-var activePercentiles;
-
 // Events
 function initializeEvents(traffic) {
   initializeTypeahead(traffic);
-  initializePercentileTabsEvents(traffic);
+  //initializePercentileTabsEvents();
 }
 
-function initializePercentileTabsEvents(traffic) {
+function initializePercentileTabsEvents() {
   var i = 0;
   var tabs = $('.percentile-graphs').children();
   for (i = 0; i < tabs.length; i++) {
@@ -16,14 +12,6 @@ function initializePercentileTabsEvents(traffic) {
       selectedTab = $(this);
       if (!selectedTab.hasClass('active')) {
         selectedTab.addClass('active');
-        var tabs = $('.percentile-graphs').children();
-        for (i = 0; i < tabs.length; i++) {
-          currentTab = $(tabs[i]);
-          if (currentTab.hasClass('active') && currentTab.attr('id') !== selectedTab.attr('id')) {
-            currentTab.removeClass('active');
-          }
-        }
-        renderGraph(traffic.pairData[activePairId].today, activePredictions, activePercentiles, activeDistance);
       }
     });
   }
@@ -62,7 +50,7 @@ function initializeTypeahead(traffic) {
 
 // Handle when the path is clicked or when an item is pulled from the drop-down
 var pathSelect = function(pairId, traffic) {
-  activePairId = pairId;
+
   var pairData = traffic.pairData[pairId];
   if(pairData) {
     // Pull the historical data for the pair id
@@ -70,7 +58,6 @@ var pathSelect = function(pairId, traffic) {
     $.ajax({
       url: 'data/'+pairId+".json",
     }).done(function(percentiles) {
-      activePercentiles = percentiles;
 
 
       // Show the PairId Title (Name)
@@ -103,10 +90,8 @@ var pathSelect = function(pairId, traffic) {
 
       d3.select('.segment-selected').classed('segment-selected', false);  // Remove Existing Value
       d3.select('#svg-pairid-'+pairId).classed('segment-selected', true);
-      activePairId = pairId;
 
       distance = pairData.travelTime/60*pairData.speed;
-      activeDistance = distance;
       renderGraph(pairData.today,pairData.predictions,percentiles,distance);
 
       // Render Current Location
