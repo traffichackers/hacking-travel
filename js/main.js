@@ -50,7 +50,7 @@ var pathSelect = function(pairId, pairData) {
   if(pairDatum) {
 
     // Pull the historical percentiles for the pair id
-    setPercentileTabDowLabel();
+    renderers.setPercentileTabDowLabel();
     $.ajax({
       url: 'data/'+pairId+".json",
     }).done(function(percentiles) {
@@ -71,24 +71,24 @@ var pathSelect = function(pairId, pairData) {
       // Draw the graph
       renderGraph(pairDatum, percentiles);
 
-      // Show the result
-      $('#charts').fadeIn(100);
     });
   };
 };
 
 
 // Renderers
-function setPercentileTabDowLabel() {
-  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  dow = getDayOfWeek();
-  day = 'Previous '+days[dow]+'s';
-  $('#dow').children().first().html(day);
+var renderers = {
+  setPercentileTabDowLabel: function() {
+    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    dow = getDayOfWeek();
+    day = 'Previous '+days[dow]+'s';
+    $('#dow').children().first().html(day);
+  }
 }
 
 function renderMiseryIndex(traffic) {
-  miseryIndex = getMiseryIndex(traffic);
-
+  var miseryIndexText = 'The current misery index is '+getMiseryIndex(traffic);
+  $('#miseryIndex').html();
 }
 
 function prepareGraphSeries(data, color, name) {
@@ -444,4 +444,5 @@ $.when(
   initializeEvents(traffic);
   renderMiseryIndex(traffic);
   renderRoads(traffic, roadsResults[0], backgroundRoads[0], idMapResults[0]);
+  $('#charts').fadeIn(100);
 });
