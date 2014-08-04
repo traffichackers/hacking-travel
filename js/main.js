@@ -59,9 +59,9 @@ var pathSelect = function(pairId, pairData) {
       $('#speed').html(Math.round(pairDatum.speed));
       $('#travelTime').html(Math.round(pairDatum.travelTime/60));
 
-      // Show the Congestion Ratio
+      // Show the congestion ratio
       var congestionRatioText = util.getCongestionRatioText(pairDatum)
-      $('#site-status').addClass('.site-status-'+congestionRatioText);
+      $('#site-status').addClass('status-'+congestionRatioText);
       $('#site-status-text').html(congestionRatioText);
 
       // Remove segment highlighting on the previous segment (if any) and add to the ne segment
@@ -70,6 +70,10 @@ var pathSelect = function(pairId, pairData) {
 
       // Draw the graph
       renderGraph(pairDatum, percentiles);
+
+      // Hide the region section and show the segment section
+      $('#detail-region').addClass('detail-hidden');
+      $('#charts').removeClass('detail-hidden');
 
     });
   };
@@ -87,8 +91,18 @@ var renderers = {
 }
 
 function renderMiseryIndex(traffic) {
-  var miseryIndexText = 'The current misery index is '+getMiseryIndex(traffic);
-  $('#miseryIndex').html();
+
+  // Show speed and misery index
+  var regionalConditions = getMiseryIndex(traffic)
+  $('#average-region-speed').html(regionalConditions.speed);
+  $('#misery-index').html(regionalConditions.miseryIndex);
+
+  // Show the congestion ratio
+  var congestionRatioText = util.getCongestionRatioText(regionalConditions)
+  $('#average-region-status').addClass('status-'+congestionRatioText);
+  $('#average-region-status-text').html(congestionRatioText);
+
+
 }
 
 function prepareGraphSeries(data, color, name) {
@@ -219,14 +233,17 @@ function getDayOfWeek() {
 function getMiseryIndex(traffic) {
   var denominator = 0;
   var numerator = 0;
+  var speedSummation = 0;
+  var freeflowSummation = 0;
+  var count = 0;
 
   for (var pairId in traffic.pairData) {
     pair = traffic.pairData[pairId];
 
-    speed = pair.speed;
-    freeFlow = pair.freeFlow;
-    travelTime = pair.travelTime;
-
+    var speed = pair.speed;
+    var freeFlow = pair.freeFlow;
+    var travelTime = pair.travelTime;
+    var distance, speedBelowFreeflow;
     if (!isNaN(speed) && !isNaN(travelTime) && !isNaN(freeFlow)) {
       distance = travelTime/60*speed;
       denominator += distance;
@@ -234,10 +251,13 @@ function getMiseryIndex(traffic) {
       if (speedBelowFreeflow > 0) {
         numerator += speedBelowFreeflow*distance;
       }
+      speedSummation += parseFloat(speed);
+      freeflowSummation += parseFloat(freeFlow);
+      count++
     }
   }
   miseryIndex = numerator/denominator;
-  return miseryIndex;
+  return {'miseryIndex': miseryIndex.toString().substr(0,3), 'speed': Math.round(speedSummation/count), 'freeFlow': Math.round(freeflowSummation/count)}
 }
 
 function renderRoads(traffic, roads, backgroundRoads, idMap) {
@@ -444,5 +464,5 @@ $.when(
   initializeEvents(traffic);
   renderMiseryIndex(traffic);
   renderRoads(traffic, roadsResults[0], backgroundRoads[0], idMapResults[0]);
-  $('#charts').fadeIn(100);
+  $('#detail-region').removeClass('detail-hidden');
 });
