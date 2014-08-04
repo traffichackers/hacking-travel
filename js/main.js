@@ -106,10 +106,22 @@ function renderMiseryIndex(traffic) {
 
 }
 
-function prepareGraphSeries(data, color, name) {
-  seriesElement = {};
+function prepareGraphSeries(data, level) {
+  var name = level+"th Percentile"
+  var seriesElement = {};
   seriesElement.data = data;
-  seriesElement.color = color;
+  if (level === 10 || level === 90) {
+    seriesElement.color = 'rgb(240,240,240)';
+  } else if (level === 30 || level === 70) {
+    seriesElement.color = 'rgb(220,220,220)';
+  } else if (level === 50) {
+    seriesElement.color = 'rgb(200,200,200)';
+  } else if (level === 'Today') {
+    seriesElement.color = 'rgb(120,120,120)';
+  } else if (level === 'Predictions') {
+    seriesElement.color = 'rgb(243,154,29)';
+  }
+
   seriesElement.name = name;
   return seriesElement;
 }
@@ -136,14 +148,16 @@ function renderGraph(pairDatum, percentiles) {
     percentile = chosenPercentiles[key];
     percentile = fixFormatting(percentile, distance)  // Fix number formatting
     percentileLevel = parseInt(key.slice(1));
-    alpha = (1-Math.abs(percentileLevel-50)/50)*0.4;  // Set Color
-    var seriesElement = prepareGraphSeries(percentile, 'rgba(70,130,180,'+alpha+')', percentileLevel+"th Percentile")
+    var seriesElement = prepareGraphSeries(percentile, percentileLevel);
+    seriesElement.renderer = 'area';
     seriesData.push(seriesElement);
   }
 
+
   // Add the Data for Today
   today = fixFormatting(today, distance)
-  var seriesElement = prepareGraphSeries(today, 'rgba(70,130,180,0.7)', 'Today')
+  var seriesElement = prepareGraphSeries(today, 'Today')
+  seriesElement.renderer = 'line';
   seriesData.push(seriesElement);
 
   // Add the Predictions
@@ -158,14 +172,16 @@ function renderGraph(pairDatum, percentiles) {
     currentTime = new Date(currentTime.getTime() + 5*60000);
   }
   formattedPredictions = fixFormatting(formattedPredictions, distance);
-  var seriesElement = prepareGraphSeries(formattedPredictions, 'rgba(241,82,86,0.7)', 'Predictions')
+  var seriesElement = prepareGraphSeries(formattedPredictions, 'Predictions');
+  seriesElement.renderer = 'line';
   seriesData.push(seriesElement);
 
   // Erase the previous graph (if any) and render the new graph
   $("#historicalTravelTimes").empty();
   var graph = new Rickshaw.Graph({
     element: document.querySelector("#historicalTravelTimes"),
-    renderer: 'line',
+    renderer: 'multi',
+    unstack: true,
     series: seriesData,
     width: 400,
     height: 200
