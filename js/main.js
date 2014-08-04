@@ -22,7 +22,7 @@ function initializeTypeahead(pairData) {
   // Generate the typeahead dataset
   typeaheadData = []
   for (pairId in pairData) {
-    typeaheadData.push( {'pairName': formatting.formatSegmentTitle(pairData[pairId].title), 'pairId': pairId } );
+    typeaheadData.push( {'pairName': pairData[pairId].title, 'pairId': pairId } );
   }
 
   // Initialize the bloodhound suggestion engine
@@ -54,6 +54,8 @@ var pathSelect = function(pairId, pairData) {
     $.ajax({
       url: 'data/'+pairId+".json",
     }).done(function(percentiles) {
+
+      $('#segment-title').html(pairDatum.title)
 
       // Show speed, and travel time
       $('#speed').html(Math.round(pairDatum.speed));
@@ -101,7 +103,6 @@ function renderMiseryIndex(traffic) {
   var congestionRatioText = util.getCongestionRatioText(regionalConditions)
   $('#average-region-status').addClass('status-'+congestionRatioText);
   $('#average-region-status-text').html(congestionRatioText);
-
 
 }
 
@@ -182,15 +183,6 @@ function renderGraph(pairDatum, percentiles) {
 
 
 // Formatting
-var formatting = {
-  formatSegmentTitle: function(title) {
-    if (title.length > 60) {
-      title = title.slice(0,60) + '...';
-    }
-    return title
-  }
-}
-
 function fixFormatting(percentile, distance) {
   for (var i=0; i<percentile.length; i++) {
     if (isNaN(percentile[i].x)) {
