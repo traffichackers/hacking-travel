@@ -27,17 +27,28 @@
         </ul>
         <form class="navbar-form navbar-left" role="search">
           <div class="form-group">
-            <input id="segment-autocomplete" type="text" class="form-control" placeholder="Search">
+            <input id="segment-autocomplete" type="text" class="form-control" placeholder="Type a segment name">
           </div>
         </form>
       </div>
     </div>
   </div>
   <div class="hundred-height">
-    <div id="charts">
-      <div>
-        <span id='title'></span>
-      </div>
+    <div id="detail-region" class="detail detail-hidden">
+      <span style="font-size: 2.5em" id="average-region-speed"></span>
+      <span style="font-size: 1em">mph</span>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+
+
+      <span id="misery-index" style="font-size: 2.5em"></span>
+      <span id="misery-index" style="font-size: 1em">misery index</span>
+
+
+      <span id="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span id="average-region-status-text" style="font-size: 1em">normal</span>
+
+    </div>
+    <div id="charts" class="detail detail-hidden">
       <div>
 
         <span style="font-size: 2.5em" id="speed"></span>
