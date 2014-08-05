@@ -280,7 +280,7 @@ function renderRoads(traffic, roads, backgroundRoads, idMap) {
 
   var projection = d3.geo.mercator()
     .rotate([0, 0])
-    .center([-70.95, 42.00])
+    .center([-70.95, 42.05])
     .scale(20000)
     .translate([width / 2, height / 2]);
 
