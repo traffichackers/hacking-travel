@@ -37,22 +37,25 @@ body {
 /* Segment */
 .segment {
   stroke: rgb(0,0,0);
-  fill: none;
   stroke-width: 0.5;
+  fill: none;
 }
 
 .segment:hover {
   stroke: black;
   stroke-width: 1.0;
+  fill: none;
 }
 
 .segment-flyout {
-  stroke: lightgrey;
+  stroke: rgb(0,0,0);
   stroke-width: 1.0;
+  fill: none;
 }
 
 .segment-selected {
-  stroke: black;
+  stroke: rgb(0,0,0);
+  fill: none;
 }
 
 .segment-label {
