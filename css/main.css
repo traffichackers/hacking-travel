@@ -29,27 +29,27 @@ body {
 
 /* Road */
 .road {
-  stroke: rgb(225,225,225);
+  stroke: rgb(230,230,230);
   fill: none;
   strok-width: 0.5;
 }
 
 /* Segment */
 .segment {
-  stroke: rgb(0,0,0);
+  stroke: rgb(100,100,100);
   stroke-width: 0.5;
   fill: none;
 }
 
 .segment:hover {
-  stroke: black;
+  stroke: rgb(0,0,0);
   stroke-width: 1.0;
   fill: none;
 }
 
 .segment-flyout {
-  stroke: rgb(0,0,0);
-  stroke-width: 1.0;
+  stroke: rgb(100,100,100);
+  stroke-width: 0.5;
   fill: none;
 }
 
