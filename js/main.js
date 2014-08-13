@@ -67,8 +67,8 @@ var pathSelect = function(pairId, pairData) {
       $('#site-status-text').html(congestionRatioText);
 
       // Remove segment highlighting on the previous segment (if any) and add to the ne segment
-      d3.select('.segment-selected').classed('segment-selected', false);
-      d3.select('#svg-pairid-'+pairId).classed('segment-selected', true);
+      d3.select('.segment-selected').classed({'segment':true, 'segment-selected':false});
+      d3.select('#svg-pairid-'+pairId).classed({'segment':true, 'segment-selected':true});
 
       // Draw the graph
       renderGraph(pairDatum, percentiles);
@@ -334,6 +334,57 @@ function calculateDistance(point1, point2) {
   return Math.sqrt(Math.pow(point1.x-point2.x,2) + Math.pow(point1.y-point2.y,2));
 }
 
+function getBoundaries(path) {
+  var boundingBox = path.getBBox();
+  return {
+    'x1': boundingBox.x,
+    'y1': boundingBox.y,
+    'x2': boundingBox.x+boundingBox.width,
+    'y2': boundingBox.y+boundingBox.height
+  };
+}
+
+function hasOverlap(a, b) {
+  // X Overlap
+  var xOverlap = false;
+  if (a.x1 < b.x1 && a.x2 > b.x1) {
+    xOverlap = true;
+  } else if (a.x1 < b.x2 && a.x2 > b.x2) {
+    xOverlap = true;
+  } else if (b.x1 < a.x1 && b.x2 > a.x1) {
+    xOverlap = true;
+  } else if (b.x1 < a.x2 && b.x2 > a.x2) {
+    xOverlap = true;
+  }
+
+  // Y Overlap
+  var yOverlap = false;
+  if (a.y1 < b.y1 && a.y2 > b.y1) {
+    yOverlap = true;
+  } else if (a.y1 < b.y2 && a.y2 > b.y2) {
+    yOverlap = true;
+  } else if (b.y1 < a.y1 && b.y2 > a.y1) {
+    yOverlap = true;
+  } else if (b.y1 < a.y2 && b.y2 > a.y2) {
+    yOverlap = true;
+  }
+
+  if (xOverlap && yOverlap) {
+    return true;
+  } else {
+    return false;
+  }
+
+}
+
+function addMargin(box, margin) {
+  box.x1 = box.x1-margin;
+  box.x2 = box.x2+margin;
+  box.y1 = box.y1-margin;
+  box.y2 = box.y2+margin;
+  return box;
+}
+
 function calculateOffsetVectors(segment, multiplier) {
   var totalLength = segment.getTotalLength();
   var initialPoint = segment.getPointAtLength(0);
@@ -358,16 +409,11 @@ function calculateOffsetVectors(segment, multiplier) {
   return [offsetVector, offsetVectorNegative];
 }
 
-function spotlightSegments(activeSegment, roadFeature) {
-  var activeSegmentMidpoint = activeSegment.getPointAtLength(activeSegment.getTotalLength()/2);
-  var spotlightRadius = 10;
-
-  // Remove Existing Labels
-  d3.selectAll('.segment-label').remove();
+function calculateCentroid(activeSegment, roadFeature, spotlightRadius) {
 
   // Calculate Centroid
-  var segments = d3.selectAll('.segment')[0];
-  var centroids = [];
+  var activeSegmentMidpoint = activeSegment.getPointAtLength(activeSegment.getTotalLength()/2);
+  var segments = roadFeature.selectAll('.segment')[0];
   var cNumeratorX = 0;
   var cNumeratorY = 0;
   var cDenominator = 0;
@@ -380,73 +426,64 @@ function spotlightSegments(activeSegment, roadFeature) {
     if (epicenterDistance < spotlightRadius) {
       var initialPoint = segment.getPointAtLength(0);
       var terminalPoint = segment.getPointAtLength(totalLength);
-      var centroid = {}
-      centroid.x = 1/3*(initialPoint.x+midPoint.x+terminalPoint.x);
-      centroid.y = 1/3*(initialPoint.y+midPoint.y+terminalPoint.y);
-      centroid.length = totalLength;
-      centroids.push(centroid);
-      cNumeratorX += centroid.x*totalLength;
-      cNumeratorY += centroid.y*totalLength;
-      cDenominator += totalLength
+      var xCentroid = 1/3*(initialPoint.x+midPoint.x+terminalPoint.x);
+      var yCentroid = 1/3*(initialPoint.y+midPoint.y+terminalPoint.y);
+
+      cNumeratorX += xCentroid*totalLength;
+      cNumeratorY += yCentroid*totalLength;
+      cDenominator += totalLength;
     }
   }
-  var com = {'x': cNumeratorX/cDenominator, 'y': cNumeratorY/cDenominator};
+  return {'x': cNumeratorX/cDenominator, 'y': cNumeratorY/cDenominator};
+}
 
-  // Remove Flyout Formatting for Older Flyouts
-  d3.selectAll('.segment-flyout').attr('class', function(d, i) {
-    var classList = this.classList
-    updatedClasses = ""
-    for (var i=0; i<classList.length; i++) {
-      var className = classList[i];
-      if (className !== 'segment-flyout') {
-        updatedClasses += className;
-      }
+function getOffsetVector(currentSegment, epicenterDistance, queuedTransformations, currentSegmentMidpoint, com) {
+
+  var offsetVectors = calculateOffsetVectors(currentSegment, epicenterDistance);
+
+  // Get the Decision Vector
+  decisionVector = {}
+  for (var i=0; i<offsetVectors.length; i++) {
+    offsetVector = offsetVectors[i];
+    testSegmentMidpoint = currentSegmentMidpoint;
+    testSegmentMidpoint.x += offsetVector.x;
+    testSegmentMidpoint.y += offsetVector.y;
+    offsetVector.distance = calculateDistance(com,testSegmentMidpoint);
+    if (!("distance" in decisionVector) || (offsetVector.distance < decisionVector.distance)) {
+      decisionVector = offsetVector;
     }
-    return updatedClasses;
-  });
 
-  // Calculate Midpoints for All Segments and Compare to Active Segment
-  var dataset = [];
-  d3.selectAll('.segment').transition().attr('transform', function(d, i) {
-    currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
-    var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
+    /*
+    // Collision avoidance
+    for transformation in queuedTransformations
 
-    // Apply a Transform Attribute
-    if (epicenterDistance < spotlightRadius) {
-      var offsetVectors = calculateOffsetVectors(this, epicenterDistance);
-      var decisionVector = {};
+      transformation.height
+      transformation.width
+      transformation.x
+      transformation.y
 
-      // Test for the Proper Offset Direction
-      for (var i=0; i<offsetVectors.length; i++) {
-        offsetVector = offsetVectors[i];
-        testSegmentMidpoint = currentSegmentMidpoint;
-        testSegmentMidpoint.x += offsetVector.x;
-        testSegmentMidpoint.y += offsetVector.y;
-        offsetVector.distance = calculateDistance(com,testSegmentMidpoint);
-        if (!("distance" in decisionVector) || (offsetVector.distance < decisionVector.distance)) {
-          decisionVector = offsetVector;
-        }
-      }
 
-      // Push Title Data for Text Labels
-      currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
-      var title = d3.select(this).attr('data-title')
-      dataset.push({'name':title, 'x': currentSegmentEnd.x+decisionVector.x, 'y': currentSegmentEnd.y+decisionVector.y })
-
-      // Set Flyout Formatting
-      var classes = d3.select(this).attr('class')
-      d3.select(this).attr('class', classes + ' segment-flyout');
-
-      // Return the Translation
-      return 'translate('+decisionVector.x+','+decisionVector.y+')';
-
-    } else {
-      return '';
+    var currentMinX = currentSegmentStart.x+decisionVector.x,
+    var currentMaxX = currentSegmentEnd.x+decisionVector.x,
+    var currentMinY = currentSegmentStart.y+decisionVector.y,
+    var currentMaxY = currentSegmentEnd.y+decisionVector.y,
+    for (transformation in queuedTransformations) {
+      if decisionVector
     }
-  });
+    */
 
-  // Add Titles to Transformed Elements
-  var texts = roadFeature.selectAll("text").data(dataset).enter();
+    return decisionVector;
+
+  }
+}
+
+function addSegmentLabels(transformations) {
+
+  // Remove labels from paths in prior generations
+  d3.selectAll('.segment-label').remove();
+
+  // Add labels to newly translated paths
+  var texts = roadFeature.selectAll("text").data(transformations).enter();
   texts.append("text")
   .text(function(d, i) {
     return d.name;
@@ -458,6 +495,52 @@ function spotlightSegments(activeSegment, roadFeature) {
   .attr('y', function(d, i) {
     return d.y;
   })
+
+}
+
+function spotlightSegments(activeSegment, roadFeature) {
+  var spotlightRadius = 10;
+  var priorTransformations = [];
+
+  // Remove previous generation segment flyouts, if any
+  d3.selectAll('.segment-flyout').classed('segment-flyout',false)
+
+  // Calculate the center of mass for all segments within the spotlightRadius
+  var com = calculateCentroid(activeSegment, roadFeature, spotlightRadius)
+
+  // See the transform attribute on the road segments
+  var activeBoundaries = getBoundaries(activeSegment);
+  var activeBoundariesWithMargin = addMargin(activeBoundaries, spotlightRadius);
+  d3.selectAll('.segment').transition().attr('transform', function(d, i) {
+    var currentBoundaries = getBoundaries(this);
+    // Determine if current segment is close to the active segment
+    currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
+    var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
+    //if (epicenterDistance < spotlightRadius) {
+
+    if (hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
+      var offsetVector = getOffsetVector(this, epicenterDistance, priorTransformations, currentSegmentMidpoint, com);
+
+      // Store a record of this transformation
+      var currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
+      priorTransformations.push({
+        'bbox': currentBoundaries,
+        'name': d3.select(this).attr('data-title'),
+        'x': currentSegmentEnd.x+decisionVector.x,
+        'y': currentSegmentEnd.y+decisionVector.y
+      });
+
+      // Set Flyout Formatting
+      d3.select(this).classed('segment-flyout',true);
+
+      // Return the Translation
+      return 'translate('+offsetVector.x+','+offsetVector.y+')';
+
+    // Return a zero translation if the current segment is not close to the active segment
+    } else {
+      return 'translate(0,0)';
+    }
+  });
 
 }
 
