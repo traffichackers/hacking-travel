@@ -477,7 +477,7 @@ function getOffsetVector(currentSegment, epicenterDistance, queuedTransformation
   }
 }
 
-function addSegmentLabels(transformations) {
+function addSegmentLabels(roadFeature, transformations) {
 
   // Remove labels from paths in prior generations
   d3.selectAll('.segment-label').remove();
@@ -541,6 +541,8 @@ function spotlightSegments(activeSegment, roadFeature) {
       return 'translate(0,0)';
     }
   });
+
+  addSegmentLabels(roadFeature, priorTransformations);
 
 }
 
