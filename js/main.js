@@ -334,6 +334,15 @@ function calculateDistance(point1, point2) {
   return Math.sqrt(Math.pow(point1.x-point2.x,2) + Math.pow(point1.y-point2.y,2));
 }
 
+function translateBoundaries(boundaries,translationVector) {
+  returnBoundaries = {}
+  returnBoundaries.x1 = boundaries.x1+translationVector.x;
+  returnBoundaries.x2 = boundaries.x2+translationVector.x;
+  returnBoundaries.y1 = boundaries.y1+translationVector.y;
+  returnBoundaries.y2 = boundaries.y2+translationVector.y;
+  return returnBoundaries;
+}
+
 function getBoundaries(path) {
   var boundingBox = path.getBBox();
   return {
@@ -385,7 +394,7 @@ function addMargin(box, margin) {
   return box;
 }
 
-function calculateOffsetVectors(segment, multiplier) {
+function getNormalVectors(segment) {
   var totalLength = segment.getTotalLength();
   var initialPoint = segment.getPointAtLength(0);
   var terminalPoint = segment.getPointAtLength(totalLength);
@@ -400,16 +409,15 @@ function calculateOffsetVectors(segment, multiplier) {
 
   var normalSlope = dx/(-1*dy);
   var offsetVector = {}
-  multiplier = (1+multiplier)*2
-  offsetVector.x = dy*multiplier;
-  offsetVector.y = -1*dx*multiplier;
+  offsetVector.x = dy;
+  offsetVector.y = -1*dx;
   var offsetVectorNegative = {}
-  offsetVectorNegative.x = -1*dy*multiplier;
-  offsetVectorNegative.y = dx*multiplier;
+  offsetVectorNegative.x = -1*dy;
+  offsetVectorNegative.y = dx;
   return [offsetVector, offsetVectorNegative];
 }
 
-function calculateCentroid(activeSegment, roadFeature, spotlightRadius) {
+function getCentroid(activeSegment, roadFeature, spotlightRadius) {
 
   // Calculate Centroid
   var activeSegmentMidpoint = activeSegment.getPointAtLength(activeSegment.getTotalLength()/2);
@@ -437,44 +445,46 @@ function calculateCentroid(activeSegment, roadFeature, spotlightRadius) {
   return {'x': cNumeratorX/cDenominator, 'y': cNumeratorY/cDenominator};
 }
 
-function getOffsetVector(currentSegment, epicenterDistance, queuedTransformations, currentSegmentMidpoint, com) {
+function getOffsetVector(currentSegment, queuedTransformations, currentSegmentMidpoint, com, currentBoundaries) {
+  var baseOffsetDistance = 2.5;
 
-  var offsetVectors = calculateOffsetVectors(currentSegment, epicenterDistance);
+  // Calculate the normal vectors
+  var offsetVectors = getNormalVectors(currentSegment);
 
-  // Get the Decision Vector
-  decisionVector = {}
+  // Decide which normal vector to use
+  baseDecisionVector = {}
   for (var i=0; i<offsetVectors.length; i++) {
     offsetVector = offsetVectors[i];
     testSegmentMidpoint = currentSegmentMidpoint;
     testSegmentMidpoint.x += offsetVector.x;
     testSegmentMidpoint.y += offsetVector.y;
     offsetVector.distance = calculateDistance(com,testSegmentMidpoint);
-    if (!("distance" in decisionVector) || (offsetVector.distance < decisionVector.distance)) {
-      decisionVector = offsetVector;
+    if (!("distance" in baseDecisionVector) || (offsetVector.distance < baseDecisionVector.distance)) {
+      baseDecisionVector = offsetVector;
     }
-
-    /*
-    // Collision avoidance
-    for transformation in queuedTransformations
-
-      transformation.height
-      transformation.width
-      transformation.x
-      transformation.y
-
-
-    var currentMinX = currentSegmentStart.x+decisionVector.x,
-    var currentMaxX = currentSegmentEnd.x+decisionVector.x,
-    var currentMinY = currentSegmentStart.y+decisionVector.y,
-    var currentMaxY = currentSegmentEnd.y+decisionVector.y,
-    for (transformation in queuedTransformations) {
-      if decisionVector
-    }
-    */
-
-    return decisionVector;
-
   }
+
+  console.log(baseDecisionVector);
+  // Increase the offset to avoid collisions
+  var offsetDistance = baseOffsetDistance;
+  var decisionVector = {};
+  decisionVector.x = baseDecisionVector.x;
+  decisionVector.y = baseDecisionVector.y;
+  translatedBoundaries = translateBoundaries(currentBoundaries,baseDecisionVector);
+  for (var j=0; j<queuedTransformations.length; j++) {
+    var previousBoundaries = queuedTransformations[j].boundaries;
+    if (hasOverlap(translatedBoundaries, previousBoundaries)) {
+      offsetDistance += baseOffsetDistance;
+      decisionVector.x = baseDecisionVector.x*offsetDistance;
+      decisionVector.y = baseDecisionVector.y*offsetDistance;
+      translatedBoundaries = translateBoundaries(currentBoundaries,decisionVector);
+      console.log('base offset distance: '+offsetDistance);
+      console.log(decisionVector);
+      j = 0;
+    }
+  }
+  console.log('-');
+  return decisionVector;
 }
 
 function addSegmentLabels(roadFeature, transformations) {
@@ -499,35 +509,36 @@ function addSegmentLabels(roadFeature, transformations) {
 }
 
 function spotlightSegments(activeSegment, roadFeature) {
-  var spotlightRadius = 10;
+  var spotlightRadius = 5;
   var priorTransformations = [];
 
   // Remove previous generation segment flyouts, if any
   d3.selectAll('.segment-flyout').classed('segment-flyout',false)
 
   // Calculate the center of mass for all segments within the spotlightRadius
-  var com = calculateCentroid(activeSegment, roadFeature, spotlightRadius)
+  var com = getCentroid(activeSegment, roadFeature, spotlightRadius)
 
   // See the transform attribute on the road segments
   var activeBoundaries = getBoundaries(activeSegment);
   var activeBoundariesWithMargin = addMargin(activeBoundaries, spotlightRadius);
   d3.selectAll('.segment').transition().attr('transform', function(d, i) {
     var currentBoundaries = getBoundaries(this);
+
     // Determine if current segment is close to the active segment
     currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
     var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
     //if (epicenterDistance < spotlightRadius) {
-
     if (hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
-      var offsetVector = getOffsetVector(this, epicenterDistance, priorTransformations, currentSegmentMidpoint, com);
+
+      var offsetVector = getOffsetVector(this, priorTransformations, currentSegmentMidpoint, com, currentBoundaries);
 
       // Store a record of this transformation
       var currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
       priorTransformations.push({
-        'bbox': currentBoundaries,
+        'x': currentSegmentEnd.x+offsetVector.x,
+        'y': currentSegmentEnd.y+offsetVector.y,
         'name': d3.select(this).attr('data-title'),
-        'x': currentSegmentEnd.x+decisionVector.x,
-        'y': currentSegmentEnd.y+decisionVector.y
+        'boundaries': translateBoundaries(currentBoundaries,offsetVector)
       });
 
       // Set Flyout Formatting
@@ -542,7 +553,7 @@ function spotlightSegments(activeSegment, roadFeature) {
     }
   });
 
-  addSegmentLabels(roadFeature, priorTransformations);
+  //addSegmentLabels(roadFeature, priorTransformations);
 
 }
 
