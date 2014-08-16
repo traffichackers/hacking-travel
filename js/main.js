@@ -464,7 +464,6 @@ function getOffsetVector(currentSegment, queuedTransformations, currentSegmentMi
     }
   }
 
-  console.log(baseDecisionVector);
   // Increase the offset to avoid collisions
   var offsetDistance = baseOffsetDistance;
   var decisionVector = {};
@@ -478,12 +477,9 @@ function getOffsetVector(currentSegment, queuedTransformations, currentSegmentMi
       decisionVector.x = baseDecisionVector.x*offsetDistance;
       decisionVector.y = baseDecisionVector.y*offsetDistance;
       translatedBoundaries = translateBoundaries(currentBoundaries,decisionVector);
-      console.log('base offset distance: '+offsetDistance);
-      console.log(decisionVector);
       j = 0;
     }
   }
-  console.log('-');
   return decisionVector;
 }
 
@@ -509,51 +505,54 @@ function addSegmentLabels(roadFeature, transformations) {
 }
 
 function spotlightSegments(activeSegment, roadFeature) {
-  var spotlightRadius = 5;
-  var priorTransformations = [];
+  if (!activeSegment.classList.contains('segment-flyout')) {
 
-  // Remove previous generation segment flyouts, if any
-  d3.selectAll('.segment-flyout').classed('segment-flyout',false)
+    var spotlightRadius = 5;
+    var priorTransformations = [];
 
-  // Calculate the center of mass for all segments within the spotlightRadius
-  var com = getCentroid(activeSegment, roadFeature, spotlightRadius)
+    // Remove previous generation segment flyouts, if any
+    d3.selectAll('.segment-flyout').classed('segment-flyout',false)
 
-  // See the transform attribute on the road segments
-  var activeBoundaries = getBoundaries(activeSegment);
-  var activeBoundariesWithMargin = addMargin(activeBoundaries, spotlightRadius);
-  d3.selectAll('.segment').transition().attr('transform', function(d, i) {
-    var currentBoundaries = getBoundaries(this);
+    // Calculate the center of mass for all segments within the spotlightRadius
+    var com = getCentroid(activeSegment, roadFeature, spotlightRadius)
 
-    // Determine if current segment is close to the active segment
-    currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
-    var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
-    //if (epicenterDistance < spotlightRadius) {
-    if (hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
+    // See the transform attribute on the road segments
+    var activeBoundaries = getBoundaries(activeSegment);
+    var activeBoundariesWithMargin = addMargin(activeBoundaries, spotlightRadius);
+    d3.selectAll('.segment').transition().attr('transform', function(d, i) {
+      var currentBoundaries = getBoundaries(this);
 
-      var offsetVector = getOffsetVector(this, priorTransformations, currentSegmentMidpoint, com, currentBoundaries);
+      // Determine if current segment is close to the active segment
+      currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
+      var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
 
-      // Store a record of this transformation
-      var currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
-      priorTransformations.push({
-        'x': currentSegmentEnd.x+offsetVector.x,
-        'y': currentSegmentEnd.y+offsetVector.y,
-        'name': d3.select(this).attr('data-title'),
-        'boundaries': translateBoundaries(currentBoundaries,offsetVector)
-      });
+      if (hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
 
-      // Set Flyout Formatting
-      d3.select(this).classed('segment-flyout',true);
+        var offsetVector = getOffsetVector(this, priorTransformations, currentSegmentMidpoint, com, currentBoundaries);
 
-      // Return the Translation
-      return 'translate('+offsetVector.x+','+offsetVector.y+')';
+        // Store a record of this transformation
+        var currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
+        priorTransformations.push({
+          'x': currentSegmentEnd.x+offsetVector.x,
+          'y': currentSegmentEnd.y+offsetVector.y,
+          'name': d3.select(this).attr('data-title'),
+          'boundaries': translateBoundaries(currentBoundaries,offsetVector)
+        });
 
-    // Return a zero translation if the current segment is not close to the active segment
-    } else {
-      return 'translate(0,0)';
-    }
-  });
+        // Set Flyout Formatting
+        d3.select(this).classed('segment-flyout',true);
 
-  //addSegmentLabels(roadFeature, priorTransformations);
+        // Return the Translation
+        return 'translate('+offsetVector.x+','+offsetVector.y+')';
+
+      // Return a zero translation if the current segment is not close to the active segment
+      } else {
+        return 'translate(0,0)';
+      }
+    });
+
+    //addSegmentLabels(roadFeature, priorTransformations);
+  }
 
 }
 
