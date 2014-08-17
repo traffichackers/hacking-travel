@@ -36,17 +36,23 @@
   <div class="hundred-height">
     <div id="detail-region" class="detail detail-hidden">
       <p>Eastern Massachusetts Region</p>
+
+      <!-- Regional Speed -->
       <span style="font-size: 2.5em" id="average-region-speed"></span>
       <span style="font-size: 1em">mph</span>
       &nbsp;&nbsp;&nbsp;&nbsp;
 
-
+      <!-- Misery Index -->
       <span id="misery-index" style="font-size: 2.5em"></span>
       <span id="misery-index" style="font-size: 1em">misery index</span>
       &nbsp;&nbsp;&nbsp;&nbsp;
 
+      <!-- Status Icon -->
       <span id="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-      <span id="average-region-status-text" style="font-size: 1em">normal</span>
+      <span id="average-region-status-text" style="font-size: 1em"></span>
+
+      <!-- Impacted Segments -->
+      <div id="impacted-segments"></div>
 
     </div>
     <div id="charts" class="detail detail-hidden">
@@ -63,7 +69,7 @@
         &nbsp;&nbsp;&nbsp;&nbsp;
 
         <span id="site-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-        <span id="site-status-text" style="font-size: 1em">normal</span>
+        <span id="site-status-text" style="font-size: 1em"></span>
 
       </div>
       <div>
@@ -101,4 +107,5 @@
 <script type='text/javascript' src='js/rickshaw.min.js'></script>
 <script type='text/javascript' src='js/bootstrap.min.js'></script>
 <script type='text/javascript' src='js/typeahead.bundle.js'></script>
+<script type='text/javascript' src='js/underscore-min.js'></script>
 <script type='text/javascript' src='js/main.js'></script>

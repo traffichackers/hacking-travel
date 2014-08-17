@@ -95,7 +95,7 @@ var renderers = {
 function renderMiseryIndex(traffic) {
 
   // Show speed and misery index
-  var regionalConditions = getMiseryIndex(traffic)
+  var regionalConditions = getMiseryIndex(traffic);
   $('#average-region-speed').html(regionalConditions.speed);
   $('#misery-index').html(regionalConditions.miseryIndex);
 
@@ -104,6 +104,17 @@ function renderMiseryIndex(traffic) {
   $('#average-region-status').addClass('status-'+congestionRatioText);
   $('#average-region-status-text').html(congestionRatioText);
 
+  // Show the most heavily impacted segments, if any
+  /*
+  var impactedSegmentList = '';
+  for (var i=0; i<regionalConditions.impactedSegments.length; i++) {
+    var segment = regionalConditions.impactedSegments[i];
+    if (typeof segment.title !== 'undefined' && typeof segment.speedBelowFreeflow !== 'undefined') {
+      impactedSegmentList += '<p>'+segment.title + ', ' + Math.round(segment.speedBelowFreeflow) + ' mph</p>';
+   }
+   $('#impacted-segments').html(impactedSegmentList)
+  }
+  */
 }
 
 function prepareGraphSeries(data, level) {
@@ -244,6 +255,7 @@ function getMiseryIndex(traffic) {
   var speedSummation = 0;
   var freeflowSummation = 0;
   var count = 0;
+  var impactedSegments = [];
 
   for (var pairId in traffic.pairData) {
     pair = traffic.pairData[pairId];
@@ -258,6 +270,7 @@ function getMiseryIndex(traffic) {
       speedBelowFreeflow = freeFlow-speed;
       if (speedBelowFreeflow > 0) {
         numerator += speedBelowFreeflow*distance;
+        impactedSegments.push({'title':pair.title, 'speedBelowFreeflow':speedBelowFreeflow});
       }
       speedSummation += parseFloat(speed);
       freeflowSummation += parseFloat(freeFlow);
@@ -265,7 +278,17 @@ function getMiseryIndex(traffic) {
     }
   }
   miseryIndex = numerator/denominator;
-  return {'miseryIndex': miseryIndex.toString().substr(0,3), 'speed': Math.round(speedSummation/count), 'freeFlow': Math.round(freeflowSummation/count)}
+
+  // Sort the impacted segments
+  impactedSegments = _.sortBy(impactedSegments, function(segment){ return -1*segment.speedBelowFreeflow });
+  impactedSegments = impactedSegments.slice(0,10);
+
+  return {
+    'miseryIndex': miseryIndex.toString().substr(0,3),
+    'speed': Math.round(speedSummation/count),
+    'freeFlow': Math.round(freeflowSummation/count),
+    'impactedSegments': impactedSegments
+  }
 }
 
 function renderRoads(traffic, roads, backgroundRoads, idMap) {
@@ -519,39 +542,44 @@ function spotlightSegments(activeSegment, roadFeature) {
     // See the transform attribute on the road segments
     var activeBoundaries = getBoundaries(activeSegment);
     var activeBoundariesWithMargin = addMargin(activeBoundaries, spotlightRadius);
-    d3.selectAll('.segment').transition().attr('transform', function(d, i) {
-      var currentBoundaries = getBoundaries(this);
+    d3.selectAll('.segment')
+      .transition()
+      .duration(750)
+      .attr('transform', function(d, i) {
+        var currentBoundaries = getBoundaries(this);
 
-      // Determine if current segment is close to the active segment
-      currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
-      var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
+        // Determine if current segment is close to the active segment
+        currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
+        var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
 
-      if (hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
+        if (hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
 
-        var offsetVector = getOffsetVector(this, priorTransformations, currentSegmentMidpoint, com, currentBoundaries);
+          var offsetVector = getOffsetVector(this, priorTransformations, currentSegmentMidpoint, com, currentBoundaries);
 
-        // Store a record of this transformation
-        var currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
-        priorTransformations.push({
-          'x': currentSegmentEnd.x+offsetVector.x,
-          'y': currentSegmentEnd.y+offsetVector.y,
-          'name': d3.select(this).attr('data-title'),
-          'boundaries': translateBoundaries(currentBoundaries,offsetVector)
-        });
+          // Store a record of this transformation
+          var currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
+          priorTransformations.push({
+            'x': currentSegmentEnd.x+offsetVector.x,
+            'y': currentSegmentEnd.y+offsetVector.y,
+            'name': d3.select(this).attr('data-title'),
+            'boundaries': translateBoundaries(currentBoundaries,offsetVector)
+          });
 
-        // Set Flyout Formatting
-        d3.select(this).classed('segment-flyout',true);
+          // Set Flyout Formatting
+          d3.select(this).classed('segment-flyout',true);
 
-        // Return the Translation
-        return 'translate('+offsetVector.x+','+offsetVector.y+')';
+          // Return the Translation
+          return 'translate('+offsetVector.x+','+offsetVector.y+')';
 
-      // Return a zero translation if the current segment is not close to the active segment
-      } else {
-        return 'translate(0,0)';
+        // Return a zero translation if the current segment is not close to the active segment
+        } else {
+          return 'translate(0,0)';
+        }
       }
-    });
+    );
 
     //addSegmentLabels(roadFeature, priorTransformations);
+
   }
 
 }
@@ -563,9 +591,10 @@ $.when(
   $.getJSON("roads.json"),
   $.getJSON("topo/background_roads.json")
 ).then( function (trafficResults, idMapResults, roadsResults, backgroundRoads) {
-  traffic = trafficResults[0]
+  var traffic = trafficResults[0];
+  var idMap = idMapResults[0]
   initializeEvents(traffic);
   renderMiseryIndex(traffic);
-  renderRoads(traffic, roadsResults[0], backgroundRoads[0], idMapResults[0]);
+  renderRoads(traffic, roadsResults[0], backgroundRoads[0], idMap);
   $('#detail-region').removeClass('detail-hidden');
 });
