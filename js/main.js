@@ -291,7 +291,7 @@ function getMiseryIndex(traffic) {
   }
 }
 
-function renderRoads(traffic, roads, backgroundRoads, idMap) {
+function renderRoads(traffic, roads, backgroundRoads) {
   mapElement = $("#map-canvas");
 
   var width = mapElement.width(),
@@ -326,11 +326,11 @@ function renderRoads(traffic, roads, backgroundRoads, idMap) {
     .enter().append("path")
     .attr("d", d3.geo.path().projection(projection))
     .attr('id', function(d, i) {
-      return 'svg-pairid-'+idMap[d.properties.UID];
+      return 'svg-pairid-'+d.properties.SegmentID;
     })
     .attr('data-title', function(d, i) {
       try {
-        return traffic.pairData[idMap[d.properties.UID]].title
+        return traffic.pairData[d.properties.SegmentID].title
       } catch (e) {
         return ''
       }
@@ -338,7 +338,7 @@ function renderRoads(traffic, roads, backgroundRoads, idMap) {
     })
     .attr('class','segment')
     .on('click',function(d, i) {
-      pathSelect(idMap[d.properties.UID], traffic.pairData);
+      pathSelect(d.properties.SegmentID, traffic.pairData);
     })
     .on('mouseover', function(d, i) {
       spotlightSegments(this, roadFeature);
@@ -587,14 +587,12 @@ function spotlightSegments(activeSegment, roadFeature) {
 // Get Data and Initialize
 $.when(
   $.getJSON("current.json"),
-  $.getJSON("idMap.json"),
   $.getJSON("roads.json"),
   $.getJSON("topo/background_roads.json")
-).then( function (trafficResults, idMapResults, roadsResults, backgroundRoads) {
+).then( function (trafficResults, roadsResults, backgroundRoads) {
   var traffic = trafficResults[0];
-  var idMap = idMapResults[0]
   initializeEvents(traffic);
   renderMiseryIndex(traffic);
-  renderRoads(traffic, roadsResults[0], backgroundRoads[0], idMap);
+  renderRoads(traffic, roadsResults[0], backgroundRoads[0]);
   $('#detail-region').removeClass('detail-hidden');
 });
