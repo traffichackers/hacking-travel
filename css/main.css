@@ -31,13 +31,13 @@ body {
 .road {
   stroke: rgb(230,230,230);
   fill: none;
-  strok-width: 0.5;
+  stroke-width: 0.5;
 }
 
 /* Segment */
 .segment {
   stroke: rgb(100,100,100);
-  stroke-width: 0.5;
+  stroke-width: 0.8;
   fill: none;
 }
 
@@ -49,7 +49,7 @@ body {
 
 .segment-flyout {
   stroke: rgb(100,100,100);
-  stroke-width: 0.5;
+  stroke-width: 0.8;
   fill: none;
 }
 
@@ -61,7 +61,7 @@ body {
 .segment-label {
   font-family: Tahoma;
   font-size: 7pt;
-  fill: black;
+  fill: rgb(0,0,0);
 }
 
 /* Charts and Detail Pane */

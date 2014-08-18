@@ -1,6 +1,6 @@
 // Events
 function initializeEvents(traffic) {
-  initializeTypeahead(traffic.pairData);
+  initializeTypeahead(traffic);
   //initializePercentileTabsEvents();
 }
 
@@ -17,8 +17,9 @@ function initializePercentileTabsEvents() {
   }
 }
 
-function initializeTypeahead(pairData) {
-
+function initializeTypeahead(traffic) {
+  var pairData = traffic.pairData;
+  
   // Generate the typeahead dataset
   typeaheadData = []
   for (pairId in pairData) {
@@ -418,26 +419,20 @@ function addMargin(box, margin) {
 }
 
 function getNormalVectors(segment) {
+
+  // Get dx and dy for the current segment
   var totalLength = segment.getTotalLength();
   var initialPoint = segment.getPointAtLength(0);
   var terminalPoint = segment.getPointAtLength(totalLength);
-  var dx, dy;
-  dx = terminalPoint.x - initialPoint.x;
-  dy = terminalPoint.y - initialPoint.y;
+  var dx = terminalPoint.x - initialPoint.x;
+  var dy = terminalPoint.y - initialPoint.y;
 
+  // Normalize
   var length = Math.sqrt(Math.pow(dx,2)+Math.pow(dy,2));
-
   dx = dx/length;
   dy = dy/length;
 
-  var normalSlope = dx/(-1*dy);
-  var offsetVector = {}
-  offsetVector.x = dy;
-  offsetVector.y = -1*dx;
-  var offsetVectorNegative = {}
-  offsetVectorNegative.x = -1*dy;
-  offsetVectorNegative.y = dx;
-  return [offsetVector, offsetVectorNegative];
+  return [{'x':dy, 'y':-1*dx}, {'x': -1*dy, 'y':dx}]
 }
 
 function getCentroid(activeSegment, roadFeature, spotlightRadius) {
@@ -468,45 +463,59 @@ function getCentroid(activeSegment, roadFeature, spotlightRadius) {
   return {'x': cNumeratorX/cDenominator, 'y': cNumeratorY/cDenominator};
 }
 
-function getOffsetVector(currentSegment, queuedTransformations, currentSegmentMidpoint, com, currentBoundaries) {
-  var baseOffsetDistance = 2.5;
-
-  // Calculate the normal vectors
-  var offsetVectors = getNormalVectors(currentSegment);
-
-  // Decide which normal vector to use
-  baseDecisionVector = {}
+function getCloserIndex(csm, com, offsetVectors) {
+  var closerIndex;
+  var distance, candidateDistance
   for (var i=0; i<offsetVectors.length; i++) {
     offsetVector = offsetVectors[i];
-    testSegmentMidpoint = currentSegmentMidpoint;
-    testSegmentMidpoint.x += offsetVector.x;
-    testSegmentMidpoint.y += offsetVector.y;
-    offsetVector.distance = calculateDistance(com,testSegmentMidpoint);
-    if (!("distance" in baseDecisionVector) || (offsetVector.distance < baseDecisionVector.distance)) {
-      baseDecisionVector = offsetVector;
+    if (typeof offsetVector !== 'undefined') {
+      translatedCsm = {'x': csm.x+offsetVector.x, 'y': csm.y+offsetVector.y }
+      candidateDistance = calculateDistance(com,translatedCsm);
+      if (typeof distance == 'undefined' || candidateDistance <= distance) {
+        closerIndex = i;
+      }
     }
   }
+  return closerIndex;
+}
 
-  // Increase the offset to avoid collisions
-  var offsetDistance = baseOffsetDistance;
-  var decisionVector = {};
-  decisionVector.x = baseDecisionVector.x;
-  decisionVector.y = baseDecisionVector.y;
-  translatedBoundaries = translateBoundaries(currentBoundaries,baseDecisionVector);
+function applyNormalVectorMultiplier(normalVector, multiplier) {
+  offsetVector = {};
+  offsetVector.x = normalVector.x*multiplier;
+  offsetVector.y = normalVector.y*multiplier;
+  return offsetVector
+}
+
+function getOffsetVector(currentSegment, queuedTransformations, currentSegmentMidpoint, com, currentBoundaries) {
+  var baseMultiplier = 5;
+  var multiplier = baseMultiplier;
+
+  // Calculate the normal vectors
+  var normalVectors = getNormalVectors(currentSegment);
+
+  // Calcuate the base offset
+  var offsetVectors = [];
+  var closerIndex = getCloserIndex(currentSegmentMidpoint, com, normalVectors);
+  offsetVectors[closerIndex] = applyNormalVectorMultiplier(normalVectors[closerIndex], multiplier)
+
+  // Check if the base offset has any collisions
+  var translatedBoundaries = translateBoundaries(currentBoundaries,offsetVectors[closerIndex]);
   for (var j=0; j<queuedTransformations.length; j++) {
     var previousBoundaries = queuedTransformations[j].boundaries;
     if (hasOverlap(translatedBoundaries, previousBoundaries)) {
-      offsetDistance += baseOffsetDistance;
-      decisionVector.x = baseDecisionVector.x*offsetDistance;
-      decisionVector.y = baseDecisionVector.y*offsetDistance;
-      translatedBoundaries = translateBoundaries(currentBoundaries,decisionVector);
+      offsetVectors[closerIndex] = applyNormalVectorMultiplier(normalVectors[closerIndex], multiplier)
+      closerIndex = getCloserIndex(currentSegmentMidpoint, com, offsetVectors);
+      translatedBoundaries = translateBoundaries(currentBoundaries,offsetVectors[closerIndex]);
       j = 0;
+      multiplier += baseMultiplier;
     }
   }
-  return decisionVector;
+  return offsetVectors[closerIndex];
 }
 
-function addSegmentLabels(roadFeature, transformations) {
+function addSegmentLabel(roadFeature, transformation) {
+  var transformations = []
+  transformations.push(transformation);
 
   // Remove labels from paths in prior generations
   d3.selectAll('.segment-label').remove();
@@ -552,21 +561,29 @@ function spotlightSegments(activeSegment, roadFeature) {
         currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
         var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
 
-        if (hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
+        if (activeSegment.id !== this.id && hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
 
           var offsetVector = getOffsetVector(this, priorTransformations, currentSegmentMidpoint, com, currentBoundaries);
 
           // Store a record of this transformation
           var currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
-          priorTransformations.push({
+          var priorTransformation = {
             'x': currentSegmentEnd.x+offsetVector.x,
             'y': currentSegmentEnd.y+offsetVector.y,
             'name': d3.select(this).attr('data-title'),
             'boundaries': translateBoundaries(currentBoundaries,offsetVector)
-          });
+          }
+          priorTransformations.push(priorTransformation);
 
           // Set Flyout Formatting
           d3.select(this).classed('segment-flyout',true);
+
+          // Render label on mouseover
+          d3.select(this).on('mouseover', function(d, i) {
+            addSegmentLabel(roadFeature,priorTransformation);
+          })
+
+
 
           // Return the Translation
           return 'translate('+offsetVector.x+','+offsetVector.y+')';
