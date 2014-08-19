@@ -19,7 +19,7 @@ function initializePercentileTabsEvents() {
 
 function initializeTypeahead(traffic) {
   var pairData = traffic.pairData;
-  
+
   // Generate the typeahead dataset
   typeaheadData = []
   for (pairId in pairData) {
@@ -64,6 +64,9 @@ var pathSelect = function(pairId, pairData) {
 
       // Show the congestion ratio
       var congestionRatioText = util.getCongestionRatioText(pairDatum)
+      $('#site-status').removeClass (function (index, css) {
+        return (css.match (/(^|\s)status-\S+/g) || []).join(' ');
+      });
       $('#site-status').addClass('status-'+congestionRatioText);
       $('#site-status-text').html(congestionRatioText);
 
@@ -528,10 +531,10 @@ function addSegmentLabel(roadFeature, transformation) {
   })
   .attr('class', 'segment-label')
   .attr('x', function(d, i) {
-    return d.x;
+    return d.boundaries.x1 - 10;
   })
   .attr('y', function(d, i) {
-    return d.y;
+    return d.boundaries.y1 - 10;
   })
 
 }
@@ -568,10 +571,9 @@ function spotlightSegments(activeSegment, roadFeature) {
           // Store a record of this transformation
           var currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
           var priorTransformation = {
-            'x': currentSegmentEnd.x+offsetVector.x,
-            'y': currentSegmentEnd.y+offsetVector.y,
             'name': d3.select(this).attr('data-title'),
             'boundaries': translateBoundaries(currentBoundaries,offsetVector)
+
           }
           priorTransformations.push(priorTransformation);
 
@@ -594,8 +596,6 @@ function spotlightSegments(activeSegment, roadFeature) {
         }
       }
     );
-
-    //addSegmentLabels(roadFeature, priorTransformations);
 
   }
 
