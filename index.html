@@ -5,9 +5,9 @@
   <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
   <!-- Stylesheets -->
   <link rel='stylesheet' type='text/css' href='css/main.css' media='screen' />
-  <link rel='stylesheet' href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css'>
-  <link rel='stylesheet' href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css'>
-  <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/rickshaw/1.4.6/rickshaw.css' />
+  <link rel='stylesheet' type='text/css' href='css/bootstrap.min.css'>
+  <link rel='stylesheet' type='text/css' href='css/bootstrap-theme.min.css'>
+  <link rel='stylesheet' type='text/css' href='css/rickshaw.css' />
 </head>
 
 <body>
@@ -27,65 +27,87 @@
         </ul>
         <form class="navbar-form navbar-left" role="search">
           <div class="form-group">
-            <input class="example-numbers typeahead" type="text" class="form-control" placeholder="Search">
+            <input id="segment-autocomplete" type="text" class="form-control" placeholder="Type a segment name">
           </div>
-          <button type="submit" class="btn btn-default">Go</button>
         </form>
       </div>
     </div>
   </div>
-  <div class="container hundred-height">
-    <div class="row hundred-height">
-      
-      <!-- Map -->
-      <div class="col-xs-6 .hidden-xs .hidden-sm" id="map-canvas" style="height: 80%"></div>
-      
-      <!-- Metadata -->
-      <div class="col-xs-6" id="charts">
-        <div class="row detail-pane-rows">
-          <div class="col-xs-12">
-            <span class="glyphicon glyphicon-road"></span>
-            <span id='title'></span>
+  <div class="hundred-height">
+    <div id="detail-region" class="detail detail-hidden">
+      <p>Eastern Massachusetts Region</p>
+
+      <!-- Regional Speed -->
+      <span style="font-size: 2.5em" id="average-region-speed"></span>
+      <span style="font-size: 1em">mph</span>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+
+      <!-- Misery Index -->
+      <span id="misery-index" style="font-size: 2.5em"></span>
+      <span id="misery-index" style="font-size: 1em">misery index</span>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+
+      <!-- Status Icon -->
+      <span id="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <span id="average-region-status-text" style="font-size: 1em"></span>
+
+      <!-- Impacted Segments -->
+      <div id="impacted-segments"></div>
+
+    </div>
+    <div id="charts" class="detail detail-hidden">
+      <div>
+
+        <p id="segment-title"></p>
+
+        <span style="font-size: 2.5em" id="speed"></span>
+        <span style="font-size: 1em">mph</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+
+        <span style="font-size: 2.5em" id="travelTime"></span>
+        <span style="font-size: 1em">min</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+
+        <span id="site-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span id="site-status-text" style="font-size: 1em"></span>
+
+      </div>
+      <div>
+        <div id='historicalTravelTimes'></div>
+        <!--
+        <div id="historical-travel-times-controls">
+          <span>Show ranges for </span>
+          <div class="btn-group btn-group-xs">
+             <button type="button" class="btn btn-default">Similar</button>
+             <button type="button" class="btn btn-default">All</button>
+          </div>
+          <div class="btn-group btn-group-xs">
+             <button type="button" class="btn btn-default">Wednesdays</button>
+             <button type="button" class="btn btn-default">Weekdays</button>
+             <button type="button" class="btn btn-default">Days</button>
           </div>
         </div>
-        <div class="row detail-pane-rows">
-          <div class="col-xs-3">
-            <span style="font-size: 2.5em" id="speed"></span>
-            <span style="font-size: 1em">mph</span>
-          </div>
-          <div class="col-xs-3">
-            <span style="font-size: 2.5em" id="travelTime"></span>
-            <span style="font-size: 1em">min</span>
-          </div>
-          <div class="col-xs-3">
-            <span id="site-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span id="site-status-text" style="font-size: 1em">normal</span>
-          </div>
-        </div>
-        <div class="row detail-pane-rows">
-          <ul class="nav nav-tabs percentile-graphs">
-            <li id="all" class="active"><a href="#">All Days</a></li>
-            <li id="dow" class=""><a href="#">Similar Days of the Week</a></li>
-            <!--
-            <li id="wd" class=""><a href="#">Weekdays</a></li>
-            <li id="we" class=""><a href="#">Weekends</a></li>
-            -->
-          </ul>
-          <div id='historicalTravelTimes'></div>
-        </div>
+        -->
       </div>
     </div>
+
+    <!-- Map -->
+    <div id="map-canvas">
+    </div>
+
   </div>
 </body>
 </html>
 
+</body>
+</html>
+
 <!-- Libraries -->
-<script type='text/javascript' src='//code.jquery.com/jquery-1.11.0.min.js'></script>
-<script type='text/javascript' src='//d3js.org/d3.v3.min.js' charset='utf-8'></script>
-<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/rickshaw/1.4.6/rickshaw.min.js'></script>
-<script type='text/javascript' src='//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js'></script>
-<script type='text/javascript' src='//maps.googleapis.com/maps/api/js?key=AIzaSyCXxVrTd3DeBuGka8NF3DQ2bVuEmPvVhKQ&sensor=false'></script>
+<script type='text/javascript' src='js/jquery-1.11.1.min.js'></script>
+<script type='text/javascript' src='js/d3.v3.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='js/topojson.v1.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='js/rickshaw.min.js'></script>
+<script type='text/javascript' src='js/bootstrap.min.js'></script>
 <script type='text/javascript' src='js/typeahead.bundle.js'></script>
-<script type='text/javascript' src='js/segments.js'></script>
-<script type='text/javascript' src='js/data.js'></script>
-<script type='text/javascript' src='js/map.js'></script>
+<script type='text/javascript' src='js/underscore-min.js'></script>
+<script type='text/javascript' src='js/main.js'></script>
