@@ -1,23 +1,26 @@
 // Events
 function initializeEvents(traffic) {
   initializeTypeahead(traffic);
-  //initializePercentileTabsEvents();
+  initializeGraphControls();
 }
 
-function initializePercentileTabsEvents() {
-  var i = 0;
-  var tabs = $('.percentile-graphs').children();
-  for (i = 0; i < tabs.length; i++) {
-    $(tabs[i]).on("click", function() {
-      selectedTab = $(this);
-      if (!selectedTab.hasClass('active')) {
-        selectedTab.addClass('active');
-      }
-    });
+function initializeGraphControls() {
+  renderers.setPercentileTabDowLabel();
+
+  var buttonClasses = ['.type-button', '.day-button'];
+  for (var i=0; i<buttonClasses.length; i++) {
+    setButtonToggleHandler(buttonClasses[i])
   }
 }
 
-function initializeTypeahead(traffic) {
+function setButtonToggleHandler(buttonClass) {
+  $(buttonClass).on('click', function (){
+    $(buttonClass).removeClass('active')
+    $(this).addClass('active');
+  });
+}
+
+function initializeTypeahead(traffic, graphData) {
   var pairData = traffic.pairData;
 
   // Generate the typeahead dataset
@@ -40,48 +43,38 @@ function initializeTypeahead(traffic) {
     source: pairDataEngine.ttAdapter()
   });
   $('#segment-autocomplete').bind('typeahead:selected', function (event, suggestion, dataSet) {
-    pathSelect(suggestion.pairId, traffic.pairData);
+    pathSelect(suggestion.pairId, traffic.pairData, graphData);
   });
 }
 
 
 // Handle when the path is clicked or when an item is pulled from the drop-down
-var pathSelect = function(pairId, pairData) {
+var pathSelect = function(pairId, pairData, graphData) {
   pairDatum = pairData[pairId];
-  if(pairDatum) {
+  if (pairDatum) {
 
-    // Pull the historical percentiles for the pair id
-    renderers.setPercentileTabDowLabel();
-    $.ajax({
-      url: 'data/'+pairId+".json",
-    }).done(function(percentiles) {
-
-      $('#segment-title').html(pairDatum.title)
-
-      // Show speed, and travel time
-      $('#speed').html(Math.round(pairDatum.speed));
-      $('#travelTime').html(Math.round(pairDatum.travelTime/60));
-
-      // Show the congestion ratio
-      var congestionRatioText = util.getCongestionRatioText(pairDatum)
-      $('#site-status').removeClass (function (index, css) {
-        return (css.match (/(^|\s)status-\S+/g) || []).join(' ');
-      });
-      $('#site-status').addClass('status-'+congestionRatioText);
-      $('#site-status-text').html(congestionRatioText);
-
-      // Remove segment highlighting on the previous segment (if any) and add to the ne segment
-      d3.select('.segment-selected').classed({'segment':true, 'segment-selected':false});
-      d3.select('#svg-pairid-'+pairId).classed({'segment':true, 'segment-selected':true});
-
-      // Draw the graph
-      renderGraph(pairDatum, percentiles);
-
-      // Hide the region section and show the segment section
-      $('#detail-region').addClass('detail-hidden');
-      $('#charts').removeClass('detail-hidden');
-
+    // Show the Header
+    $('#segment-title').html(pairDatum.title)
+    $('#speed').html(Math.round(pairDatum.speed));
+    $('#travelTime').html(Math.round(pairDatum.travelTime/60));
+    var congestionRatioText = util.getCongestionRatioText(pairDatum)
+    $('#site-status').removeClass (function (index, css) {
+      return (css.match (/(^|\s)status-\S+/g) || []).join(' ');
     });
+    $('#site-status').addClass('status-'+congestionRatioText);
+    $('#site-status-text').html(congestionRatioText);
+
+    // Remove segment highlighting on the previous segment (if any) and add to the ne segment
+    d3.select('.segment-selected').classed({'segment':true, 'segment-selected':false});
+    d3.select('#svg-pairid-'+pairId).classed({'segment':true, 'segment-selected':true});
+
+    // Draw the graph
+    renderGraph(pairDatum, graphData);
+
+    // Hide the region section and show the segment section
+    $('#detail-region').addClass('detail-hidden');
+    $('#charts').removeClass('detail-hidden');
+
   };
 };
 
@@ -91,8 +84,7 @@ var renderers = {
   setPercentileTabDowLabel: function() {
     var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     dow = getDayOfWeek();
-    day = 'Previous '+days[dow]+'s';
-    $('#dow').children().first().html(day);
+    $('#dow').html(days[dow]+'s');
   }
 }
 
@@ -125,12 +117,14 @@ function prepareGraphSeries(data, level) {
   var name = level+"th Percentile"
   var seriesElement = {};
   seriesElement.data = data;
-  if (level === 10 || level === 90) {
+  if (level === '10' || level === '90') {
     seriesElement.color = 'rgb(240,240,240)';
-  } else if (level === 30 || level === 70) {
+  } else if (level === '25' || level === '75') {
     seriesElement.color = 'rgb(220,220,220)';
-  } else if (level === 50) {
+  } else if (level === '50') {
     seriesElement.color = 'rgb(200,200,200)';
+  } else if (level === 'min' || level === 'max') {
+    seriesElement.color = 'rgb(180,180,180)';
   } else if (level === 'Today') {
     seriesElement.color = 'rgb(120,120,120)';
   } else if (level === 'Predictions') {
@@ -141,39 +135,55 @@ function prepareGraphSeries(data, level) {
   return seriesElement;
 }
 
-function renderGraph(pairDatum, percentiles) {
+function renderGraph(pairDatum, graphData) {
 
-  var today = pairDatum.today
-  var predictions = pairDatum.predictions
+  var today = graphData.today
+  var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
   var distance = pairDatum.travelTime/60*pairDatum.speed;
-
   var seriesData = [];
 
   // Select the proper percentile
-  var activeTab = getActivePercentileTab();
-  if (activeTab === 'dow') {
-    dow = getDayOfWeek();
-    chosenPercentiles = percentiles.percentiles[activeTab][dow];
-  } else {
-    chosenPercentiles = percentiles.percentiles[activeTab];
-  }
+  var type = $('.type-button.active').attr('id');
+  var day =  $('.day-button.active').attr('id');
+  var chosenPercentiles = graphData[type+'_'+day][pairDatum.pairId];
 
   // Prepare each percentile
   for (key in chosenPercentiles) {
-    percentile = chosenPercentiles[key];
-    percentile = fixFormatting(percentile, distance)  // Fix number formatting
-    percentileLevel = parseInt(key.slice(1));
-    var seriesElement = prepareGraphSeries(percentile, percentileLevel);
+    var chosenPercentile = chosenPercentiles[key];
+    var seriesElement = {};
+    var formattedPredictions = [];
+    var formattedPrediction;
+    var currentTime = new Date('1/1/1970');
+    currentTime = new Date(currentTime.getTime() - 5*60*60000);
+    for (var i=0; i<chosenPercentile.length; i++) {
+      formattedPrediction = {'x':currentTime.toJSON().substr(11,5),'y':chosenPercentile[i]};
+      formattedPredictions.push(formattedPrediction);
+      currentTime = new Date(currentTime.getTime() + 5*60000);
+    }
+    formattedPredictions = fixFormatting(formattedPredictions, distance);
+    var seriesElement = prepareGraphSeries(formattedPredictions, key);
     seriesElement.renderer = 'area';
     seriesData.push(seriesElement);
   }
 
-
+  /*
   // Add the Data for Today
-  today = fixFormatting(today, distance)
-  var seriesElement = prepareGraphSeries(today, 'Today')
+  var seriesElement = {};
+  var formattedPredictions = [];
+  var formattedPrediction;
+  var currentTime = new Date('1/1/1970');
+  currentTime = new Date(currentTime.getTime() - 5*60*60000);
+  for (var i=0; i<today.length; i++) {
+    formattedPrediction = {'x':currentTime.toJSON().substr(11,5),'y':today[i]};
+    formattedPredictions.push(formattedPrediction);
+    currentTime = new Date(currentTime.getTime() + 5*60000);
+  }
+  formattedPredictions = fixFormatting(formattedPredictions, distance);
+  var seriesElement = prepareGraphSeries(formattedPredictions, 'Today');
   seriesElement.renderer = 'line';
   seriesData.push(seriesElement);
+  */
+
 
   // Add the Predictions
   var seriesElement = {};
@@ -190,6 +200,7 @@ function renderGraph(pairDatum, percentiles) {
   var seriesElement = prepareGraphSeries(formattedPredictions, 'Predictions');
   seriesElement.renderer = 'line';
   seriesData.push(seriesElement);
+  
 
   // Erase the previous graph (if any) and render the new graph
   $("#historicalTravelTimes").empty();
@@ -295,7 +306,8 @@ function getMiseryIndex(traffic) {
   }
 }
 
-function renderRoads(traffic, roads, backgroundRoads) {
+function renderRoads(traffic, roads, backgroundRoads, graphData) {
+
   mapElement = $("#map-canvas");
 
   var width = mapElement.width(),
@@ -342,7 +354,7 @@ function renderRoads(traffic, roads, backgroundRoads) {
     })
     .attr('class','segment')
     .on('click',function(d, i) {
-      pathSelect(d.properties.SegmentID, traffic.pairData);
+      pathSelect(d.properties.SegmentID, traffic.pairData, graphData);
     })
     .on('mouseover', function(d, i) {
       spotlightSegments(this, roadFeature);
@@ -602,14 +614,31 @@ function spotlightSegments(activeSegment, roadFeature) {
 }
 
 // Get Data and Initialize
+var graphData = {};
 $.when(
-  $.getJSON("current.json"),
-  $.getJSON("roads.json"),
-  $.getJSON("topo/background_roads.json")
+  $.getJSON("data/predictions/all_dow.json"),
+  $.getJSON("data/predictions/all_weekdays.json"),
+  $.getJSON("data/predictions/all_weekends.json"),
+  $.getJSON("data/predictions/similar_dow.json"),
+  $.getJSON("data/predictions/similar_weekdays.json"),
+  $.getJSON("data/predictions/similar_weekends.json")
+).then( function (allDowResults, allWeekdaysResults, allWeekendsResults, similarDowResults, similarWeekdaysResults, similarWeekendsResults) {
+  graphData.all_dow = allDowResults[0];
+  graphData.all_weekdays = allWeekdaysResults[0];
+  graphData.all_weekends = allWeekendsResults[0];
+  graphData.similar_dow = similarDowResults[0];
+  graphData.similar_weekdays = similarWeekdaysResults[0];
+  graphData.similar_weekends = similarWeekendsResults[0];
+});
+
+$.when(
+  $.getJSON("data/current.json"),
+  $.getJSON("data/segments.json"),
+  $.getJSON("data/background.json")
 ).then( function (trafficResults, roadsResults, backgroundRoads) {
   var traffic = trafficResults[0];
-  initializeEvents(traffic);
+  initializeEvents(traffic, graphData);
   renderMiseryIndex(traffic);
-  renderRoads(traffic, roadsResults[0], backgroundRoads[0]);
+  renderRoads(traffic, roadsResults[0], backgroundRoads[0], graphData);
   $('#detail-region').removeClass('detail-hidden');
 });
