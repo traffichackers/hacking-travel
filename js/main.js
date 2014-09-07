@@ -1,6 +1,6 @@
 // Events
-function initializeEvents(traffic) {
-  initializeTypeahead(traffic);
+function initializeEvents(traffic, graphData) {
+  initializeTypeahead(traffic, graphData);
   initializeGraphControls();
 }
 
@@ -69,6 +69,7 @@ var pathSelect = function(pairId, pairData, graphData) {
     d3.select('#svg-pairid-'+pairId).classed({'segment':true, 'segment-selected':true});
 
     // Draw the graph
+    $("#historicalTravelTimes").empty();
     renderGraph(pairDatum, graphData);
 
     // Hide the region section and show the segment section
@@ -113,25 +114,57 @@ function renderMiseryIndex(traffic) {
   */
 }
 
-function prepareGraphSeries(data, level) {
-  var name = level+"th Percentile"
+function prepareGraphSeries(unformattedData, level, renderer, distance, start) {
+
   var seriesElement = {};
-  seriesElement.data = data;
-  if (level === '10' || level === '90') {
-    seriesElement.color = 'rgb(240,240,240)';
-  } else if (level === '25' || level === '75') {
-    seriesElement.color = 'rgb(220,220,220)';
-  } else if (level === '50') {
-    seriesElement.color = 'rgb(200,200,200)';
-  } else if (level === 'min' || level === 'max') {
-    seriesElement.color = 'rgb(180,180,180)';
-  } else if (level === 'Today') {
-    seriesElement.color = 'rgb(120,120,120)';
-  } else if (level === 'Predictions') {
-    seriesElement.color = 'rgb(243,154,29)';
+  var data = [];
+  var formattedDatum;
+  var currentTime = new Date(start);
+  currentTime = new Date(currentTime.getTime());
+  for (var i=0; i<unformattedData.length; i++) {
+    formattedDatum = {'x':currentTime.getTime(),'y':distance/(unformattedData[i]/60)};
+    data.push(formattedDatum);
+    currentTime = new Date(currentTime.getTime() + 5*60000);
   }
 
-  seriesElement.name = name;
+  var name = level
+  var seriesElement = {};
+  seriesElement.data = data;
+
+  // Set Name
+  nameMap = {
+    'max':'Min',
+    '90':'10th Percentile',
+    '75':'25th Percentile',
+    '50':'50th Percentile',
+    '25':'75th Percentile',
+    '10':'90th Percentile',
+    'min':'Max'
+  }
+  var mappedName = nameMap[name];
+  if (typeof mappedName !== 'undefined') {
+    seriesElement.name = mappedName
+  } else {
+    seriesElement.name = name
+  }
+
+  // Set Color
+  var inner = 'rgb(160,160,160)';
+  var mid = 'rgb(200,200,200)';
+  var outer = 'rgb(240,240,240)';
+  levels = {
+    'Min':'rgb(255,255,255)',
+    '10th Percentile':outer,
+    '25th Percentile':mid,
+    '50th Percentile':inner,
+    '75th Percentile':inner,
+    '90th Percentile':mid,
+    'Max':outer,
+    'Predictions':'rgb(243,154,29)'
+  }
+  seriesElement.color = levels[seriesElement.name]
+
+  seriesElement.renderer = renderer
   return seriesElement;
 }
 
@@ -139,6 +172,7 @@ function renderGraph(pairDatum, graphData) {
 
   var today = graphData.today
   var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
+  var predictionsStart = graphData.similar_dow.Start
   var distance = pairDatum.travelTime/60*pairDatum.speed;
   var seriesData = [];
 
@@ -146,64 +180,30 @@ function renderGraph(pairDatum, graphData) {
   var type = $('.type-button.active').attr('id');
   var day =  $('.day-button.active').attr('id');
   var chosenPercentiles = graphData[type+'_'+day][pairDatum.pairId];
+  var chosenPercentilesStart = graphData[type+'_'+day].Start
 
   // Prepare each percentile
-  for (key in chosenPercentiles) {
-    var chosenPercentile = chosenPercentiles[key];
-    var seriesElement = {};
-    var formattedPredictions = [];
-    var formattedPrediction;
-    var currentTime = new Date('1/1/1970');
-    currentTime = new Date(currentTime.getTime() - 5*60*60000);
-    for (var i=0; i<chosenPercentile.length; i++) {
-      formattedPrediction = {'x':currentTime.toJSON().substr(11,5),'y':chosenPercentile[i]};
-      formattedPredictions.push(formattedPrediction);
-      currentTime = new Date(currentTime.getTime() + 5*60000);
-    }
-    formattedPredictions = fixFormatting(formattedPredictions, distance);
-    var seriesElement = prepareGraphSeries(formattedPredictions, key);
-    seriesElement.renderer = 'area';
+  var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
+  for (var i=0; i<percentileOrder.length; i++) {
+    var chosenPercentile = chosenPercentiles[percentileOrder[i]];
+    var seriesElement = prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart);
     seriesData.push(seriesElement);
   }
 
   /*
   // Add the Data for Today
-  var seriesElement = {};
-  var formattedPredictions = [];
-  var formattedPrediction;
-  var currentTime = new Date('1/1/1970');
-  currentTime = new Date(currentTime.getTime() - 5*60*60000);
-  for (var i=0; i<today.length; i++) {
-    formattedPrediction = {'x':currentTime.toJSON().substr(11,5),'y':today[i]};
-    formattedPredictions.push(formattedPrediction);
-    currentTime = new Date(currentTime.getTime() + 5*60000);
-  }
-  formattedPredictions = fixFormatting(formattedPredictions, distance);
-  var seriesElement = prepareGraphSeries(formattedPredictions, 'Today');
+  var seriesElement = prepareGraphSeries(today, 'Today', 'line', distance);
   seriesElement.renderer = 'line';
   seriesData.push(seriesElement);
   */
 
 
   // Add the Predictions
-  var seriesElement = {};
-  var formattedPredictions = [];
-  var formattedPrediction;
-  var currentTime = new Date('1/1/1970');
-  currentTime = new Date(currentTime.getTime() - 5*60*60000);
-  for (var i=0; i<predictions.length; i++) {
-    formattedPrediction = {'x':currentTime.toJSON().substr(11,5),'y':predictions[i]};
-    formattedPredictions.push(formattedPrediction);
-    currentTime = new Date(currentTime.getTime() + 5*60000);
-  }
-  formattedPredictions = fixFormatting(formattedPredictions, distance);
-  var seriesElement = prepareGraphSeries(formattedPredictions, 'Predictions');
-  seriesElement.renderer = 'line';
+  var seriesElement = prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart);
   seriesData.push(seriesElement);
-  
+
 
   // Erase the previous graph (if any) and render the new graph
-  $("#historicalTravelTimes").empty();
   var graph = new Rickshaw.Graph({
     element: document.querySelector("#historicalTravelTimes"),
     renderer: 'multi',
@@ -216,27 +216,18 @@ function renderGraph(pairDatum, graphData) {
 
   // Activate the hover effect and show the axes
   var hoverDetail = new Rickshaw.Graph.HoverDetail( { graph: graph });
-  var xAxis = new Rickshaw.Graph.Axis.Time({ graph: graph });
+  var format = function(d) {
+    d = new Date(d)
+    return d.toISOString().substr(11,5)
+  }
+  var xAxis = new Rickshaw.Graph.Axis.X({
+    graph: graph,
+    tickFormat: format,
+  });
   xAxis.render();
   var yAxis = new Rickshaw.Graph.Axis.Y({ graph: graph });
   yAxis.render();
 
-}
-
-
-// Formatting
-function fixFormatting(percentile, distance) {
-  for (var i=0; i<percentile.length; i++) {
-    if (isNaN(percentile[i].x)) {
-      hoursAndMinutes = percentile[i].x.split(':');
-      today = new Date();
-      newDate = new Date(Date.UTC(1900+today.getYear(), today.getMonth(), today.getDay(), hoursAndMinutes[0], hoursAndMinutes[1]));
-      newDate.setHours(newDate.getHours() - 4);
-      percentile[i].x = newDate.getTime()/1000;
-      percentile[i].y = distance/(percentile[i].y/60);
-    }
-  }
-  return percentile;
 }
 
 // Utilities
