@@ -217,8 +217,12 @@ function renderGraph(pairDatum, graphData) {
   // Activate the hover effect and show the axes
   var hoverDetail = new Rickshaw.Graph.HoverDetail( {
     graph: graph,
-    render: function(args) {
-      console.log(args);
+    xFormatter: function(x) {
+      var tempDate = new Date(x);
+      return tempDate.toISOString().substr(11,5);
+    },
+    yFormatter: function(y) {
+      return Math.round(y)+" mph";
     }
   });
   var format = function(d) {
