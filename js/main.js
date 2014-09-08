@@ -215,7 +215,12 @@ function renderGraph(pairDatum, graphData) {
   graph.render();
 
   // Activate the hover effect and show the axes
-  var hoverDetail = new Rickshaw.Graph.HoverDetail( { graph: graph });
+  var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+    graph: graph,
+    render: function(args) {
+      console.log(args);
+    }
+  });
   var format = function(d) {
     d = new Date(d)
     return d.toISOString().substr(11,5)
@@ -612,14 +617,16 @@ $.when(
   $.getJSON("data/predictions/all_weekends.json"),
   $.getJSON("data/predictions/similar_dow.json"),
   $.getJSON("data/predictions/similar_weekdays.json"),
-  $.getJSON("data/predictions/similar_weekends.json")
-).then( function (allDowResults, allWeekdaysResults, allWeekendsResults, similarDowResults, similarWeekdaysResults, similarWeekendsResults) {
+  $.getJSON("data/predictions/similar_weekends.json"),
+  $.getJSON("data/today.json")
+).then( function (allDowResults, allWeekdaysResults, allWeekendsResults, similarDowResults, similarWeekdaysResults, similarWeekendsResults, todayResults) {
   graphData.all_dow = allDowResults[0];
   graphData.all_weekdays = allWeekdaysResults[0];
   graphData.all_weekends = allWeekendsResults[0];
   graphData.similar_dow = similarDowResults[0];
   graphData.similar_weekdays = similarWeekdaysResults[0];
   graphData.similar_weekends = similarWeekendsResults[0];
+  graphData.today = todayResults[0];
 });
 
 $.when(
