@@ -1,3 +1,4 @@
 .DS_Store
-current.json
+data/current.json
+data/today.json
 data/predictions/
