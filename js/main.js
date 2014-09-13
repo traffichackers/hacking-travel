@@ -543,7 +543,7 @@ function addSegmentLabel(roadFeature, transformation) {
   })
   .attr('class', 'segment-label')
   .attr('x', function(d, i) {
-    return d.boundaries.x1 - 10;
+    return d.boundaries.x1 + 10;
   })
   .attr('y', function(d, i) {
     return d.boundaries.y1 - 10;
@@ -590,6 +590,7 @@ function spotlightSegments(activeSegment, roadFeature) {
           priorTransformations.push(priorTransformation);
 
           // Set Flyout Formatting
+          d3.select(this).classed('segment-nonflyout',false);
           d3.select(this).classed('segment-flyout',true);
 
           // Render label on mouseover
@@ -604,6 +605,7 @@ function spotlightSegments(activeSegment, roadFeature) {
 
         // Return a zero translation if the current segment is not close to the active segment
         } else {
+          d3.select(this).classed('segment-nonflyout',true);
           return 'translate(0,0)';
         }
       }

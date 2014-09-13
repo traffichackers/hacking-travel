@@ -36,19 +36,22 @@ body {
 
 /* Segment */
 .segment {
-  stroke: rgb(100,100,100);
-  stroke-width: 0.8;
+  stroke: rgb(160,160,160);
+  stroke-width: 1.25;
   fill: none;
+  cursor: pointer;
 }
 
-.segment:hover {
+.segment-flyout:hover {
   stroke: rgb(0,0,0);
-  stroke-width: 1.0;
-  fill: none;
 }
 
 .segment-flyout {
-  stroke: rgb(100,100,100);
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.segment-nonflyout {
   stroke-width: 0.8;
   fill: none;
 }
@@ -60,8 +63,9 @@ body {
 
 .segment-label {
   font-family: Tahoma;
-  font-size: 7pt;
+  font-size: 8pt;
   fill: rgb(0,0,0);
+  stroke: rgb(0,0,0);
 }
 
 /* Charts and Detail Pane */
@@ -69,8 +73,7 @@ body {
   position: absolute;
   right: 10px;
   width: 35em;
-  background-color: white;
-  opacity: 0.98;
+  background-color: rgba(255,255,255,0.5);
 }
 
 .detail-hidden {
