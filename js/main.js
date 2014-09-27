@@ -1,21 +1,24 @@
 // Events
 function initializeEvents(traffic, graphData) {
   initializeTypeahead(traffic, graphData);
-  initializeGraphControls();
+  renderers.setPercentileTabDowLabel();
 }
 
-function initializeGraphControls() {
-  renderers.setPercentileTabDowLabel();
+function setGraphControlEvents(pairDatum, graphData) {
+  $('.type-button').off('click');
   $('.type-button').on('click', function (){
     $('.subselects').css('display','none');
     section = '#'+$(this).attr('id')+'-subselects';
     $(section).css('display','inline-block');
     $('.type-button').removeClass('active');
     $(this).addClass('active');
+    renderGraph(pairDatum, graphData);
   });
+  $('.subselects-button').off('click');
   $('.subselects-button').on('click', function (){
     $('.subselects-button').removeClass('active')
     $(this).addClass('active');
+    renderGraph(pairDatum, graphData);
   });
 }
 
@@ -68,8 +71,8 @@ var pathSelect = function(pairId, pairData, graphData) {
     d3.select('#svg-pairid-'+pairId).classed({'segment':true, 'segment-selected':true});
 
     // Draw the graph
-    $("#historicalTravelTimes").empty();
     renderGraph(pairDatum, graphData);
+    setGraphControlEvents(pairDatum, graphData);
 
     // Hide the region section and show the segment section
     $('#detail-region').addClass('detail-hidden');
@@ -174,7 +177,7 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start) {
 }
 
 function renderGraph(pairDatum, graphData) {
-
+  $("#historicalTravelTimes").empty();
   var today = graphData.today
   var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
   var predictionsStart = graphData.similar_dow.Start
