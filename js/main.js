@@ -6,16 +6,15 @@ function initializeEvents(traffic, graphData) {
 
 function initializeGraphControls() {
   renderers.setPercentileTabDowLabel();
-
-  var buttonClasses = ['.type-button', '.day-button'];
-  for (var i=0; i<buttonClasses.length; i++) {
-    setButtonToggleHandler(buttonClasses[i])
-  }
-}
-
-function setButtonToggleHandler(buttonClass) {
-  $(buttonClass).on('click', function (){
-    $(buttonClass).removeClass('active')
+  $('.type-button').on('click', function (){
+    $('.subselects').css('display','none');
+    section = '#'+$(this).attr('id')+'-subselects';
+    $(section).css('display','inline-block');
+    $('.type-button').removeClass('active');
+    $(this).addClass('active');
+  });
+  $('.subselects-button').on('click', function (){
+    $('.subselects-button').removeClass('active')
     $(this).addClass('active');
   });
 }
@@ -86,6 +85,12 @@ var renderers = {
     var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     dow = getDayOfWeek();
     $('#dow').html(days[dow]+'s');
+    if (dow === 1 || dow === 6) {
+      $('#dowtype').html('Weekends');
+    } else {
+      $('#dowtype').html('Weekdays');
+    }
+    $('#'+days[dow].toLowerCase()).addClass('active',true);
   }
 }
 
@@ -178,9 +183,9 @@ function renderGraph(pairDatum, graphData) {
 
   // Select the proper percentile
   var type = $('.type-button.active').attr('id');
-  var day =  $('.day-button.active').attr('id');
-  var chosenPercentiles = graphData[type+'_'+day][pairDatum.pairId];
-  var chosenPercentilesStart = graphData[type+'_'+day].Start
+  var subselect =  $('.subselects-button').attr('id');
+  var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
+  var chosenPercentilesStart = graphData[type+'_'+subselect].Start
 
   // Prepare each percentile
   var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
@@ -209,7 +214,7 @@ function renderGraph(pairDatum, graphData) {
     renderer: 'multi',
     unstack: true,
     series: seriesData,
-    width: 400,
+    width: 550,
     height: 200
   });
   graph.render();
@@ -618,12 +623,17 @@ function spotlightSegments(activeSegment, roadFeature) {
 // Get Data and Initialize
 var graphData = {};
 $.when(
-  $.getJSON("data/predictions/all_dow.json"),
+  $.getJSON("data/predictions/similar_dow.json"),
+  $.getJSON("data/predictions/similar_dowtype.json"),
+  $.getJSON("data/predictions/all_monday.json"),
+  $.getJSON("data/predictions/all_tuesday.json"),
+  $.getJSON("data/predictions/all_wednesday.json"),
+  $.getJSON("data/predictions/all_thursday.json"),
+  $.getJSON("data/predictions/all_friday.json"),
+  $.getJSON("data/predictions/all_saturday.json"),
+  $.getJSON("data/predictions/all_sunday.json"),
   $.getJSON("data/predictions/all_weekdays.json"),
   $.getJSON("data/predictions/all_weekends.json"),
-  $.getJSON("data/predictions/similar_dow.json"),
-  $.getJSON("data/predictions/similar_weekdays.json"),
-  $.getJSON("data/predictions/similar_weekends.json"),
   $.getJSON("data/today.json")
 ).then( function (allDowResults, allWeekdaysResults, allWeekendsResults, similarDowResults, similarWeekdaysResults, similarWeekendsResults, todayResults) {
   graphData.all_dow = allDowResults[0];
