@@ -88,7 +88,7 @@ var renderers = {
     var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     dow = getDayOfWeek();
     $('#dow').html(days[dow]+'s');
-    if (dow === 1 || dow === 6) {
+    if (dow === 0 || dow === 6) {
       $('#dowtype').html('Weekends');
       $('#dowtype').attr('data-type','weekends')
     } else {
