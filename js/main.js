@@ -124,17 +124,21 @@ function renderMiseryIndex(traffic) {
   */
 }
 
-function prepareGraphSeries(unformattedData, level, renderer, distance, start) {
+function prepareGraphSeries(unformattedData, level, renderer, distance, start, utc) {
 
   var seriesElement = {};
   var data = [];
   var formattedDatum;
   var currentTime = new Date(start);
-  currentTime = new Date(currentTime.getTime());
+  var currentTimeMilliseconds
+  if (utc === true) {
+    currentTimeMilliseconds = currentTime.getTime()-currentTime.getTimezoneOffset()*60*1000
+  }
+
   for (var i=0; i<unformattedData.length; i++) {
-    formattedDatum = {'x':currentTime.getTime(),'y':distance/(unformattedData[i]/60)};
+    formattedDatum = {'x':currentTimeMilliseconds,'y':distance/(unformattedData[i]/60)};
     data.push(formattedDatum);
-    currentTime = new Date(currentTime.getTime() + 5*60000);
+    currentTimeMilliseconds = currentTimeMilliseconds + 5*60000;
   }
 
   var name = level
@@ -197,7 +201,7 @@ function renderGraph(pairDatum, graphData) {
   var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
   for (var i=0; i<percentileOrder.length; i++) {
     var chosenPercentile = chosenPercentiles[percentileOrder[i]];
-    var seriesElement = prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart);
+    var seriesElement = prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true);
     seriesData.push(seriesElement);
   }
 
@@ -210,7 +214,7 @@ function renderGraph(pairDatum, graphData) {
 
 
   // Add the Predictions
-  var seriesElement = prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart);
+  var seriesElement = prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true);
   seriesData.push(seriesElement);
 
 
