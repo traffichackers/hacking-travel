@@ -133,6 +133,8 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start, u
   var currentTimeMilliseconds
   if (utc === true) {
     currentTimeMilliseconds = currentTime.getTime()-currentTime.getTimezoneOffset()*60*1000
+  } else {
+    currentTimeMilliseconds = currentTime.getTime()
   }
 
   for (var i=0; i<unformattedData.length; i++) {
@@ -174,7 +176,8 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start, u
     '75th Percentile':inner,
     '90th Percentile':mid,
     'Max':outer,
-    'Predictions':'rgb(243,154,29)'
+    'Predictions':'rgb(243,154,29)',
+    'Today': 'rgb(135,135,135)'
   }
   seriesElement.color = levels[seriesElement.name]
 
@@ -184,9 +187,7 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start, u
 
 function renderGraph(pairDatum, graphData) {
   $("#historicalTravelTimes").empty();
-  var today = graphData.today
-  var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
-  var predictionsStart = graphData.similar_dow.Start
+
   var distance = pairDatum.travelTime/60*pairDatum.speed;
   var seriesData = [];
 
@@ -194,10 +195,10 @@ function renderGraph(pairDatum, graphData) {
   //var type = $('.type-button.active').attr('id');
   var type = 'similar'
   var subselect = $('.subselects-button.active').attr('data-type');
-  var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
-  var chosenPercentilesStart = graphData[type+'_'+subselect].Start
 
   // Prepare each percentile
+  var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
+  var chosenPercentilesStart = graphData[type+'_'+subselect].Start
   var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
   for (var i=0; i<percentileOrder.length; i++) {
     var chosenPercentile = chosenPercentiles[percentileOrder[i]];
@@ -205,15 +206,16 @@ function renderGraph(pairDatum, graphData) {
     seriesData.push(seriesElement);
   }
 
-  /*
   // Add the Data for Today
-  var seriesElement = prepareGraphSeries(today, 'Today', 'line', distance);
-  seriesElement.renderer = 'line';
+  var today = graphData.today[pairDatum.pairId];
+  var todayStart = graphData.today.Start;
+  var seriesElement = prepareGraphSeries(today, 'Today', 'line', distance, todayStart, true);
   seriesData.push(seriesElement);
-  */
 
 
   // Add the Predictions
+  var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
+  var predictionsStart = graphData.similar_dow.Start
   var seriesElement = prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true);
   seriesData.push(seriesElement);
 
