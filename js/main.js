@@ -130,17 +130,17 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start, u
   var data = [];
   var formattedDatum;
   var currentTime = new Date(start);
-  var currentTimeMilliseconds
+  var currentTimeSeconds
   if (utc === true) {
-    currentTimeMilliseconds = currentTime.getTime()-currentTime.getTimezoneOffset()*60*1000
+    currentTimeSeconds = (currentTime.getTime()-currentTime.getTimezoneOffset()*60*1000)/1000
   } else {
-    currentTimeMilliseconds = currentTime.getTime()
+    currentTimeSeconds = currentTime.getTime()/1000
   }
 
   for (var i=0; i<unformattedData.length; i++) {
-    formattedDatum = {'x':currentTimeMilliseconds,'y':distance/(unformattedData[i]/60)};
+    formattedDatum = {'x':currentTimeSeconds,'y':distance/(unformattedData[i]/60)};
     data.push(formattedDatum);
-    currentTimeMilliseconds = currentTimeMilliseconds + 5*60000;
+    currentTimeSeconds = currentTimeSeconds + 5*60000/1000;
   }
 
   var name = level
@@ -212,13 +212,11 @@ function renderGraph(pairDatum, graphData) {
   var seriesElement = prepareGraphSeries(today, 'Today', 'line', distance, todayStart, true);
   seriesData.push(seriesElement);
 
-
   // Add the Predictions
   var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
   var predictionsStart = graphData.similar_dow.Start
   var seriesElement = prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true);
   seriesData.push(seriesElement);
-
 
   // Erase the previous graph (if any) and render the new graph
   var graph = new Rickshaw.Graph({
@@ -235,8 +233,8 @@ function renderGraph(pairDatum, graphData) {
   var hoverDetail = new Rickshaw.Graph.HoverDetail( {
     graph: graph,
     xFormatter: function(x) {
-      var tempDate = new Date(x);
-      return tempDate.toISOString().substr(11,5);
+      var tempDate = new Date(x*1000);
+      return tempDate.toLocaleDateString() + " " + tempDate.toLocaleTimeString();
     },
     yFormatter: function(y) {
       return Math.round(y)+" mph";
@@ -246,12 +244,24 @@ function renderGraph(pairDatum, graphData) {
     d = new Date(d)
     return d.toISOString().substr(11,5)
   }
+
+  var xAxis = new Rickshaw.Graph.Axis.Time({
+    graph: graph,
+    timeFixture: new Rickshaw.Fixtures.Time.Local()
+  });
+
+  /*
   var xAxis = new Rickshaw.Graph.Axis.X({
     graph: graph,
     tickFormat: format,
   });
+  */
   xAxis.render();
-  var yAxis = new Rickshaw.Graph.Axis.Y({ graph: graph });
+
+  var yAxis = new Rickshaw.Graph.Axis.Y({
+    graph: graph,
+    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
+  });
   yAxis.render();
 
 }
