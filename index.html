@@ -11,6 +11,7 @@
 </head>
 
 <body>
+
   <!-- Header -->
   <div class="navbar navbar-default navbar-static-top" role="navigation">
     <div class="container">
@@ -109,7 +110,15 @@
     </div>
 
     <!-- Map -->
-    <div id="map-canvas"></div>
+    <div id="map-canvas">
+      <svg id="map-canvas-svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="segment-direction" viewBox="0 0 10 10" refX="1" refY="5" markerUnits="strokeWidth" orient="auto" markerWidth="3" markerHeight="3">
+            <polyline points="0,0 8,5 0,10 1,5" fill="rgb(100,100,100)"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
 
   </div>
 </body>

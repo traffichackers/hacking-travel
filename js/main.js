@@ -177,7 +177,7 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start, u
     '90th Percentile':mid,
     'Max':outer,
     'Predictions':'rgb(243,154,29)',
-    'Today': 'rgb(135,135,135)',
+    'Earlier Today': 'rgb(135,135,135)',
     'Now':'rgb(0,0,255)'
   }
   seriesElement.color = levels[seriesElement.name]
@@ -220,7 +220,7 @@ function renderGraph(pairDatum, graphData) {
   // Add the Data for Today
   var today = graphData.today[pairDatum.pairId];
   var todayStart = graphData.today.Start;
-  var seriesElement = prepareGraphSeries(today, 'Today', 'line', distance, todayStart, true);
+  var seriesElement = prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, true);
   seriesData.push(seriesElement);
 
   // Add the Predictions
@@ -278,7 +278,8 @@ function renderGraph(pairDatum, graphData) {
 
   var yAxis = new Rickshaw.Graph.Axis.Y({
     graph: graph,
-    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
+    tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+    tickValues: [25,50,75,100]
   });
   yAxis.render();
 
@@ -367,9 +368,10 @@ function renderRoads(traffic, roads, backgroundRoads, graphData) {
   var width = mapElement.width(),
     height = mapElement.height();
 
-  svg = d3.select("#map-canvas").append("svg")
+  svg = d3.select("#map-canvas-svg")
     .attr("width", width)
     .attr("height", height);
+
 
   var projection = d3.geo.mercator()
     .rotate([0, 0])
@@ -646,6 +648,7 @@ function spotlightSegments(activeSegment, roadFeature) {
           // Set Flyout Formatting
           d3.select(this).classed('segment-nonflyout',false);
           d3.select(this).classed('segment-flyout',true);
+          d3.select(this).attr('marker-end','url(#segment-direction)');
 
           // Render label on mouseover
           d3.select(this).on('mouseover', function(d, i) {
@@ -660,6 +663,7 @@ function spotlightSegments(activeSegment, roadFeature) {
         // Return a zero translation if the current segment is not close to the active segment
         } else {
           d3.select(this).classed('segment-nonflyout',true);
+          d3.select(this).attr('marker-end','');
           return 'translate(0,0)';
         }
       }

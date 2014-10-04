@@ -43,7 +43,7 @@ body {
 }
 
 .segment-flyout:hover {
-  stroke: rgb(0,0,0);
+  stroke: rgb(100,100,100);
 }
 
 .segment-flyout {
@@ -57,7 +57,7 @@ body {
 }
 
 .segment-selected {
-  stroke: rgb(0,0,0);
+  stroke: rgb(100,100,100);
   fill: none;
 }
 
@@ -78,6 +78,10 @@ body {
 
 .detail-hidden {
   display: none;
+}
+
+#historicalTravelTimes {
+  border-bottom: 1px solid lightgrey;
 }
 
 #historical-travel-times-controls {
