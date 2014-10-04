@@ -132,9 +132,9 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start, u
   var currentTime = new Date(start);
   var currentTimeSeconds
   if (utc === true) {
-    currentTimeSeconds = (currentTime.getTime()-currentTime.getTimezoneOffset()*60*1000)/1000
+    currentTimeSeconds = (currentTime.getTime())/1000;
   } else {
-    currentTimeSeconds = currentTime.getTime()/1000
+    currentTimeSeconds = currentTime.getTime()/1000;
   }
 
   for (var i=0; i<unformattedData.length; i++) {
@@ -177,7 +177,8 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start, u
     '90th Percentile':mid,
     'Max':outer,
     'Predictions':'rgb(243,154,29)',
-    'Today': 'rgb(135,135,135)'
+    'Today': 'rgb(135,135,135)',
+    'Now':'rgb(0,0,255)'
   }
   seriesElement.color = levels[seriesElement.name]
 
@@ -206,6 +207,16 @@ function renderGraph(pairDatum, graphData) {
     seriesData.push(seriesElement);
   }
 
+  // Add Vertical Line for Today
+  var seriesElement = {};
+  var currentTime = new Date(graphData.similar_dow.Start);
+  var currentTimeSeconds = (currentTime.getTime())/1000;
+  seriesElement.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
+  seriesElement.color = 'rgb(145,196,245)';
+  seriesElement.renderer = 'line';
+  seriesElement.name = 'Now';
+  seriesData.push(seriesElement);
+
   // Add the Data for Today
   var today = graphData.today[pairDatum.pairId];
   var todayStart = graphData.today.Start;
@@ -218,7 +229,7 @@ function renderGraph(pairDatum, graphData) {
   var seriesElement = prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true);
   seriesData.push(seriesElement);
 
-  // Erase the previous graph (if any) and render the new graph
+  // Render the new graph
   var graph = new Rickshaw.Graph({
     element: document.querySelector("#historicalTravelTimes"),
     renderer: 'multi',
@@ -237,7 +248,11 @@ function renderGraph(pairDatum, graphData) {
       return tempDate.toLocaleDateString() + " " + tempDate.toLocaleTimeString();
     },
     yFormatter: function(y) {
-      return Math.round(y)+" mph";
+      if (y === 0) {
+        return "divides historical traffic from predictions"
+      } else {
+        return Math.round(y)+" mph";
+      }
     }
   });
   var format = function(d) {
@@ -245,17 +260,20 @@ function renderGraph(pairDatum, graphData) {
     return d.toISOString().substr(11,5)
   }
 
+  var unit = {}
+  unit.formatTime = function(d) {
+    return d.toTimeString().substring(0,5);
+  };
+  unit.formatter = function(d) {
+    return this.formatTime(d);
+  };
+  unit.name = "hour";
+  unit.seconds = 21600;
   var xAxis = new Rickshaw.Graph.Axis.Time({
     graph: graph,
+    timeUnit:unit,
     timeFixture: new Rickshaw.Fixtures.Time.Local()
   });
-
-  /*
-  var xAxis = new Rickshaw.Graph.Axis.X({
-    graph: graph,
-    tickFormat: format,
-  });
-  */
   xAxis.render();
 
   var yAxis = new Rickshaw.Graph.Axis.Y({
@@ -263,6 +281,15 @@ function renderGraph(pairDatum, graphData) {
     tickFormat: Rickshaw.Fixtures.Number.formatKMBT
   });
   yAxis.render();
+
+  /*
+  var annotator = new Rickshaw.Graph.Annotate({
+    graph: graph,
+    element: document.getElementById('timeline')
+  });
+  annotator.add(1412039701, "You are here");
+  annotator.update();
+  */
 
 }
 
