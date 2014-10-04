@@ -193,13 +193,17 @@ function renderGraph(pairDatum, graphData) {
   var seriesData = [];
 
   // Select the proper percentile
-  //var type = $('.type-button.active').attr('id');
-  var type = 'similar'
+  var type = $('.type-button.active').attr('id');
   var subselect = $('.subselects-button.active').attr('data-type');
 
   // Prepare each percentile
   var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
-  var chosenPercentilesStart = graphData[type+'_'+subselect].Start
+  if (type === 'all') {
+    var today = new Date();
+    var chosenPercentilesStart = today.toISOString().substr(0,11)+"04:00:00";
+  } else {
+    var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
+  }
   var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
   for (var i=0; i<percentileOrder.length; i++) {
     var chosenPercentile = chosenPercentiles[percentileOrder[i]];
@@ -262,7 +266,8 @@ function renderGraph(pairDatum, graphData) {
 
   var unit = {}
   unit.formatTime = function(d) {
-    return d.toTimeString().substring(0,5);
+    var localeTimeString = d.toLocaleTimeString();
+    return localeTimeString.substr(0,4)+localeTimeString.substr(7,10);
   };
   unit.formatter = function(d) {
     return this.formatTime(d);
@@ -679,29 +684,29 @@ $.when(
   $.getJSON("data/predictions/similar_dow.json"),
   $.getJSON("data/predictions/similar_weekdays.json"),
   $.getJSON("data/predictions/similar_weekends.json"),
-  //$.getJSON("data/predictions/all_mondays.json"),
-  //$.getJSON("data/predictions/all_tuesdays.json"),
-  //$.getJSON("data/predictions/all_wednesdays.json"),
-  //$.getJSON("data/predictions/all_thursdays.json"),
-  //$.getJSON("data/predictions/all_fridays.json"),
-  //$.getJSON("data/predictions/all_saturdays.json"),
-  //$.getJSON("data/predictions/all_sundays.json"),
-  //$.getJSON("data/predictions/all_weekdays.json"),
-  //$.getJSON("data/predictions/all_weekends.json"),
+  $.getJSON("data/predictions/all_mondays.json"),
+  $.getJSON("data/predictions/all_tuesdays.json"),
+  $.getJSON("data/predictions/all_wednesdays.json"),
+  $.getJSON("data/predictions/all_thursdays.json"),
+  $.getJSON("data/predictions/all_fridays.json"),
+  $.getJSON("data/predictions/all_saturdays.json"),
+  $.getJSON("data/predictions/all_sundays.json"),
+  $.getJSON("data/predictions/all_weekdays.json"),
+  $.getJSON("data/predictions/all_weekends.json"),
   $.getJSON("data/today.json")
-).then( function (similarDowResults, similarWeekdayResults, similarWeekendResults, /*allMondaysResults, allTuesdaysResults, allWednesdaysResults, allThursdaysResults, allFridaysResults, allSaturdaysResults, allSundaysResults, allWeekdaysResults, allWeekendsResults,*/ todayResults) {
+).then( function (similarDowResults, similarWeekdayResults, similarWeekendResults, allMondaysResults, allTuesdaysResults, allWednesdaysResults, allThursdaysResults, allFridaysResults, allSaturdaysResults, allSundaysResults, allWeekdaysResults, allWeekendsResults, todayResults) {
   graphData.similar_dow = similarDowResults[0];
   graphData.similar_weekdays = similarWeekdayResults[0];
   graphData.similar_weekends = similarWeekendResults[0];
-  //graphData.all_mondays = allMondaysResults[0];
-  //graphData.all_tuesdays = allTuesdaysResults[0];
-  //graphData.all_wednesdays = allWednesdaysResults[0];
-  //graphData.all_thursdays = allThursdaysResults[0];
-  //graphData.all_fridays = allFridaysResults[0];
-  //graphData.all_saturdays = allSaturdaysResults[0];
-  //graphData.all_sundays = allSundaysResults[0];
-  //graphData.allWeekendsResults = allWeekendsResults[0];
-  //graphData.allWeekdaysResults = allWeekdaysResults[0];
+  graphData.all_mondays = allMondaysResults[0];
+  graphData.all_tuesdays = allTuesdaysResults[0];
+  graphData.all_wednesdays = allWednesdaysResults[0];
+  graphData.all_thursdays = allThursdaysResults[0];
+  graphData.all_fridays = allFridaysResults[0];
+  graphData.all_saturdays = allSaturdaysResults[0];
+  graphData.all_sundays = allSundaysResults[0];
+  graphData.all_weekends = allWeekendsResults[0];
+  graphData.all_weekdays = allWeekdaysResults[0];
   graphData.today = todayResults[0];
 });
 

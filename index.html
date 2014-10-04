@@ -4,10 +4,10 @@
   <title>Traffic Hackers</title>
   <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
   <!-- Stylesheets -->
-  <link rel='stylesheet' type='text/css' href='css/main.css' media='screen' />
   <link rel='stylesheet' type='text/css' href='css/bootstrap.min.css'>
   <link rel='stylesheet' type='text/css' href='css/bootstrap-theme.min.css'>
   <link rel='stylesheet' type='text/css' href='css/rickshaw.css' />
+  <link rel='stylesheet' type='text/css' href='css/main.css' media='screen' />
 </head>
 
 <body>
@@ -77,34 +77,31 @@
         <div id='historicalTravelTimes'></div>
         <!--<div id="timeline"></div>-->
         <div id="historical-travel-times-controls">
-          <span>Show historical ranges for similar </span>
-          <!--
+          <span>Show historical ranges for </span>
           <div class="btn-group btn-group-xs">
              <button id="similar" type="button" class="btn btn-default type-button active">Similar</button>
              <button id="all" type="button" class="btn btn-default type-button">All</button>
           </div>
-          -->
           <span>&nbsp;</span>
           <div id="similar-subselects" class="btn-group btn-group-xs subselects">
              <button id="dow" data-type='dow' type="button" class="btn btn-default subselects-button active">{{dow}}</button>
              <button id="dowtype" type="button" class="btn btn-default subselects-button">{{dowType}}</button>
           </div>
-          <!--
           <div id="all-subselects" class="btn-group btn-group-xs subselects">
-             <button id="mondays" type="button" class="btn btn-default subselects-button">M</button>
-             <button id="tuesdays" type="button" class="btn btn-default subselects-button">T</button>
-             <button id="wednesdays" type="button" class="btn btn-default subselects-button">W</button>
-             <button id="thursdays" type="button" class="btn btn-default subselects-button">T</button>
-             <button id="fridays" type="button" class="btn btn-default subselects-button">F</button>
-             <button id="saturdays" type="button" class="btn btn-default subselects-button">S</button>
-             <button id="sundays" type="button" class="btn btn-default subselects-button">S</button>
-             <button id="weekdays" type="button" class="btn btn-default subselects-button">Weekdays</button>
-             <button id="weekends" type="button" class="btn btn-default subselects-button">Weekends</button>
-             <button id="calendar" type="button" class="btn btn-default subselects-button">
+             <button id="mondays" data-type="mondays" type="button" class="btn btn-default subselects-button">M</button>
+             <button id="tuesdays" data-type="tuesdays" type="button" class="btn btn-default subselects-button">T</button>
+             <button id="wednesdays" data-type="wednesdays" type="button" class="btn btn-default subselects-button">W</button>
+             <button id="thursdays" data-type="thursdays" type="button" class="btn btn-default subselects-button">T</button>
+             <button id="fridays" data-type="fridays" type="button" class="btn btn-default subselects-button">F</button>
+             <button id="saturdays" data-type="saturdays" type="button" class="btn btn-default subselects-button">S</button>
+             <button id="sundays" data-type="sundays" type="button" class="btn btn-default subselects-button">S</button>
+             <button id="weekdays" data-type="weekdays" type="button" class="btn btn-default subselects-button">Weekdays</button>
+             <button id="weekends" data-type="weekdays" type="button" class="btn btn-default subselects-button">Weekends</button>
+             <!--<button id="calendar" type="button" class="btn btn-default subselects-button">
                <span class="glyphicon glyphicon-calendar"></span>
              </button>
+             -->
           </div>
-          -->
         </div>
       </div>
     </div>

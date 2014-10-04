@@ -110,6 +110,15 @@ body {
   background-color: rgb(248,157,154);
 }
 
+.rickshaw_graph .x_tick .title {
+  font-size: 0.75em;
+}
+
+.rickshaw_graph .y_ticks text {
+  stroke: rgba(0, 0, 0, 0);
+  font-size: 0.7em;
+}
+
 /* Typeahead CSS */
 .tt-dropdown-menu,
 .gist {
