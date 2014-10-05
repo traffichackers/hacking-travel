@@ -16,7 +16,8 @@ function setGraphControlEvents(pairDatum, graphData) {
   });
   $('.subselects-button').off('click');
   $('.subselects-button').on('click', function (){
-    $('.subselects-button').removeClass('active')
+    var type = $('.type-button.active').attr('id');
+    $('#'+type+'-subselects > .subselects-button').removeClass('active')
     $(this).addClass('active');
     renderGraph(pairDatum, graphData);
   });
@@ -124,7 +125,7 @@ function renderMiseryIndex(traffic) {
   */
 }
 
-function prepareGraphSeries(unformattedData, level, renderer, distance, start, utc) {
+function prepareGraphSeries(unformattedData, level, renderer, distance, start, utc, maxPoints) {
 
   var seriesElement = {};
   var data = [];
@@ -138,9 +139,12 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start, u
   }
 
   for (var i=0; i<unformattedData.length; i++) {
-    formattedDatum = {'x':currentTimeSeconds,'y':distance/(unformattedData[i]/60)};
-    data.push(formattedDatum);
-    currentTimeSeconds = currentTimeSeconds + 5*60000/1000;
+    if (i<=maxPoints || typeof maxPoints === 'undefined' ) {
+      formattedDatum = {'x':currentTimeSeconds,'y':distance/(unformattedData[i]/60)};
+      data.push(formattedDatum);
+      currentTimeSeconds = currentTimeSeconds + 5*60000/1000;
+    }
+
   }
 
   var name = level
@@ -165,8 +169,8 @@ function prepareGraphSeries(unformattedData, level, renderer, distance, start, u
   }
 
   // Set Color
-  var inner = 'rgb(160,160,160)';
-  var mid = 'rgb(200,200,200)';
+  var inner = 'rgb(190,190,190)';
+  var mid = 'rgb(210,210,210)';
   var outer = 'rgb(240,240,240)';
   levels = {
     'Min':'rgb(255,255,255)',
@@ -194,20 +198,21 @@ function renderGraph(pairDatum, graphData) {
 
   // Select the proper percentile
   var type = $('.type-button.active').attr('id');
-  var subselect = $('.subselects-button.active').attr('data-type');
+  var subselect = $('#'+type+'-subselects > .subselects-button.active').attr('data-type');
 
   // Prepare each percentile
+  var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
+  var todayStart = new Date(graphData.today.Start);
+  var minToday = todayStart.getTime()/1000;
+  var predictionsStart = new Date(graphData.similar_dow.Start);
+  var maxPredictions = predictionsStart.getTime()/1000+predictions.length*5*60;
+  var maxPoints = (predictionsStart.getTime()-todayStart.getTime())/(1000*60*5)+predictions.length+48;
   var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
-  if (type === 'all') {
-    var today = new Date();
-    var chosenPercentilesStart = today.toISOString().substr(0,11)+"04:00:00";
-  } else {
-    var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
-  }
+  var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
   var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
   for (var i=0; i<percentileOrder.length; i++) {
     var chosenPercentile = chosenPercentiles[percentileOrder[i]];
-    var seriesElement = prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true);
+    var seriesElement = prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints);
     seriesData.push(seriesElement);
   }
 
