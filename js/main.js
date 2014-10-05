@@ -401,6 +401,20 @@ function renderRoads(traffic, roads, backgroundRoads, graphData) {
   var roadFeatures = roadFeature.selectAll("path")
     .data(roads.features)
     .enter().append("path")
+    .style('stroke', function(d, i) {
+      var pairDatum = traffic.pairData[d.properties.SegmentID];
+      if (pairDatum) {
+        var congestionRatioText = util.getCongestionRatioText(pairDatum);
+        var colors = {
+          normal: "rgb(142,204,158)",
+          impacted: "rgb(250,189,137)",
+          congested: "rgb(248,157,154)"
+        }
+        return colors[congestionRatioText];
+      } else {
+        return "rgb(160,160,160)";
+      }
+    })
     .attr("d", d3.geo.path().projection(projection))
     .attr('id', function(d, i) {
       return 'svg-pairid-'+d.properties.SegmentID;
@@ -411,7 +425,6 @@ function renderRoads(traffic, roads, backgroundRoads, graphData) {
       } catch (e) {
         return ''
       }
-
     })
     .attr('class','segment')
     .on('click',function(d, i) {
