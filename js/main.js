@@ -676,8 +676,17 @@ function spotlightSegments(activeSegment, roadFeature) {
         // Determine if current segment is close to the active segment
         currentSegmentMidpoint = this.getPointAtLength(this.getTotalLength()/2);
         var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
+        if (activeSegment.id === this.id) {
+          d3.select(this).classed('segment-nonflyout',false);
+          d3.select(this).classed('segment-flyout',true);
+          d3.select(this).attr('marker-end','url(#segment-direction)');
 
-        if (activeSegment.id !== this.id && hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
+          // Render label on mouseover
+          d3.select(this).on('mouseover', function(d, i) {
+            addSegmentLabel(roadFeature,priorTransformation);
+          })
+
+        } else if (activeSegment.id !== this.id && hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
           //console.log(this.id);
           var offsetVector = getOffsetVector(this, priorTransformations, currentSegmentMidpoint, com, currentBoundaries);
           //console.log("     ");

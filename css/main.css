@@ -71,7 +71,8 @@ body {
 /* Charts and Detail Pane */
 .detail {
   position: absolute;
-  right: 10px;
+  right: 30px;
+  margin-top: 1em;
   width: 40em;
   background-color: rgb(255,255,255);
 }
