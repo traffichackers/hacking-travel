@@ -211,6 +211,9 @@ function renderGraph(pairDatum, graphData) {
   var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
   var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
   var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
+  if (type === 'all') {
+    chosenPercentilesStart = graphData.today.Start
+  }
   for (var i=0; i<percentileOrder.length; i++) {
     var chosenPercentile = chosenPercentiles[percentileOrder[i]];
     var seriesElement = prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints);
