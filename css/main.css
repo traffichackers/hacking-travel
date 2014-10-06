@@ -120,6 +120,10 @@ body {
 }
 
 /* Typeahead CSS */
+span.twitter-typeahead {
+  background-color: white;
+}
+
 .tt-dropdown-menu,
 .gist {
   text-align: left;

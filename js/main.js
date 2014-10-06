@@ -53,6 +53,7 @@ function initializeTypeahead(traffic, graphData) {
 
 // Handle when the path is clicked or when an item is pulled from the drop-down
 var pathSelect = function(pairId, pairData, graphData) {
+  //console.log(pairId);
   pairDatum = pairData[pairId];
   if (pairDatum) {
 
@@ -206,7 +207,7 @@ function renderGraph(pairDatum, graphData) {
   var minToday = todayStart.getTime()/1000;
   var predictionsStart = new Date(graphData.similar_dow.Start);
   var maxPredictions = predictionsStart.getTime()/1000+predictions.length*5*60;
-  var maxPoints = (predictionsStart.getTime()-todayStart.getTime())/(1000*60*5)+predictions.length+48;
+  var maxPoints = (predictionsStart.getTime()-todayStart.getTime())/(1000*60*5)+predictions.length;
   var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
   var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
   var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
@@ -471,7 +472,22 @@ function getBoundaries(path) {
   };
 }
 
-function hasOverlap(a, b) {
+function expand(orig) {
+  var out = {};
+  var expansion = 5;
+  out.x1 = orig.x1-expansion;
+  out.x2 = orig.x2+expansion;
+  out.y1 = orig.y1-expansion;
+  out.y2 = orig.y2+expansion;
+  return out;
+}
+
+function hasOverlap(aOrig, bOrig) {
+
+  // Enlarge a and b
+  var a = expand(aOrig);
+  var b = expand(bOrig);
+
   // X Overlap
   var xOverlap = false;
   if (a.x1 < b.x1 && a.x2 > b.x1) {
@@ -581,7 +597,7 @@ function applyNormalVectorMultiplier(normalVector, multiplier) {
 }
 
 function getOffsetVector(currentSegment, queuedTransformations, currentSegmentMidpoint, com, currentBoundaries) {
-  var baseMultiplier = 5;
+  var baseMultiplier = 7;
   var multiplier = baseMultiplier;
 
   // Calculate the normal vectors
@@ -597,11 +613,14 @@ function getOffsetVector(currentSegment, queuedTransformations, currentSegmentMi
   for (var j=0; j<queuedTransformations.length; j++) {
     var previousBoundaries = queuedTransformations[j].boundaries;
     if (hasOverlap(translatedBoundaries, previousBoundaries)) {
+      //console.log('has overlap');
+      //console.log('  previousCollision: '+JSON.stringify(queuedTransformations[j]));
+      multiplier += baseMultiplier;
       offsetVectors[closerIndex] = applyNormalVectorMultiplier(normalVectors[closerIndex], multiplier)
       closerIndex = getCloserIndex(currentSegmentMidpoint, com, offsetVectors);
       translatedBoundaries = translateBoundaries(currentBoundaries,offsetVectors[closerIndex]);
+      //console.log("  translatedBoundaries: "+JSON.stringify(translatedBoundaries));
       j = 0;
-      multiplier += baseMultiplier;
     }
   }
   return offsetVectors[closerIndex];
@@ -656,8 +675,9 @@ function spotlightSegments(activeSegment, roadFeature) {
         var epicenterDistance = calculateDistance(com, currentSegmentMidpoint);
 
         if (activeSegment.id !== this.id && hasOverlap(activeBoundariesWithMargin, currentBoundaries)) {
-
+          //console.log(this.id);
           var offsetVector = getOffsetVector(this, priorTransformations, currentSegmentMidpoint, com, currentBoundaries);
+          //console.log("     ");
 
           // Store a record of this transformation
           var currentSegmentEnd = this.getPointAtLength(this.getTotalLength());
