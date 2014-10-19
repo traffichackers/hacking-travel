@@ -430,7 +430,7 @@ function renderRoads(traffic, roads, backgroundRoads, graphData) {
     })
     .attr('data-title', function(d, i) {
       try {
-        return traffic.pairData[d.properties.SegmentID].title
+        return d.properties.Full_Desc
       } catch (e) {
         return ''
       }
