@@ -314,7 +314,12 @@ var renderers = {
     var texts = roadFeature.selectAll("text").data(transformations).enter();
     texts.append("text")
     .text(function(d, i) {
-      return d.name;
+      if (typeof d === 'undefined' || d.name === 'undefined') {
+        return '';
+      } else {
+        return d.name;
+      }
+
     })
     .attr('class', 'segment-label')
     .attr('x', function(d, i) {
@@ -524,7 +529,7 @@ var helper = {
     impactedSegments = impactedSegments.slice(0,10);
 
     return {
-      'miseryIndex': Math.round( miseryIndex * 10) / 10
+      'miseryIndex': Math.round( miseryIndex * 10) / 10,
       'speed': Math.round(speedSummation/count),
       'freeFlow': Math.round(freeflowSummation/count),
       'impactedSegments': impactedSegments
