@@ -202,7 +202,7 @@ var renderers = {
 
     // Prepare each percentile
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
-    var todayStart = new Date(graphData.today.Start);
+    var todayStart = new Date(graphData.today.Start.substring(0, graphData.today.Start.length - 1));
     var minToday = todayStart.getTime()/1000;
     var predictionsStart = new Date(graphData.similar_dow.Start);
     var maxPredictions = predictionsStart.getTime()/1000+predictions.length*5*60;
@@ -211,7 +211,7 @@ var renderers = {
     var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
     var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
     if (type === 'all') {
-      chosenPercentilesStart = graphData.today.Start
+      chosenPercentilesStart = graphData.today.Start.substring(0, graphData.today.Start.length - 1);
     }
     for (var i=0; i<percentileOrder.length; i++) {
       var chosenPercentile = chosenPercentiles[percentileOrder[i]];
@@ -231,7 +231,7 @@ var renderers = {
 
     // Add the Data for Today
     var today = graphData.today[pairDatum.pairId];
-    var todayStart = graphData.today.Start;
+    var todayStart = graphData.today.Start.substring(0, graphData.today.Start.length - 1);
     var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, true);
     seriesData.push(seriesElement);
 
