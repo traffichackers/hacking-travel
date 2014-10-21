@@ -332,7 +332,8 @@ var renderers = {
   },
 
   spotlightSegments: function(activeSegment, roadFeature) {
-    if (!activeSegment.classList.contains('segment-flyout')) {
+    if (activeSegment.className.baseVal.indexOf('segment-flyout') === -1) {
+    //if (!activeSegment.classList.contains('segment-flyout')) {
 
       var spotlightRadius = 5;
       var priorTransformations = [];
@@ -382,7 +383,9 @@ var renderers = {
             // Set Flyout Formatting
             d3.select(this).classed('segment-nonflyout',false);
             d3.select(this).classed('segment-flyout',true);
-            d3.select(this).attr('marker-end','url(#segment-direction)');
+            if (typeof activeSegment.classList !== 'undefined') {
+              d3.select(this).attr('marker-end','url(#segment-direction)');
+            }
 
             // Render label on mouseover
             d3.select(this).on('mouseover', function(d, i) {
