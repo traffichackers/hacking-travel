@@ -3,5 +3,5 @@ data/current.json
 data/today.json
 data/predictions/
 node_modules/
-dist/
-config.env
+build/
+.env
