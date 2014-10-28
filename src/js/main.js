@@ -202,26 +202,32 @@ var renderers = {
 
     // Prepare each percentile
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
-    var todayStart = new Date(graphData.today.Start.substring(0, graphData.today.Start.length - 1));
+    var todayStart = new Date(graphData.today.Start);
     var minToday = todayStart.getTime()/1000;
-    var predictionsStart = new Date(graphData.similar_dow.Start);
+    var predictionsStart = new Date(graphData.similar_dow.Start+"-04:00");
     var maxPredictions = predictionsStart.getTime()/1000+predictions.length*5*60;
     var maxPoints = (predictionsStart.getTime()-todayStart.getTime())/(1000*60*5)+predictions.length;
     var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
-    var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
-    var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
     if (type === 'all') {
-      chosenPercentilesStart = graphData.today.Start.substring(0, graphData.today.Start.length - 1);
-    }
+	  var chosenPercentilesStart = graphData.today.Start;
+	} else {
+	  var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
+	}
+
+    var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
     for (var i=0; i<percentileOrder.length; i++) {
       var chosenPercentile = chosenPercentiles[percentileOrder[i]];
-      var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints);
-      seriesData.push(seriesElement);
+	  if (type === 'all') {
+		var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, maxPoints);
+	  } else {
+		var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints);
+	  }
+	  seriesData.push(seriesElement);
     }
 
     // Add Vertical Line for Today
     var seriesElement = {};
-    var currentTime = new Date(graphData.similar_dow.Start);
+    var currentTime = new Date(graphData.similar_dow.Start+"-04:00");
     var currentTimeSeconds = (currentTime.getTime())/1000;
     seriesElement.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
     seriesElement.color = 'rgb(145,196,245)';
@@ -231,8 +237,8 @@ var renderers = {
 
     // Add the Data for Today
     var today = graphData.today[pairDatum.pairId];
-    var todayStart = graphData.today.Start.substring(0, graphData.today.Start.length - 1);
-    var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, true);
+    var todayStart = graphData.today.Start;
+    var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false);
     seriesData.push(seriesElement);
 
     // Add the Predictions
@@ -428,13 +434,13 @@ var helper = {
     var seriesElement = {};
     var data = [];
     var formattedDatum;
-    var currentTime = new Date(start);
+	if (utc === true) {
+		var currentTime = new Date(start+"-04:00");
+	} else {
+	  var currentTime = new Date(start);
+	}
     var currentTimeSeconds
-    if (utc === true) {
-      currentTimeSeconds = (currentTime.getTime())/1000;
-    } else {
-      currentTimeSeconds = currentTime.getTime()/1000;
-    }
+    currentTimeSeconds = currentTime.getTime()/1000;
 
     for (var i=0; i<unformattedData.length; i++) {
       if (i<=maxPoints || typeof maxPoints === 'undefined' ) {
@@ -754,8 +760,8 @@ $.when(
 
 $.when(
   $.getJSON("data/current.json"),
-  $.getJSON("roads/segments.json"),
-  $.getJSON("roads/background.json")
+  $.getJSON("data/segments.json"),
+  $.getJSON("data/background.json")
 ).then( function (trafficResults, roadsResults, backgroundRoads) {
   var traffic = trafficResults[0];
   events.initializeEvents(traffic, graphData);
