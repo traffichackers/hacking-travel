@@ -1,0 +1,28 @@
+{
+  "name": "hacking-travel",
+  "version": "0.1.0",
+  "description": "travel predictions website",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apcollier/hacking-travel.git"
+  },
+  "keywords": [
+    "travel",
+    "predictions",
+    "roadway"
+  ],
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/apcollier/hacking-travel/issues"
+  },
+  "homepage": "https://github.com/apcollier/hacking-travel",
+  "dependencies": {
+    "dotenv": "^0.4.0",
+    "gulp": "^3.8.9",
+    "s3": "^4.3.1"
+  }
+}
