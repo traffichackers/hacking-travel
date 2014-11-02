@@ -4,4 +4,5 @@ data/today.json
 data/predictions/
 node_modules/
 build/
+.sass-cache/
 .env
