@@ -2,7 +2,7 @@
 web interface for [hacking-travel-predictions](https://github.com/ecooper2/hacking-travel-predictions) and [hacking-travel-data](https://github.com/apcollier/hacking-travel-data)
 
 ## Developing Locally
-1.  Ensure that [Node.js](http://nodejs.org) is installed.  If needed, [Node.js](http://nodejs.org) can be installed via [homebrew](http://brew.sh).  After installing [homebrew](http://brew.sh), use the following command to install [Node.js](http://nodejs.org):
+1.  Ensure that [Node.js](http://nodejs.org) is installed.  If needed, [Node.js](http://nodejs.org) can be installed via [homebrew](http://brew.sh) - first install [homebrew](http://brew.sh), then type the following command in the terminal:
   ```
   $ brew install node
   ```
