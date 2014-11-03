@@ -760,8 +760,8 @@ $.when(
 
 $.when(
   $.getJSON("data/current.json"),
-  $.getJSON("data/segments.json"),
-  $.getJSON("data/background.json")
+  $.getJSON("roads/segments.json"),
+  $.getJSON("roads/background.json")
 ).then( function (trafficResults, roadsResults, backgroundRoads) {
   var traffic = trafficResults[0];
   events.initializeEvents(traffic, graphData);
