@@ -6,13 +6,7 @@ var child_process = require('child_process');
 
 
 var filelist = ['./src/*.html', './src/js/*', './src/css/*', './src/fonts/*', './src/roads/*'];
-gulp.task('build', function() {
-
-  // Build Site
-  for (var i=0; i<filelist.length; i++) {
-    gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest('build/'));
-  }
-  console.log("website built");
+gulp.task('build', function(callback) {
 
   // Build Blog
   child_process.execFile('jekyll', ['build', '--source', './blog/', '--destination', './build/blog/'], function(error, stdout, stderr) {
@@ -22,19 +16,42 @@ gulp.task('build', function() {
        console.log(stderr);
      } else {
        console.log("blog built");
+       callback();
      }
   });
 
+  // Build Site
+  for (var i=0; i<filelist.length; i++) {
+    gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest('build/'));
+  }
+  console.log("website built");
+
 });
 
-gulp.task('watch', function() {
+gulp.task('watch', function(callback) {
   for (var i=0; i<filelist.length; i++) {
     gulp.watch(filelist[i], ['build']);
   }
-  gulp.watch('./blog/**/*.*', ['build']);
+  gulp.watch('./blog/**/*.8', ['build']);
+  console.log('watching');
+  callback();
 });
 
-gulp.task('upload-aws', function() {
+gulp.task('serve', function(callback) {
+  child_process.execFile('http-server', ['build'], function(error, stdout, stderr) {
+    if (error) {
+      console.log(error);
+    } else if (stderr) {
+      console.log(stderr);
+    } else {
+      console.log(stdout);
+    }
+  });
+  console.log("website running at http://localhost:8080");
+  callback();
+})
+
+gulp.task('upload-aws', function(callback) {
   dotenv.load();
   var client = s3.createClient({
     s3Options: {
@@ -58,7 +75,9 @@ gulp.task('upload-aws', function() {
   });
   uploader.on('end', function() {
     console.log("done uploading");
+    callback();
   });
 });
 
+gulp.task('dev', ['watch', 'serve'])
 gulp.task('prod', ['build', 'upload-aws']);
