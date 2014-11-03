@@ -1,6 +1,6 @@
 # Site settings
 title: Traffichackers.com
-email: your-email@domain.com
+email: andrew@acollier.com
 description:
 baseurl: "/blog" # the subpath of your site, e.g. /blog/
 url: "http://traffichackers.com" # the base hostname & protocol for your site

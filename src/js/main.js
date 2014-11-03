@@ -204,7 +204,7 @@ var renderers = {
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
     var todayStart = new Date(graphData.today.Start);
     var minToday = todayStart.getTime()/1000;
-    var predictionsStart = new Date(graphData.similar_dow.Start+"-04:00");
+    var predictionsStart = new Date(graphData.similar_dow.Start+"-05:00");
     var maxPredictions = predictionsStart.getTime()/1000+predictions.length*5*60;
     var maxPoints = (predictionsStart.getTime()-todayStart.getTime())/(1000*60*5)+predictions.length;
     var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
@@ -227,7 +227,7 @@ var renderers = {
 
     // Add Vertical Line for Today
     var seriesElement = {};
-    var currentTime = new Date(graphData.similar_dow.Start+"-04:00");
+    var currentTime = new Date(graphData.similar_dow.Start+"-05:00");
     var currentTimeSeconds = (currentTime.getTime())/1000;
     seriesElement.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
     seriesElement.color = 'rgb(145,196,245)';
@@ -435,7 +435,7 @@ var helper = {
     var data = [];
     var formattedDatum;
 	if (utc === true) {
-		var currentTime = new Date(start+"-04:00");
+		var currentTime = new Date(start+"-05:00");
 	} else {
 	  var currentTime = new Date(start);
 	}

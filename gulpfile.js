@@ -32,7 +32,7 @@ gulp.task('watch', function(callback) {
   for (var i=0; i<filelist.length; i++) {
     gulp.watch(filelist[i], ['build']);
   }
-  gulp.watch('./blog/**/*.8', ['build']);
+  gulp.watch('./blog/**/*.*', ['build']);
   console.log('watching');
   callback();
 });
