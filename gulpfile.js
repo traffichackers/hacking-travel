@@ -1,9 +1,13 @@
+// Modules
 var gulp = require('gulp');
-var s3 = require('s3');
+var awspublish = require('gulp-awspublish');
 var dotenv = require('dotenv');
 var child_process = require('child_process');
 
+// Globals
+dotenv.load();
 var filelist = ['./src/*.html', './src/js/*', './src/css/*', './src/fonts/*', './src/roads/*'];
+
 gulp.task('build', function(callback) {
 
   // Build Site
@@ -23,9 +27,6 @@ gulp.task('build', function(callback) {
        callback();
      }
   });
-
-
-
 });
 
 gulp.task('watch', function(callback) {
@@ -51,33 +52,17 @@ gulp.task('serve', function(callback) {
   callback();
 })
 
-gulp.task('upload-aws', function(callback) {
-  dotenv.load();
-  var client = s3.createClient({
-    s3Options: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-    },
-  });
-  var params = {
-    localDir: "build",
-    deleteRemoved: false,
-    s3Params: {
-      Bucket: "traffichackers",
-    }
-  };
-  var uploader = client.uploadDir(params);
-  uploader.on('error', function(err) {
-    console.error("unable to sync:", err.stack);
-  });
-  uploader.on('progress', function() {
-    console.log("progress", uploader.progressAmount, uploader.progressTotal);
-  });
-  uploader.on('end', function() {
-    console.log("done uploading");
-    callback();
-  });
+
+gulp.task('publish', function() {
+  var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: 'traffichackers' });
+  var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
+  return gulp.src('./build/**/*.*')
+  .pipe(awspublish.gzip({ ext: '' }))
+  .pipe(publisher.publish(headers))
+  .pipe(publisher.cache())
+  .pipe(awspublish.reporter());
+
 });
 
 gulp.task('dev', ['watch', 'serve'])
-gulp.task('prod', ['build', 'upload-aws']);
+gulp.task('prod', ['build', 'publish']);
