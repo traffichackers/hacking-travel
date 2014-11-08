@@ -8,17 +8,16 @@ var child_process = require('child_process');
 dotenv.load();
 var filelist = ['./src/*.html', './src/js/*', './src/css/*', './src/fonts/*', './src/roads/*'];
 
-gulp.task('build', function(callback) {
-
+function buildAll(destination, includeData, callback) {
   // Build Site
   for (var i=0; i<filelist.length; i++) {
-    gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest('build/'));
+    gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest(destination+'/'));
   }
   console.log("website built");
 
   // Build Blog
-  child_process.execFile('jekyll', ['build', '--source', './blog/', '--destination', './build/blog/'], function(error, stdout, stderr) {
-	   if (error) {
+  child_process.execFile('jekyll', ['build', '--source', './blog/', '--destination', './'+destination+'/blog/'], function(error, stdout, stderr) {
+     if (error) {
        console.log(error);
      } else if (stderr) {
        console.log(stderr);
@@ -27,19 +26,34 @@ gulp.task('build', function(callback) {
        callback();
      }
   });
+
+  // Include the Data Directory, if Needed
+  if (includeData) {
+    gulp.src('./src/data/**/*.*', {base:"./src/"}).pipe(gulp.dest(destination+'/'));
+  }
+}
+
+gulp.task('build', function(callback) {
+  buildAll('build', false, callback);
 });
+
+gulp.task('build-dev', function(callback) {
+  buildAll('dev', true, callback);
+})
 
 gulp.task('watch', function(callback) {
   for (var i=0; i<filelist.length; i++) {
-    gulp.watch(filelist[i], ['build']);
+    gulp.watch(filelist[i], ['build-dev']);
   }
-  gulp.watch('./blog/**/*.*', ['build']);
+  gulp.watch('./blog/**/*.*', ['build-dev']);
+  gulp.watch('./src/data/*.json', ['build-dev'])
+  gulp.watch('./src/data/predictions/*.json', ['build-dev'])
   console.log('watching');
   callback();
 });
 
-gulp.task('serve', function(callback) {
-  child_process.execFile('http-server', ['build'], function(error, stdout, stderr) {
+gulp.task('serve-dev', function(callback) {
+  child_process.execFile('http-server', ['dev'], function(error, stdout, stderr) {
     if (error) {
       console.log(error);
     } else if (stderr) {
@@ -64,5 +78,5 @@ gulp.task('publish', function() {
 
 });
 
-gulp.task('dev', ['watch', 'serve'])
+gulp.task('dev', ['watch', 'serve-dev'])
 gulp.task('prod', ['build', 'publish']);

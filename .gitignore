@@ -4,6 +4,7 @@ data/today.json
 data/predictions/
 node_modules/
 build/
+dev/
 .sass-cache/
 .env
 .awspublish-traffichackers
