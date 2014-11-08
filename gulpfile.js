@@ -1,12 +1,16 @@
 var gulp = require('gulp');
 var s3 = require('s3');
 var dotenv = require('dotenv');
-var gulp = require('gulp');
 var child_process = require('child_process');
-
 
 var filelist = ['./src/*.html', './src/js/*', './src/css/*', './src/fonts/*', './src/roads/*'];
 gulp.task('build', function(callback) {
+
+  // Build Site
+  for (var i=0; i<filelist.length; i++) {
+    gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest('build/'));
+  }
+  console.log("website built");
 
   // Build Blog
   child_process.execFile('jekyll', ['build', '--source', './blog/', '--destination', './build/blog/'], function(error, stdout, stderr) {
@@ -20,11 +24,7 @@ gulp.task('build', function(callback) {
      }
   });
 
-  // Build Site
-  for (var i=0; i<filelist.length; i++) {
-    gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest('build/'));
-  }
-  console.log("website built");
+
 
 });
 
