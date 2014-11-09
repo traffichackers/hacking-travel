@@ -13,7 +13,6 @@ function buildAll(destination, includeData, callback) {
   for (var i=0; i<filelist.length; i++) {
     gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest(destination+'/'));
   }
-  console.log("website built");
 
   // Build Blog
   child_process.execFile('jekyll', ['build', '--source', './blog/', '--destination', './'+destination+'/blog/'], function(error, stdout, stderr) {
@@ -22,7 +21,6 @@ function buildAll(destination, includeData, callback) {
      } else if (stderr) {
        console.log(stderr);
      } else {
-       console.log("blog built");
        callback();
      }
   });
@@ -48,7 +46,6 @@ gulp.task('watch', function(callback) {
   gulp.watch('./blog/**/*.*', ['build-dev']);
   gulp.watch('./src/data/*.json', ['build-dev'])
   gulp.watch('./src/data/predictions/*.json', ['build-dev'])
-  console.log('watching');
   callback();
 });
 
