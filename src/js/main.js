@@ -101,9 +101,10 @@ var renderers = {
   },
 
   renderRoads: function(traffic, roads, backgroundRoads, graphData) {
-    mapElement = $("#map-canvas");
-    var width = mapElement.width(),
-      height = mapElement.height();
+    var headerElement = $("#header");
+    var documentElement = $(document)
+    var width = documentElement.width() - 6;
+    var height = documentElement.height() - headerElement.height() - 6;
     svg = d3.select("#map-canvas-svg")
       .attr("width", width)
       .attr("height", height);
