@@ -65,7 +65,7 @@ gulp.task('serve-dev', function(callback) {
 
 
 gulp.task('publish', function() {
-  var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: 'traffichackers' });
+  var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: 'www.traffichackers.com' });
   var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
   return gulp.src('./build/**/*.*')
   .pipe(awspublish.gzip({ ext: '' }))
