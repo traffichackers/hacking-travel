@@ -31,10 +31,6 @@ function buildAll(destination, includeData, callback) {
   }
 }
 
-gulp.task('build', function(callback) {
-  buildAll('build', false, callback);
-});
-
 gulp.task('build-dev', function(callback) {
   buildAll('dev', true, callback);
 })
@@ -65,14 +61,15 @@ gulp.task('serve-dev', function(callback) {
 
 
 gulp.task('publish', function() {
-  var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: 'www.traffichackers.com' });
-  var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
-  return gulp.src('./build/**/*.*')
-  .pipe(awspublish.gzip({ ext: '' }))
-  .pipe(publisher.publish(headers))
-  .pipe(publisher.cache())
-  .pipe(awspublish.reporter());
-
+  buildAll('build', false, function() {
+    var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: 'www.traffichackers.com' });
+    var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
+    return gulp.src('./build/**/*.*')
+    .pipe(awspublish.gzip({ ext: '' }))
+    .pipe(publisher.publish(headers))
+    .pipe(publisher.cache())
+    .pipe(awspublish.reporter());
+  });
 });
 
 gulp.task('dev', ['watch', 'serve-dev'])
