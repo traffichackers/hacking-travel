@@ -60,7 +60,7 @@ gulp.task('serve-dev', function(callback) {
 })
 
 
-gulp.task('publish', function() {
+gulp.task('prod', function() {
   buildAll('build', false, function() {
     var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: 'www.traffichackers.com' });
     var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
@@ -73,4 +73,3 @@ gulp.task('publish', function() {
 });
 
 gulp.task('dev', ['watch', 'serve-dev'])
-gulp.task('prod', ['build', 'publish']);
