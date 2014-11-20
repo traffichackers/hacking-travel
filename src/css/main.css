@@ -183,6 +183,21 @@ span.twitter-typeahead {
   display: none;
 }
 
-.sections-row {
-  margin: 3em 0em;
+.sections-row-heading {
+  margin-top: 2em;
+  font-size: 1.2em;
+  font-weight: 400;
+}
+
+.sections-row-description {
+  margin-bottom: 1em;
+}
+
+
+.sections-row-charts {
+  margin-bottom: 4em;
+}
+
+.chart-title {
+  font-weight: 400;
 }

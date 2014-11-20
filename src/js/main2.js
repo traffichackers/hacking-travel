@@ -714,135 +714,143 @@ $.when(
   graphData.today = todayResults[0];
   var traffic = trafficResults[0];
 
-  /*
   zones = {
     'north': {"northbound": [5587, 5574, 5572, 5511, 5556], "southbound": [5557, 5559, 5573, 5575, 5588] },
     'south': {"northbound": [10193, 10190, 10189, 10188, 10187, 14669, 5506], "southbound": [14670, 10182, 10181, 10180, 10179, 10178, 5501]},
     'west': {"westbound": [10088, 10086, 10085, 10389, 10386, 10385, 10382, 10357, 10356], "eastbound": [10361, 10499, 10379, 10376, 10375, 10374, 10238, 10083, 10082] },
-    'cape': {"westbound": [14681, 14697, 14679, 14691, 14683, 14685, 14687, 14689, 14693, 14695, 14717, 14722], "eastbound": [14686, 14680, 14690, 14682, 14692, 14684, 14698, 14688, 14694, 14748, 14696, 14747]}
+    //'cape': {"westbound": [14681, 14697, 14679, 14691, 14683, 14685, 14687, 14689, 14693, 14695, 14717, 14722], "eastbound": [14686, 14680, 14690, 14682, 14692, 14684, 14698, 14688, 14694, 14748, 14696, 14747]}
+  }
+
+  /*
+  zones = {
+    'north': [5587, 5574, 5572, 5511, 5556, 5557, 5559, 5573, 5575, 5588]
+    ,'south': [10193, 10190, 10189, 10188, 10187, 14669, 5506, 14670, 10182, 10181, 10180, 10179, 10178, 5501]
+    ,'west': [10088, 10086, 10085, 10389, 10386, 10385, 10382, 10357, 10356, 10361, 10499, 10379, 10376, 10375, 10374, 10238, 10083, 10082]
+    //,'cape': [14681, 14697, 14679, 14691, 14683, 14685, 14687, 14689, 14693, 14695, 14717, 14722, 14686, 14680, 14690, 14682, 14692, 14684, 14698, 14688, 14694, 14748, 14696, 14747]
   }
   */
 
-  zones = {
-    'north': [5587] //, 5574, 5572, 5511, 5556, 5557, 5559, 5573, 5575, 5588]
-    ,'south': [10193] //, 10190, 10189, 10188, 10187, 14669, 5506, 14670, 10182, 10181, 10180, 10179, 10178, 5501]
-    ,'west': [10088] //, 10086, 10085, 10389, 10386, 10385, 10382, 10357, 10356, 10361, 10499, 10379, 10376, 10375, 10374, 10238, 10083, 10082]
-    //,'cape': [14681, 14697, 14679, 14691, 14683, 14685, 14687, 14689, 14693, 14695, 14717, 14722, 14686, 14680, 14690, 14682, 14692, 14684, 14698, 14688, 14694, 14748, 14696, 14747]
-  }
   // Show speed and misery index
   for (zoneName in zones) {
-    var zonePairIds = zones[zoneName];
-    var regionalConditions = helper.getMiseryIndex(traffic, zonePairIds);
-    $('#detail-region-' + zoneName + ' .average-region-speed').html(regionalConditions.speed);
-    $('#detail-region-' + zoneName + ' .misery-index').html(regionalConditions.miseryIndex);
+    var directions = zones[zoneName]
+    for (direction in directions) {
+      var zonePairIds = directions[direction];
+      var regionalConditions = helper.getMiseryIndex(traffic, zonePairIds);
+      var pairName = zoneName + '-' + direction;
+      $('#detail-region-' + pairName + ' .average-region-speed').html(regionalConditions.speed);
+      $('#detail-region-' + pairName + ' .misery-index').html(regionalConditions.miseryIndex);
 
-    // Show the congestion ratio
-    var congestionRatioText = helper.getCongestionRatioText(regionalConditions)
-    $('#detail-region-' + zoneName + ' .average-region-status').addClass('status-'+congestionRatioText);
-    $('#detail-region-' + zoneName + ' .average-region-status-text').html(congestionRatioText);
+      // Show the congestion ratio
+      var congestionRatioText = helper.getCongestionRatioText(regionalConditions)
+      $('#detail-region-' + pairName + ' .average-region-status').addClass('status-'+congestionRatioText);
+      $('#detail-region-' + pairName + ' .average-region-status-text').html(congestionRatioText);
 
-    // Coalesce Speeds
-    var numerator = 0;
-    var denominator = 0;
-    var distance;
-    var zonePairDatum = {};
-    var pairDatum;
-    var travelTimes = 0;
-    var counter = 0;
-    for (pairId in traffic.pairData)
-      if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
-        pairDatum = traffic.pairData[pairId];
-        travelTimes += pairDatum.travelTime;
-        distance = pairDatum.travelTime/60*pairDatum.speed;
-        numerator += pairDatum.speed*distance;
-        denominator += distance;
-        counter++
+
+
+
+      // Coalesce Speeds
+      var numerator = 0;
+      var denominator = 0;
+      var distance;
+      var zonePairDatum = {};
+      var pairDatum;
+      var travelTimes = 0;
+      var counter = 0;
+      for (pairId in traffic.pairData)
+        if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
+          pairDatum = traffic.pairData[pairId];
+          travelTimes += pairDatum.travelTime;
+          distance = pairDatum.travelTime/60*pairDatum.speed;
+          numerator += pairDatum.speed*distance;
+          denominator += distance;
+          counter++
+        }
+      zonePairDatum.speed = numerator/denominator;
+      zonePairDatum.travelTime = travelTimes/counter;
+      zonePairDatum.pairId = pairName;
+
+      // Coalesce similar_dow
+      var numerator = {};
+      var denominator = {};
+      var pairDatum, distance, percentiles, travelTimes;
+      for (pairId in graphData.similar_dow) {
+        if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
+          pairDatum = traffic.pairData[parseInt(pairId)];
+          if (typeof pairDatum !== 'undefined') {
+            distance = pairDatum.travelTime/60*parseInt(pairDatum.speed);
+            percentiles = graphData.similar_dow[parseInt(pairId)];
+            for (percentile in percentiles) {
+              if (typeof numerator[percentile] === 'undefined') {
+                numerator[percentile] = []
+              }
+              if (typeof denominator[percentile] === 'undefined') {
+                denominator[percentile] = []
+              }
+              travelTimes = percentiles[percentile];
+              for (var i=0; i<travelTimes.length; i++) {
+                if (typeof numerator[percentile][i] === 'undefined') {
+                  numerator[percentile][i] = 0;
+                }
+                if (typeof denominator[percentile][i] === 'undefined') {
+                  denominator[percentile][i] = 0;
+                }
+                numerator[percentile][i] += travelTimes[i]*distance
+                denominator[percentile][i] += distance
+              }
+            }
+          }
+        }
       }
-    zonePairDatum.speed = numerator/denominator;
-    zonePairDatum.travelTime = travelTimes/counter;
-    zonePairDatum.pairId = zoneName;
+      var currentNumerator;
+      var currentDenominator;
+      var similarDow = {};
+      similarDow[pairName] = {};
+      for (percentile in numerator) {
+        currentNumerator = numerator[percentile];
+        currentDenominator = denominator[percentile];
+        if (typeof similarDow[percentile] === 'undefined') {
+          similarDow[pairName][percentile] = []
+        }
+        for (var i=0; i<currentNumerator.length; i++) {
+          similarDow[pairName][percentile][i] = currentNumerator[i]/currentDenominator[i];
+        }
+      }
+      similarDow.Start = graphData.similar_dow.Start;
 
-    // Coalesce similar_dow
-    var numerator = {};
-    var denominator = {};
-    var pairDatum, distance, percentiles, travelTimes;
-    for (pairId in graphData.similar_dow) {
-      if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
-        pairDatum = traffic.pairData[parseInt(pairId)];
-        if (typeof pairDatum !== 'undefined') {
+      // Coalesce today
+      var numerator = [];
+      var denominator = [];
+      var pairDatum, distance, percentiles, travelTimes;
+      for (pairId in graphData.today) {
+        if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
+          pairDatum = traffic.pairData[pairId];
           distance = pairDatum.travelTime/60*parseInt(pairDatum.speed);
-          percentiles = graphData.similar_dow[parseInt(pairId)];
-          for (percentile in percentiles) {
-            if (typeof numerator[percentile] === 'undefined') {
-              numerator[percentile] = []
+          travelTimes = graphData.today[pairId];
+          for (var i=0; i<travelTimes.length; i++) {
+            if (typeof numerator[i] === 'undefined') {
+              numerator[i] = 0;
             }
-            if (typeof denominator[percentile] === 'undefined') {
-              denominator[percentile] = []
+            if (typeof denominator[i] === 'undefined') {
+              denominator[i] = 0;
             }
-            travelTimes = percentiles[percentile];
-            for (var i=0; i<travelTimes.length; i++) {
-              if (typeof numerator[percentile][i] === 'undefined') {
-                numerator[percentile][i] = 0;
-              }
-              if (typeof denominator[percentile][i] === 'undefined') {
-                denominator[percentile][i] = 0;
-              }
-              numerator[percentile][i] += travelTimes[i]*distance
-              denominator[percentile][i] += distance
-            }
+            numerator[i] += travelTimes[i]*distance
+            denominator[i] += distance
           }
         }
       }
-    }
-    var currentNumerator;
-    var currentDenominator;
-    var similarDow = {};
-    similarDow[zoneName] = {};
-    for (percentile in numerator) {
-      currentNumerator = numerator[percentile];
-      currentDenominator = denominator[percentile];
-      if (typeof similarDow[percentile] === 'undefined') {
-        similarDow[zoneName][percentile] = []
+      var today = {};
+      today[pairName] = []
+      for (var i=0; i<numerator.length; i++) {
+        today[pairName][i] = numerator[i]/denominator[i];
       }
-      for (var i=0; i<currentNumerator.length; i++) {
-        similarDow[zoneName][percentile][i] = currentNumerator[i]/currentDenominator[i];
-      }
-    }
-    similarDow.Start = graphData.similar_dow.Start;
+      today.Start = graphData.today.Start;
 
-    // Coalesce today
-    var numerator = [];
-    var denominator = [];
-    var pairDatum, distance, percentiles, travelTimes;
-    for (pairId in graphData.today) {
-      if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
-        pairDatum = traffic.pairData[pairId];
-        distance = pairDatum.travelTime/60*parseInt(pairDatum.speed);
-        travelTimes = graphData.today[pairId];
-        for (var i=0; i<travelTimes.length; i++) {
-          if (typeof numerator[i] === 'undefined') {
-            numerator[i] = 0;
-          }
-          if (typeof denominator[i] === 'undefined') {
-            denominator[i] = 0;
-          }
-          numerator[i] += travelTimes[i]*distance
-          denominator[i] += distance
-        }
-      }
+      var zoneGraphData = {
+        "similar_dow": similarDow,
+        "today": today
+      };
+      renderers.renderGraph(zonePairDatum, zoneGraphData);
     }
-    var today = {};
-    today[zoneName] = []
-    for (var i=0; i<numerator.length; i++) {
-      today[zoneName][i] = numerator[i]/denominator[i];
-    }
-    today.Start = graphData.today.Start;
-
-    var zoneGraphData = {
-      "similar_dow": similarDow,
-      "today": today
-    };
-    renderers.renderGraph(zonePairDatum, zoneGraphData);
   }
 
   $('.sections').show()
