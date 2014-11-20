@@ -94,7 +94,7 @@ body {
   display: none;
 }
 
-#site-status, #average-region-status {
+#site-status, #average-region-status, .average-region-status {
   font-size: 2.5em;
   border:solid 1px darkgray;
   border-radius:2em;"
@@ -176,4 +176,13 @@ span.twitter-typeahead {
 
 .tt-suggestion p {
   margin: 0;
+}
+
+/* main2 */
+.sections {
+  display: none;
+}
+
+.sections-row {
+  margin: 3em 0em;
 }
