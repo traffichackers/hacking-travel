@@ -515,7 +515,7 @@ var helper = {
     impactedSegments = impactedSegments.slice(0,10);
 
     return {
-      'miseryIndex': Math.round( miseryIndex * 10) / 10,
+      'miseryIndex': miseryIndex.toFixed(1),
       'speed': Math.round(speedSummation/count),
       'freeFlow': Math.round(freeflowSummation/count),
       'impactedSegments': impactedSegments
