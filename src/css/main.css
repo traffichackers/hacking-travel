@@ -70,7 +70,8 @@ body {
 }
 
 /* Charts and Detail Pane */
-.detail {
+
+#charts, #detail-region {
   margin-top: 1em;
   position: absolute;
   right: 30px;
