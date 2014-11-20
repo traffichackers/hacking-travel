@@ -185,7 +185,7 @@ span.twitter-typeahead {
 
 .sections-row-heading {
   margin-top: 2em;
-  font-size: 1.2em;
+  font-size: 1.5em;
   font-weight: 400;
 }
 
@@ -200,4 +200,18 @@ span.twitter-typeahead {
 
 .chart-title {
   font-weight: 400;
+}
+
+/* contact */
+.owner-name {
+  margin: 0.75em 0em 0.25em 0em;
+}
+
+.website-link {
+  margin-bottom: 0.5em;
+  margin-top: 0.25em;
+}
+
+.website-link {
+  margin-bottom: 0.5em;
 }
