@@ -72,4 +72,4 @@ gulp.task('prod', function() {
   });
 });
 
-gulp.task('dev', ['watch', 'serve-dev'])
+gulp.task('dev', ['build-dev', 'watch', 'serve-dev'])
