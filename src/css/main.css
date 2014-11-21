@@ -210,6 +210,10 @@ span.twitter-typeahead {
   font-weight: 400;
 }
 
+.owner-list {
+  margin-top: 1.75em;
+}
+
 .website-link {
   margin-bottom: 0.5em;
   margin-top: 0.25em;
