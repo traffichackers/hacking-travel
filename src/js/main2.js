@@ -223,13 +223,28 @@ var renderers = {
     seriesData.push(seriesElement);
 
     // Render the new graph
+    var graphWidth, graphHeight;
+    if (window.innerWidth < 740) {
+      graphWidth = window.innerWidth-40;
+      graphHeight = graphWidth/550*200;
+    } else {
+      var graphWidth = window.innerWidth/1280*550;
+      var graphHeight = window.innerHeight/800*200;
+      if (graphWidth > 550) {
+        graphWidth = 550;
+      }
+      if (graphHeight > 200) {
+        graphHeight = 200;
+      }
+    }
+
     var graph = new Rickshaw.Graph({
       element: document.querySelector("#graph-"+pairDatum.pairId),
       renderer: 'multi',
       unstack: true,
       series: seriesData,
-      width: 550,
-      height: 200
+      width: graphWidth,
+      height: graphHeight
     });
     graph.render();
 

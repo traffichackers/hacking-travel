@@ -95,7 +95,7 @@ body {
   display: none;
 }
 
-#site-status, #average-region-status, .average-region-status {
+#site-status {
   font-size: 2.5em;
   border:solid 1px darkgray;
   border-radius:2em;"
@@ -199,8 +199,22 @@ span.twitter-typeahead {
   margin-bottom: 3em;
 }
 
+.average-region-status {
+  font-size: 2.0em;
+  border:solid 1px darkgray;
+  border-radius:2.0em;"
+}
+
 .chart-title {
   font-weight: 400;
+}
+
+.detail-description {
+  font-size: 0.9em;
+}
+
+.detail-number {
+  font-size: 2.0em;
 }
 
 /* contact */
