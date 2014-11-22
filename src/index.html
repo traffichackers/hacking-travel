@@ -36,15 +36,11 @@
 
   <div class="container sections">
     <div style="margin-top: 2.5em; margin-bottom: 2.5em;" class="row"><div class="col-md-12">
-      <p>Thanksgiving is one of the most congested travel periods of the year: knowledge about how traffic conditions will evolve can make miles of difference.</p>
-
-      <p>We use MassDOT's real time traffic <a href="http://www.massdot.state.ma.us/developersdata.aspx">feed</a> to predict the best and worst times to hit the roads during this busy travel time.  If you're looking for the best time to leave, scroll across each road segment to see when traffic is best … and worst. Is it better to leave Wednesday night or Thursday morning? Should you try to beat the rush out on Wednesday or have a long dinner and wait for traffic to subside?  Often changing your trip time by a few minutes can make the difference between bumper-to-bumper traffic and a free-flowing ride.  We will add more segments as MassDOT completes the <a href="http://www.massdot.state.ma.us/main/tabid/1075/ctl/detail/mid/2937/itemid/417/Governor-Patrick-Announces-Expansion-Of--Go-Time--Real-Time-Traffic-System.aspx">GoTime</a> network, but if you're planning to go north, south or west from Boston, we can help you plan your trip today.</p>
-
-    </div>
-  </div>
+      <p><span style="font-weight: 500">Thanksgiving</span> is one of the most congested travel periods of the year: a little traffic knowledge can make miles of difference.  We use MassDOT's real time traffic <a href="http://www.massdot.state.ma.us/developersdata.aspx">feed</a> to generate experimental predictions* during this busy travel time.
+    </div></div>
     <div class="row sections-row-heading"><div class="col-md-12">I-93 North of Boston</div></div>
     <div class="row sections-row-description"><div class="col-md-12">
-      <p>Going to New Hampshire? You're probably looking at I-93. North from Boston, 93 winds through the Middlesex Fells and crosses 128, passing through Wilmington, Tewksbury, Andover, Lawrence and Methuen before reaching the New Hampshire line.</p>
+      <p>Going to New Hampshire? You're probably looking at I-93. North from Boston, 93 winds through the Middlesex Fells and crosses Route 128, passing through Wilmington, Tewksbury, Andover, Lawrence and Methuen before reaching the New Hampshire line.</p>
       <p style="color: gray;">Transportation Nerd Fact: 93 South is home to Massachusetts' only permanent carpool lane from Medford to Boston, all of three miles.</p>
     </div></div>
     <div class="row sections-row-charts">
@@ -61,6 +57,13 @@
           <span class="average-region-status-text detail-description"></span>
         </div>
         <div><div id='graph-north-northbound'></div></div>
+        <div id="historical-travel-times-controls">
+          <div class="btn-group btn-group-xs">
+            <button id="similar" type="button" class="btn btn-default type-button active">Today</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2012</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2013</button>
+          </div>
+        </div>
       </div>
       <div class="col-md-6 sections-col-graphset">
         <span class="chart-title">Southbound Traffic</span>
@@ -116,7 +119,7 @@
 
     <div class="row sections-row-heading"><div class="col-md-12">Route 3 South of Boston / Pilgrims Highway</div></div>
     <div class="row sections-row-description"><div class="col-md-12">
-      <p>The infamous Southeast Expressway leads south to Cape Cod. Traffic on the Expressway is a given at nearly any time of day, and while it's not peak season to the Cape, expect traffic getting on to the Sagamore Bridge (at least there rotary is gone). If you're wondering where your cranberries came from this year on Thanksgiving, the sandy soils of the region traversed by Route 3 are some of the top cranberry producing areas in the country.</p>
+      <p>The infamous Southeast Expressway leads south to Cape Cod. Traffic on the expressway is a given at nearly any time of day, and while it's not peak season to the Cape, expect traffic getting onto the Sagamore Bridge (at least the rotary there is gone). If you evered wondered where your cranberries came from on Thanksgiving, the sandy soils of the region traversed by Route 3 are some of the top cranberry producing areas in the country.</p>
       <p style="color: gray;">Transportation Nerd Fact: The "zipper machine" (more technically, the "barrier transfer machine" makes a six mile trek twice daily to borrow one lane from each side of the Expressway to provide more capacity in the peak direction for high occupancy vehicles. Here's an <a href="http://www.patriotledger.com/article/20140111/News/301119707"> article about what it's like inside the machine</a>.</p>
     </div></div>
     <div class="row sections-row-charts">
@@ -149,6 +152,9 @@
         <div><div id='graph-south-southbound'></div></div>
       </div>
     </div>
+    <div style="margin-top: 2.5em; margin-bottom: 2.5em;" class="row"><div class="col-md-12">
+      <p><span style="font-weight: 500">*Disclaimer:</span> The predictions on this site are the result of an experimental research project.  Use at your own risk, and always take care when driving.</p>
+    </div></div>
   </div>
 </body>
 </html>
@@ -160,7 +166,6 @@
 <script type='text/javascript' src='js/topojson.v1.min.js' charset='utf-8'></script>
 <script type='text/javascript' src='js/rickshaw.min.js'></script>
 <script type='text/javascript' src='js/bootstrap.min.js'></script>
-<script type='text/javascript' src='js/typeahead.bundle.js'></script>
 <script type='text/javascript' src='js/underscore-min.js'></script>
 <script type='text/javascript' src='js/analytics.js'></script>
 <script type='text/javascript' src='js/main2.js'></script>
