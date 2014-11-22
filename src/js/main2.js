@@ -5,25 +5,17 @@ var events = {
     renderers.setPercentileTabDowLabel();
   },
 
-  setGraphControlEvents: function(pairDatum, graphData) {
+  setZoneGraphControlEvents: function(pairDatum, graphData) {
+
+    "#graph-"+pairDatum.pairId
     $('.type-button').off('click');
     $('.type-button').on('click', function (){
-      $('.subselects').css('display','none');
-      section = '#'+$(this).attr('id')+'-subselects';
-      $(section).css('display','inline-block');
       $('.type-button').removeClass('active');
       $(this).addClass('active');
-      renderers.renderGraph(pairDatum, graphData);
-    });
-    $('.subselects-button').off('click');
-    $('.subselects-button').on('click', function (){
-      var type = $('.type-button.active').attr('id');
-      $('#'+type+'-subselects > .subselects-button').removeClass('active')
-      $(this).addClass('active');
-      renderers.renderGraph(pairDatum, graphData);
+      //renderers.renderGraph(pairDatum, graphData);
     });
   },
-  
+
   // Handle when the path is clicked or when an item is pulled from the drop-down
   pathSelect: function(pairId, pairData, graphData) {
     //console.log(pairId);
@@ -697,13 +689,15 @@ var rendererHelpers = {
 
 // Get Data and Initialize
 var graphData = {};
+var pairDatums = {};
 $.when(
   $.getJSON("data/predictions/similar_dow.json"),
   $.getJSON("data/today.json"),
   $.getJSON("data/current.json")
 ).then( function (similarDowResults, todayResults, trafficResults) {
-  graphData.similar_dow = similarDowResults[0];
-  graphData.today = todayResults[0];
+  var allGraphData = {};
+  allGraphData.similar_dow = similarDowResults[0];
+  allGraphData.today = todayResults[0];
   var traffic = trafficResults[0];
 
   zones = {
@@ -712,15 +706,6 @@ $.when(
     'west': {"westbound": [10088, 10086, 10085, 10389, 10386, 10385, 10382, 10357, 10356], "eastbound": [10361, 10499, 10379, 10376, 10375, 10374, 10238, 10083, 10082] },
     //'cape': {"westbound": [14681, 14697, 14679, 14691, 14683, 14685, 14687, 14689, 14693, 14695, 14717, 14722], "eastbound": [14686, 14680, 14690, 14682, 14692, 14684, 14698, 14688, 14694, 14748, 14696, 14747]}
   }
-
-  /*
-  zones = {
-    'north': [5587, 5574, 5572, 5511, 5556, 5557, 5559, 5573, 5575, 5588]
-    ,'south': [10193, 10190, 10189, 10188, 10187, 14669, 5506, 14670, 10182, 10181, 10180, 10179, 10178, 5501]
-    ,'west': [10088, 10086, 10085, 10389, 10386, 10385, 10382, 10357, 10356, 10361, 10499, 10379, 10376, 10375, 10374, 10238, 10083, 10082]
-    //,'cape': [14681, 14697, 14679, 14691, 14683, 14685, 14687, 14689, 14693, 14695, 14717, 14722, 14686, 14680, 14690, 14682, 14692, 14684, 14698, 14688, 14694, 14748, 14696, 14747]
-  }
-  */
 
   // Show speed and misery index
   for (zoneName in zones) {
@@ -736,9 +721,6 @@ $.when(
       var congestionRatioText = helper.getCongestionRatioText(regionalConditions)
       $('#detail-region-' + pairName + ' .average-region-status').addClass('status-'+congestionRatioText);
       $('#detail-region-' + pairName + ' .average-region-status-text').html(congestionRatioText);
-
-
-
 
       // Coalesce Speeds
       var numerator = 0;
@@ -765,12 +747,12 @@ $.when(
       var numerator = {};
       var denominator = {};
       var pairDatum, distance, percentiles, travelTimes;
-      for (pairId in graphData.similar_dow) {
+      for (pairId in allGraphData.similar_dow) {
         if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
           pairDatum = traffic.pairData[parseInt(pairId)];
           if (typeof pairDatum !== 'undefined') {
             distance = pairDatum.travelTime/60*parseInt(pairDatum.speed);
-            percentiles = graphData.similar_dow[parseInt(pairId)];
+            percentiles = allGraphData.similar_dow[parseInt(pairId)];
             for (percentile in percentiles) {
               if (typeof numerator[percentile] === 'undefined') {
                 numerator[percentile] = []
@@ -807,17 +789,17 @@ $.when(
           similarDow[pairName][percentile][i] = currentNumerator[i]/currentDenominator[i];
         }
       }
-      similarDow.Start = graphData.similar_dow.Start;
+      similarDow.Start = allGraphData.similar_dow.Start;
 
       // Coalesce today
       var numerator = [];
       var denominator = [];
       var pairDatum, distance, percentiles, travelTimes;
-      for (pairId in graphData.today) {
+      for (pairId in allGraphData.today) {
         if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
           pairDatum = traffic.pairData[pairId];
           distance = pairDatum.travelTime/60*parseInt(pairDatum.speed);
-          travelTimes = graphData.today[pairId];
+          travelTimes = allGraphData.today[pairId];
           for (var i=0; i<travelTimes.length; i++) {
             if (typeof numerator[i] === 'undefined') {
               numerator[i] = 0;
@@ -835,13 +817,18 @@ $.when(
       for (var i=0; i<numerator.length; i++) {
         today[pairName][i] = numerator[i]/denominator[i];
       }
-      today.Start = graphData.today.Start;
+      today.Start = allGraphData.today.Start;
 
       var zoneGraphData = {
         "similar_dow": similarDow,
-        "today": today
+        "today": today,
+        "thanksgiving_2012": today,
+        "thanskgiving_2013": today
       };
+      pairDatums[zoneName] = zonePairDatum;
+      graphData[zoneName] = zoneGraphData;
       renderers.renderGraph(zonePairDatum, zoneGraphData);
+      events.setZoneGraphControlEvents(zoneName, zonePairDatum, zoneGraphData);
     }
   }
 
