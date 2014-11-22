@@ -153,18 +153,17 @@ var renderers = {
 	  var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
 	}
 
-/*
-    var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
+    var percentileOrder = ['max', '90', '75', '50', '25', '10', 'min']
     for (var i=0; i<percentileOrder.length; i++) {
       var chosenPercentile = chosenPercentiles[percentileOrder[i]];
 	  if (type === 'all') {
-		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, maxPoints, false);
+		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, false, maxPoints);
 	  } else {
-		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints, false);
+		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, true, maxPoints);
 	  }
 	  seriesData.push(seriesElement);
     }
-*/
+
     // Add Vertical Line for Today
     var seriesElement = {};
     var currentTime = new Date(graphData.similar_dow.Start+"-05:00");
@@ -703,8 +702,8 @@ $.when(
 
   zones = {
     'north': {"northbound": [5587], "southbound": [5559] },
-    'south': {"northbound": [10193] /*, "southbound": [14670]*/ },
-    //'west': {"westbound": [10088], "eastbound": [10361] }
+    'south': {"northbound": [10193], "southbound": [10182] },
+    'west': {"westbound": [10088], "eastbound": [10361] }
   }
 
   // Show speed and misery index
