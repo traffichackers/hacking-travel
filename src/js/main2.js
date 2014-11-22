@@ -2,7 +2,6 @@
 var events = {
 
   initializeEvents: function(traffic, graphData) {
-    events.initializeTypeahead(traffic, graphData);
     renderers.setPercentileTabDowLabel();
   },
 
@@ -24,34 +23,7 @@ var events = {
       renderers.renderGraph(pairDatum, graphData);
     });
   },
-
-  initializeTypeahead: function(traffic, graphData) {
-    var pairData = traffic.pairData;
-
-    // Generate the typeahead dataset
-    typeaheadData = []
-    for (pairId in pairData) {
-      typeaheadData.push( {'pairName': pairData[pairId].title, 'pairId': pairId } );
-    }
-
-    // Initialize the bloodhound suggestion engine
-    var pairDataEngine = new Bloodhound({
-      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.pairName); },
-      queryTokenizer: Bloodhound.tokenizers.whitespace,
-      local: typeaheadData
-    });
-    pairDataEngine.initialize();
-
-    // Instantiate the typeahead UI
-    $('#segment-autocomplete').typeahead(null, {
-      displayKey: 'pairName',
-      source: pairDataEngine.ttAdapter()
-    });
-    $('#segment-autocomplete').bind('typeahead:selected', function (event, suggestion, dataSet) {
-      events.pathSelect(suggestion.pairId, traffic.pairData, graphData);
-    });
-  },
-
+  
   // Handle when the path is clicked or when an item is pulled from the drop-down
   pathSelect: function(pairId, pairData, graphData) {
     //console.log(pairId);
