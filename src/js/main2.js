@@ -195,7 +195,7 @@ var renderers = {
 	  if (type === 'all') {
 		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, maxPoints, false);
 	  } else {
-		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints, true);
+		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints, false);
 	  }
 	  seriesData.push(seriesElement);
     }
