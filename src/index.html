@@ -44,7 +44,7 @@
       <p style="color: gray;">Transportation Nerd Fact: 93 South is home to Massachusetts' only permanent carpool lane from Medford to Boston, all of three miles.</p>
     </div></div>
     <div class="row sections-row-charts">
-      <div class="col-md-6 sections-col-graphset">
+      <div id="north-northbound" class="col-md-6 sections-col-graphset">
         <span class="chart-title">Northbound Traffic</span>
         <div id="detail-region-north-northbound" class="detail-region ">
           <span class="average-region-speed detail-number"></span>
@@ -58,16 +58,14 @@
         </div>
         <div><div id='graph-north-northbound'></div></div>
         <div id="historical-travel-times-controls">
-          <!--
           <div class="btn-group btn-group-xs">
             <button id="similar" type="button" class="btn btn-default type-button active">Today</button>
             <button id="all" type="button" class="btn btn-default type-button">This Day in 2013</button>
             <button id="all" type="button" class="btn btn-default type-button">This Day in 2012</button>
           </div>
-          -->
         </div>
       </div>
-      <div class="col-md-6 sections-col-graphset">
+      <div id="north-southbound" class="col-md-6 sections-col-graphset">
         <span class="chart-title">Southbound Traffic</span>
         <div id="detail-region-north-southbound" class="detail-region ">
           <span class="average-region-speed detail-number"></span>
@@ -80,6 +78,13 @@
           <span class="average-region-status-text detail-description"></span>
         </div>
         <div><div id='graph-north-southbound'></div></div>
+        <div id="historical-travel-times-controls">
+          <div class="btn-group btn-group-xs">
+            <button id="similar" type="button" class="btn btn-default type-button active">Today</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2013</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2012</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -89,7 +94,7 @@
       <p style="color: gray;">Transportation Nerd Fact: Like most toll roads, the Mass Pike was funded and partially built before the <a href="http://en.wikipedia.org/wiki/Federal_Aid_Highway_Act_of_1956">Interstate Highway</a> act were signed in to law in 1956, and was grandfathered in to the system.</p>
     </div></div>
     <div class="row sections-row-charts">
-      <div class="col-md-6 sections-col-graphset">
+      <div id="west-eastbound" class="col-md-6 sections-col-graphset">
         <span class="chart-title">Eastbound Traffic</span>
         <div id="detail-region-west-eastbound" class="detail-region ">
           <span class="average-region-speed detail-number"></span>
@@ -102,8 +107,15 @@
           <span class="average-region-status-text detail-description"></span>
         </div>
         <div><div id='graph-west-eastbound'></div></div>
+        <div id="historical-travel-times-controls">
+          <div class="btn-group btn-group-xs">
+            <button id="similar" type="button" class="btn btn-default type-button active">Today</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2013</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2012</button>
+          </div>
+        </div>
       </div>
-      <div class="col-md-6 sections-col-graphset">
+      <div id="west-westbound" class="col-md-6 sections-col-graphset">
         <span class="chart-title">Westbound Traffic</span>
         <div id="detail-region-west-westbound" class="detail-region ">
           <span class="average-region-speed detail-number"></span>
@@ -116,6 +128,13 @@
           <span class="average-region-status-text detail-description"></span>
         </div>
         <div><div id='graph-west-westbound'></div></div>
+        <div id="historical-travel-times-controls">
+          <div class="btn-group btn-group-xs">
+            <button id="similar" type="button" class="btn btn-default type-button active">Today</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2013</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2012</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -125,7 +144,7 @@
       <p style="color: gray;">Transportation Nerd Fact: The "zipper machine" (more technically, the "barrier transfer machine" makes a six mile trek twice daily to borrow one lane from each side of the Expressway to provide more capacity in the peak direction for high occupancy vehicles. Here's an <a href="http://www.patriotledger.com/article/20140111/News/301119707"> article about what it's like inside the machine</a>.</p>
     </div></div>
     <div class="row sections-row-charts">
-      <div class="col-md-6 sections-col-graphset">
+      <div id="south-northbound" class="col-md-6 sections-col-graphset">
         <span class="chart-title">Northbound Traffic</span>
         <div id="detail-region-south-northbound" class="detail-region ">
           <span class="average-region-speed detail-number"></span>
@@ -138,8 +157,15 @@
           <span class="average-region-status-text detail-description"></span>
         </div>
         <div><div id='graph-south-northbound'></div></div>
+        <div id="historical-travel-times-controls">
+          <div class="btn-group btn-group-xs">
+            <button id="similar" type="button" class="btn btn-default type-button active">Today</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2013</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2012</button>
+          </div>
+        </div>
       </div>
-      <div class="col-md-6 sections-col-graphset">
+      <div id="south-southbound" class="col-md-6 sections-col-graphset">
         <span class="chart-title">Southbound Traffic</span>
         <div id="detail-region-south-southbound" class="detail-region ">
           <span class="average-region-speed detail-number"></span>
@@ -152,6 +178,13 @@
           <span class="average-region-status-text detail-description"></span>
         </div>
         <div><div id='graph-south-southbound'></div></div>
+        <div id="historical-travel-times-controls">
+          <div class="btn-group btn-group-xs">
+            <button id="similar" type="button" class="btn btn-default type-button active">Today</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2013</button>
+            <button id="all" type="button" class="btn btn-default type-button">This Day in 2012</button>
+          </div>
+        </div>
       </div>
     </div>
     <div style="margin-top: 2.5em; margin-bottom: 2.5em;" class="row"><div class="col-md-12">

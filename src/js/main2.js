@@ -6,11 +6,11 @@ var events = {
   },
 
   setZoneGraphControlEvents: function(pairDatum, graphData) {
-
-    "#graph-"+pairDatum.pairId
-    $('.type-button').off('click');
-    $('.type-button').on('click', function (){
-      $('.type-button').removeClass('active');
+    var graphIdentifier = pairDatum.pairId
+    var typeButtons = $('#'+graphIdentifier+' .type-button')
+    typeButtons.off('click');
+    typeButtons.on('click', function (){
+      $(typeButtons).removeClass('active');
       $(this).addClass('active');
       //renderers.renderGraph(pairDatum, graphData);
     });
@@ -828,7 +828,7 @@ $.when(
       pairDatums[zoneName] = zonePairDatum;
       graphData[zoneName] = zoneGraphData;
       renderers.renderGraph(zonePairDatum, zoneGraphData);
-      events.setZoneGraphControlEvents(zoneName, zonePairDatum, zoneGraphData);
+      events.setZoneGraphControlEvents(zonePairDatum, zoneGraphData);
     }
   }
 
