@@ -193,9 +193,9 @@ var renderers = {
     for (var i=0; i<percentileOrder.length; i++) {
       var chosenPercentile = chosenPercentiles[percentileOrder[i]];
 	  if (type === 'all') {
-		var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, maxPoints);
+		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, maxPoints, false);
 	  } else {
-		var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints);
+		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints, true);
 	  }
 	  seriesData.push(seriesElement);
     }
@@ -404,7 +404,7 @@ var helper = {
     }
   },
 
-  prepareGraphSeries: function(unformattedData, level, renderer, distance, start, utc, maxPoints) {
+  prepareGraphSeries: function(unformattedData, level, renderer, distance, start, utc, maxPoints, speed) {
 
     var seriesElement = {};
     var data = [];
@@ -419,7 +419,12 @@ var helper = {
 
     for (var i=0; i<unformattedData.length; i++) {
       if (i<=maxPoints || typeof maxPoints === 'undefined' ) {
-        formattedDatum = {'x':currentTimeSeconds,'y':distance/(unformattedData[i]/60)};
+        if (speed) {
+          formattedDatum = {'x':currentTimeSeconds,'y':unformattedData[i]};
+        } else {
+          formattedDatum = {'x':currentTimeSeconds,'y':distance/(unformattedData[i]/60)};
+        }
+
         data.push(formattedDatum);
         currentTimeSeconds = currentTimeSeconds + 5*60000/1000;
       }
