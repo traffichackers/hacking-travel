@@ -132,7 +132,7 @@ var renderers = {
 
   renderGraph: function (pairDatum, graphData) {
 
-    var distance = pairDatum.travelTime/60*pairDatum.speed;
+    var distance = pairDatum.travelTime/(60*60)*pairDatum.speed;
     var seriesData = [];
 
     // Select the proper percentile
@@ -153,6 +153,7 @@ var renderers = {
 	  var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
 	}
 
+/*
     var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
     for (var i=0; i<percentileOrder.length; i++) {
       var chosenPercentile = chosenPercentiles[percentileOrder[i]];
@@ -163,7 +164,7 @@ var renderers = {
 	  }
 	  seriesData.push(seriesElement);
     }
-
+*/
     // Add Vertical Line for Today
     var seriesElement = {};
     var currentTime = new Date(graphData.similar_dow.Start+"-05:00");
@@ -177,13 +178,13 @@ var renderers = {
     // Add the Data for Today
     var today = graphData.today[pairDatum.pairId];
     var todayStart = graphData.today.Start;
-    var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false);
+    var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false, false);
     seriesData.push(seriesElement);
 
     // Add the Predictions
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
     var predictionsStart = graphData.similar_dow.Start
-    var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true);
+    var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true, true);
     seriesData.push(seriesElement);
 
     // Render the new graph
@@ -383,7 +384,7 @@ var helper = {
     }
   },
 
-  prepareGraphSeries: function(unformattedData, level, renderer, distance, start, utc, maxPoints, speed) {
+  prepareGraphSeries: function(unformattedData, level, renderer, distance, start, utc, speed, maxPoints) {
 
     var seriesElement = {};
     var data = [];
@@ -401,7 +402,7 @@ var helper = {
         if (speed) {
           formattedDatum = {'x':currentTimeSeconds,'y':unformattedData[i]};
         } else {
-          formattedDatum = {'x':currentTimeSeconds,'y':distance/(unformattedData[i]/60)};
+          formattedDatum = {'x':currentTimeSeconds,'y':distance/(unformattedData[i]/(60*60))};
         }
 
         data.push(formattedDatum);
@@ -701,10 +702,9 @@ $.when(
   var traffic = trafficResults[0];
 
   zones = {
-    'north': {"northbound": [5587, 5574, 5572, 5511, 5556], "southbound": [5557, 5559, 5573, 5575, 5588] },
-    'south': {"northbound": [10193, 10190, 10189, 10188, 10187, 14669, 5506], "southbound": [14670, 10182, 10181, 10180, 10179, 10178, 5501]},
-    'west': {"westbound": [10088, 10086, 10085, 10389, 10386, 10385, 10382, 10357, 10356], "eastbound": [10361, 10499, 10379, 10376, 10375, 10374, 10238, 10083, 10082] },
-    //'cape': {"westbound": [14681, 14697, 14679, 14691, 14683, 14685, 14687, 14689, 14693, 14695, 14717, 14722], "eastbound": [14686, 14680, 14690, 14682, 14692, 14684, 14698, 14688, 14694, 14748, 14696, 14747]}
+    'north': {"northbound": [5587], "southbound": [5559] },
+    'south': {"northbound": [10193] /*, "southbound": [14670]*/ },
+    //'west': {"westbound": [10088], "eastbound": [10361] }
   }
 
   // Show speed and misery index
