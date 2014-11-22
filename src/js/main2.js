@@ -10,41 +10,12 @@ var events = {
     var typeButtons = $('#'+graphIdentifier+' .type-button')
     typeButtons.off('click');
     typeButtons.on('click', function (){
+      var clickedElement = $(this);
       $(typeButtons).removeClass('active');
-      $(this).addClass('active');
-      //renderers.renderGraph(pairDatum, graphData);
+      clickedElement.addClass('active');
+      var displayDataName = clickedElement.attr('data-display')
+      renderers.renderGraph(pairDatum, graphData, displayDataName);
     });
-  },
-
-  // Handle when the path is clicked or when an item is pulled from the drop-down
-  pathSelect: function(pairId, pairData, graphData) {
-    //console.log(pairId);
-    pairDatum = pairData[pairId];
-    if (pairDatum) {
-
-      // Show the Header
-      $('#segment-title').html(pairDatum.title)
-      $('#speed').html(Math.round(pairDatum.speed));
-      $('#travelTime').html(Math.round(pairDatum.travelTime/60));
-      var congestionRatioText = helper.getCongestionRatioText(pairDatum)
-      $('#site-status').removeClass (function (index, css) {
-        return (css.match (/(^|\s)status-\S+/g) || []).join(' ');
-      });
-      $('#site-status').addClass('status-'+congestionRatioText);
-      $('#site-status-text').html(congestionRatioText);
-
-      // Remove segment highlighting on the previous segment (if any) and add to the ne segment
-      d3.select('.segment-selected').classed({'segment':true, 'segment-selected':false});
-      d3.select('#svg-pairid-'+pairId).classed({'segment':true, 'segment-selected':true});
-
-      // Draw the graph
-      renderers.renderGraph(pairDatum, graphData);
-      events.setGraphControlEvents(pairDatum, graphData);
-
-      // Hide the region section and show the segment section
-      $('.detail-region').addClass('detail-hidden');
-      $('#charts').removeClass('detail-hidden');
-    };
   }
 };
 
@@ -130,7 +101,7 @@ var renderers = {
     }
   },
 
-  renderGraph: function (pairDatum, graphData) {
+  renderGraph: function (pairDatum, graphData, displayDataName) {
 
     var distance = pairDatum.travelTime/(60*60)*pairDatum.speed;
     var seriesData = [];
@@ -141,14 +112,14 @@ var renderers = {
 
     // Prepare each percentile
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
-    var todayStart = new Date(graphData.today.Start);
+    var todayStart = new Date(graphData[displayDataName].Start);
     var minToday = todayStart.getTime()/1000;
     var predictionsStart = new Date(graphData.similar_dow.Start+"-05:00");
     var maxPredictions = predictionsStart.getTime()/1000+predictions.length*5*60;
     var maxPoints = (predictionsStart.getTime()-todayStart.getTime())/(1000*60*5)+predictions.length;
     var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
     if (type === 'all') {
-	  var chosenPercentilesStart = graphData.today.Start;
+	  var chosenPercentilesStart = graphData[displayDataName].Start;
 	} else {
 	  var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
 	}
@@ -175,9 +146,14 @@ var renderers = {
     seriesData.push(seriesElement);
 
     // Add the Data for Today
-    var today = graphData.today[pairDatum.pairId];
-    var todayStart = graphData.today.Start;
-    var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false, false);
+    var today = graphData[displayDataName][pairDatum.pairId];
+    var todayStart = graphData[displayDataName].Start;
+    if (displayDataName === 'today') {
+      var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false, false);
+    } else {
+      var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false, true);
+    }
+
     seriesData.push(seriesElement);
 
     // Add the Predictions
@@ -691,13 +667,18 @@ var rendererHelpers = {
 var graphData = {};
 var pairDatums = {};
 $.when(
-  $.getJSON("data/predictions/similar_dow.json"),
-  $.getJSON("data/today.json"),
-  $.getJSON("data/current.json")
-).then( function (similarDowResults, todayResults, trafficResults) {
+  $.getJSON("data/predictions/similar_dow.json")
+  ,$.getJSON("data/today.json")
+  ,$.getJSON("data/current.json")
+  ,$.getJSON("data/today.json")
+  ,$.getJSON("data/today.json")
+).then( function (similarDowResults, todayResults, trafficResults, thanksGiving2012Results, thanksGiving2013Results) {
   var allGraphData = {};
+  var zoneGraphData = {};
   allGraphData.similar_dow = similarDowResults[0];
   allGraphData.today = todayResults[0];
+  allGraphData.thanksgiving_2012 = thanksGiving2012Results;
+  allGraphData.thanksgiving_2013 = thanksGiving2013Results;
   var traffic = trafficResults[0];
 
   zones = {
@@ -790,44 +771,45 @@ $.when(
         }
       }
       similarDow.Start = allGraphData.similar_dow.Start;
+      zoneGraphData["similar_dow"] = similarDow;
 
-      // Coalesce today
-      var numerator = [];
-      var denominator = [];
-      var pairDatum, distance, percentiles, travelTimes;
-      for (pairId in allGraphData.today) {
-        if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
-          pairDatum = traffic.pairData[pairId];
-          distance = pairDatum.travelTime/60*parseInt(pairDatum.speed);
-          travelTimes = allGraphData.today[pairId];
-          for (var i=0; i<travelTimes.length; i++) {
-            if (typeof numerator[i] === 'undefined') {
-              numerator[i] = 0;
+      // Coalesce today, thanksgiving 2012, and thanksgiving 2013
+      var simpleItems = ['today', 'thanksgiving_2012', 'thanksgiving_2013']
+      for (var i=0; i<simpleItems; i++) {
+        var simpleItem = simpleItems[i]
+        var numerator = [];
+        var denominator = [];
+        var pairDatum, distance, percentiles, travelTimes;
+        for (pairId in allGraphData[simpleItem]) {
+          if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
+            pairDatum = traffic.pairData[pairId];
+            distance = pairDatum.travelTime/60*parseInt(pairDatum.speed);
+            travelTimes = allGraphData[simpleItem][pairId];
+            for (var i=0; i<travelTimes.length; i++) {
+              if (typeof numerator[i] === 'undefined') {
+                numerator[i] = 0;
+              }
+              if (typeof denominator[i] === 'undefined') {
+                denominator[i] = 0;
+              }
+              numerator[i] += travelTimes[i]*distance
+              denominator[i] += distance
             }
-            if (typeof denominator[i] === 'undefined') {
-              denominator[i] = 0;
-            }
-            numerator[i] += travelTimes[i]*distance
-            denominator[i] += distance
           }
         }
+        var tempSimpleItem = {};
+        tempSimpleItem[pairName] = []
+        for (var i=0; i<numerator.length; i++) {
+          tempSimpleItem[pairName][i] = numerator[i]/denominator[i];
+        }
+        tempSimpleItem.Start = allGraphData[simpleItem].Start;
+        zoneGraphData[simpleItem] = tempSimpleItem;
       }
-      var today = {};
-      today[pairName] = []
-      for (var i=0; i<numerator.length; i++) {
-        today[pairName][i] = numerator[i]/denominator[i];
-      }
-      today.Start = allGraphData.today.Start;
 
-      var zoneGraphData = {
-        "similar_dow": similarDow,
-        "today": today,
-        "thanksgiving_2012": today,
-        "thanskgiving_2013": today
-      };
+
       pairDatums[zoneName] = zonePairDatum;
       graphData[zoneName] = zoneGraphData;
-      renderers.renderGraph(zonePairDatum, zoneGraphData);
+      renderers.renderGraph(zonePairDatum, zoneGraphData, 'today');
       events.setZoneGraphControlEvents(zonePairDatum, zoneGraphData);
     }
   }
