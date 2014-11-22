@@ -701,7 +701,7 @@ $.when(
   var traffic = trafficResults[0];
 
   zones = {
-    'north': {"northbound": [5587], "southbound": [5559] },
+    'north': {"northbound": [5587, 5574], "southbound": [5559] },
     'south': {"northbound": [10193], "southbound": [10182] },
     'west': {"westbound": [10088], "eastbound": [10361] }
   }
@@ -722,7 +722,8 @@ $.when(
       $('#detail-region-' + pairName + ' .average-region-status-text').html(congestionRatioText);
 
       // Coalesce Speeds
-      var numerator = 0;
+      var numeratorSpeed = 0;
+      var numeratorTravelTime = 0;
       var denominator = 0;
       var distance;
       var zonePairDatum = {};
@@ -732,14 +733,14 @@ $.when(
       for (pairId in traffic.pairData)
         if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
           pairDatum = traffic.pairData[pairId];
-          travelTimes += pairDatum.travelTime;
           distance = pairDatum.travelTime/60*pairDatum.speed;
-          numerator += pairDatum.speed*distance;
+          numeratorSpeed += pairDatum.speed*distance;
+          numeratorTravelTime += pairDatum.travelTime*distance;
           denominator += distance;
           counter++
         }
-      zonePairDatum.speed = numerator/denominator;
-      zonePairDatum.travelTime = travelTimes/counter;
+      zonePairDatum.speed = numeratorSpeed/denominator;
+      zonePairDatum.travelTime = numeratorTravelTime/denominator;
       zonePairDatum.pairId = pairName;
 
       // Coalesce similar_dow
