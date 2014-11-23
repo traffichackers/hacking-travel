@@ -141,7 +141,7 @@ var renderers = {
     if (displayDataName === 'today') {
       var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
       var predictionsStart = graphData.similar_dow.Start
-      var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true, true);
+      var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions ', 'line', distance, predictionsStart, true, true);
       seriesData.push(seriesElement);
     }
 
@@ -151,7 +151,7 @@ var renderers = {
     if (displayDataName === 'today') {
       var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false, false);
     } else {
-      var seriesElement = helper.prepareGraphSeries(today, 'Thanksgivings Past', 'line', distance, todayStart, false, true, maxPoints);
+      var seriesElement = helper.prepareGraphSeries(today, 'Past Thanksgiving', 'line', distance, todayStart, false, true, maxPoints);
     }
     seriesData.push(seriesElement);
 
@@ -387,13 +387,13 @@ var helper = {
 
     // Set Name
     nameMap = {
-      'max':'Max',
-      '90':'90th Percentile',
-      '75':'75th Percentile',
-      '50':'50th Percentile',
-      '25':'25th Percentile',
-      '10':'10th Percentile',
-      'min':'Min'
+      'max':'Maximum Predicted Speed',
+      '90':'90th Percentile Predicted Speed',
+      '75':'75th Percentile Predicted Speed',
+      '50':'Predicted Speed',
+      '25':'25th Percentile Predicted Speed',
+      '10':'10th Percentile Predicted Speed',
+      'min':'Minimum Predicted Speed'
     }
     var mappedName = nameMap[name];
     if (typeof mappedName !== 'undefined') {
@@ -407,16 +407,16 @@ var helper = {
     var mid = 'rgb(210,210,210)';
     var outer = 'rgb(240,240,240)';
     levels = {
-      'Min':'rgb(255,255,255)',
-      '10th Percentile':outer,
-      '25th Percentile':mid,
-      '50th Percentile':inner,
-      '75th Percentile':inner,
-      '90th Percentile':mid,
-      'Max':outer,
-      'Predictions':'rgb(243,154,29)',
+      'Minimum Predicted Speed':'rgb(255,255,255)',
+      '10th Percentile Predicted Speed':outer,
+      '25th Percentile Predicted Speed':mid,
+      'Predicted Speed':inner,
+      '75th Percentile Predicted Speed':inner,
+      '90th Percentile Predicted Speed':mid,
+      'Maximum Predicted Speed':outer,
+      'Predictions ':'rgb(243,154,29)',
       'Earlier Today': 'rgb(135,135,135)',
-      'Thanksgivings Past': 'rgb(115,115,115)',
+      'Past Thanksgiving': 'rgb(115,115,115)',
       'Now':'rgb(0,0,255)'
     }
     seriesElement.color = levels[seriesElement.name]
