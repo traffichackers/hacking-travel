@@ -6,7 +6,7 @@ var child_process = require('child_process');
 
 // Globals
 dotenv.load();
-var filelist = ['./src/*.html', './src/js/*', './src/css/*', './src/fonts/*', './src/roads/*'];
+var filelist = ['./src/*.html', './src/js/*', './src/css/*', './src/fonts/*', './src/roads/*', './src/thanksgiving/*'];
 
 function buildAll(destination, includeData, callback) {
   // Build Site
