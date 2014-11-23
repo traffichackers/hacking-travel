@@ -5,7 +5,7 @@ var events = {
     renderers.setPercentileTabDowLabel();
   },
 
-  setZoneGraphControlEvents: function(pairDatum, graphData) {
+  setZoneGraphControlEvents: function(pairDatum) {
     var graphIdentifier = pairDatum.pairId
     var typeButtons = $('#'+graphIdentifier+' .type-button')
     typeButtons.off('click');
@@ -14,7 +14,7 @@ var events = {
       $(typeButtons).removeClass('active');
       clickedElement.addClass('active');
       var displayDataName = clickedElement.attr('data-display')
-      renderers.renderGraph(pairDatum, graphData, displayDataName);
+      renderers.renderGraph(pairDatum, graphData[pairDatum.pairId], displayDataName);
     });
   }
 };
@@ -102,7 +102,7 @@ var renderers = {
   },
 
   renderGraph: function (pairDatum, graphData, displayDataName) {
-
+    $("#graph-"+pairDatum.pairId).html('');
     var distance = pairDatum.travelTime/(60*60)*pairDatum.speed;
     var seriesData = [];
 
@@ -112,7 +112,7 @@ var renderers = {
 
     // Prepare each percentile
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
-    var todayStart = new Date(graphData[displayDataName].Start);
+    var todayStart = new Date(graphData.today.Start);
     var minToday = todayStart.getTime()/1000;
     var predictionsStart = new Date(graphData.similar_dow.Start+"-05:00");
     var maxPredictions = predictionsStart.getTime()/1000+predictions.length*5*60;
@@ -145,21 +145,21 @@ var renderers = {
     seriesElement.name = 'Now';
     seriesData.push(seriesElement);
 
-    // Add the Data for Today
-    var today = graphData[displayDataName][pairDatum.pairId];
-    var todayStart = graphData[displayDataName].Start;
-    if (displayDataName === 'today') {
-      var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false, false);
-    } else {
-      var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false, true);
-    }
-
-    seriesData.push(seriesElement);
 
     // Add the Predictions
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
     var predictionsStart = graphData.similar_dow.Start
     var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true, true);
+    seriesData.push(seriesElement);
+
+    // Add the Data for Today
+    var today = graphData[displayDataName][pairDatum.pairId];
+    var todayStart = graphData.today.Start;
+    if (displayDataName === 'today') {
+      var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', distance, todayStart, false, false);
+    } else {
+      var seriesElement = helper.prepareGraphSeries(today, 'Thanksgivings Past', 'line', distance, todayStart, false, true, maxPoints);
+    }
     seriesData.push(seriesElement);
 
     // Render the new graph
@@ -392,13 +392,13 @@ var helper = {
 
     // Set Name
     nameMap = {
-      'max':'Min',
-      '90':'10th Percentile',
-      '75':'25th Percentile',
+      'max':'Max',
+      '90':'90th Percentile',
+      '75':'75th Percentile',
       '50':'50th Percentile',
-      '25':'75th Percentile',
-      '10':'90th Percentile',
-      'min':'Max'
+      '25':'25th Percentile',
+      '10':'10th Percentile',
+      'min':'Min'
     }
     var mappedName = nameMap[name];
     if (typeof mappedName !== 'undefined') {
@@ -421,6 +421,7 @@ var helper = {
       'Max':outer,
       'Predictions':'rgb(243,154,29)',
       'Earlier Today': 'rgb(135,135,135)',
+      'Thanksgivings Past': 'rgb(135,135,135)',
       'Now':'rgb(0,0,255)'
     }
     seriesElement.color = levels[seriesElement.name]
@@ -665,20 +666,32 @@ var rendererHelpers = {
 
 // Get Data and Initialize
 var graphData = {};
-var pairDatums = {};
+var dowGetter = new Date();
+var thanksGivingIndex = dowGetter.getDay();
+
+var thanksGivingData = [
+  {'2012': '20121118.json', '2013': '20121124.json' },
+  {'2012': '20121119.json', '2013': '20131125.json' },
+  {'2012': '20121120.json', '2013': '20131126.json' },
+  {'2012': '20121121.json', '2013': '20131127.json' },
+  {'2012': '20121122.json', '2013': '20131128.json' },
+  {'2012': '20121123.json', '2013': '20131129.json' },
+  {'2012': '20121124.json', '2013': '20131130.json' }];
+
 $.when(
   $.getJSON("data/predictions/similar_dow.json")
   ,$.getJSON("data/today.json")
   ,$.getJSON("data/current.json")
-  ,$.getJSON("data/today.json")
-  ,$.getJSON("data/today.json")
+  ,$.getJSON("thanksgiving/"+thanksGivingData[thanksGivingIndex][2012])
+  ,$.getJSON("thanksgiving/"+thanksGivingData[thanksGivingIndex][2013])
 ).then( function (similarDowResults, todayResults, trafficResults, thanksGiving2012Results, thanksGiving2013Results) {
+  var pairDatums = {};
   var allGraphData = {};
-  var zoneGraphData = {};
+
   allGraphData.similar_dow = similarDowResults[0];
   allGraphData.today = todayResults[0];
-  allGraphData.thanksgiving_2012 = thanksGiving2012Results;
-  allGraphData.thanksgiving_2013 = thanksGiving2013Results;
+  allGraphData.thanksgiving_2012 = thanksGiving2012Results[0];
+  allGraphData.thanksgiving_2013 = thanksGiving2013Results[0];
   var traffic = trafficResults[0];
 
   zones = {
@@ -691,6 +704,7 @@ $.when(
   for (zoneName in zones) {
     var directions = zones[zoneName]
     for (direction in directions) {
+      var zoneGraphData = {};
       var zonePairIds = directions[direction];
       var regionalConditions = helper.getMiseryIndex(traffic, zonePairIds);
       var pairName = zoneName + '-' + direction;
@@ -775,25 +789,27 @@ $.when(
 
       // Coalesce today, thanksgiving 2012, and thanksgiving 2013
       var simpleItems = ['today', 'thanksgiving_2012', 'thanksgiving_2013']
-      for (var i=0; i<simpleItems; i++) {
-        var simpleItem = simpleItems[i]
+      for (var j=0; j<simpleItems.length; j++) {
+        var simpleItem = simpleItems[j]
         var numerator = [];
         var denominator = [];
         var pairDatum, distance, percentiles, travelTimes;
         for (pairId in allGraphData[simpleItem]) {
           if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
             pairDatum = traffic.pairData[pairId];
-            distance = pairDatum.travelTime/60*parseInt(pairDatum.speed);
-            travelTimes = allGraphData[simpleItem][pairId];
-            for (var i=0; i<travelTimes.length; i++) {
-              if (typeof numerator[i] === 'undefined') {
-                numerator[i] = 0;
+            if (typeof pairDatum !== 'undefined') {
+              distance = pairDatum.travelTime/60*parseInt(pairDatum.speed);
+              travelTimes = allGraphData[simpleItem][pairId];
+              for (var i=0; i<travelTimes.length; i++) {
+                if (typeof numerator[i] === 'undefined') {
+                  numerator[i] = 0;
+                }
+                if (typeof denominator[i] === 'undefined') {
+                  denominator[i] = 0;
+                }
+                numerator[i] += travelTimes[i]*distance
+                denominator[i] += distance
               }
-              if (typeof denominator[i] === 'undefined') {
-                denominator[i] = 0;
-              }
-              numerator[i] += travelTimes[i]*distance
-              denominator[i] += distance
             }
           }
         }
@@ -807,10 +823,10 @@ $.when(
       }
 
 
-      pairDatums[zoneName] = zonePairDatum;
-      graphData[zoneName] = zoneGraphData;
+      pairDatums[pairName] = zonePairDatum;
+      graphData[pairName] = zoneGraphData;
       renderers.renderGraph(zonePairDatum, zoneGraphData, 'today');
-      events.setZoneGraphControlEvents(zonePairDatum, zoneGraphData);
+      events.setZoneGraphControlEvents(zonePairDatum);
     }
   }
 
