@@ -236,3 +236,10 @@ span.twitter-typeahead {
 .website-link {
   margin-bottom: 0.5em;
 }
+
+/* map */
+#average-region-status {
+  font-size: 2.5em;
+  border:solid 1px darkgray;
+  border-radius:2.0em;"
+}
