@@ -31,6 +31,16 @@ function buildAll(destination, includeData, callback) {
   }
 }
 
+function uploadToAws(bucketName) {
+  var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: bucketName });
+  var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
+  return gulp.src('./build/**/*.*')
+  .pipe(awspublish.gzip({ ext: '' }))
+  .pipe(publisher.publish(headers))
+  .pipe(publisher.cache())
+  .pipe(awspublish.reporter());
+}
+
 gulp.task('build-dev', function(callback) {
   buildAll('dev', true, callback);
 })
@@ -62,14 +72,15 @@ gulp.task('serve-dev', function(callback) {
 
 gulp.task('prod', function() {
   buildAll('build', false, function() {
-    var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: 'www.traffichackers.com' });
-    var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
-    return gulp.src('./build/**/*.*')
-    .pipe(awspublish.gzip({ ext: '' }))
-    .pipe(publisher.publish(headers))
-    .pipe(publisher.cache())
-    .pipe(awspublish.reporter());
+    uplaodToAws('www.traffichackers.com');
   });
 });
 
-gulp.task('dev', ['build-dev', 'watch', 'serve-dev'])
+gulp.task('dev', function() {
+  buildAll('build', false, function() {
+    uploadToAws('dev.traffichackers.com');
+  });
+});
+
+
+gulp.task('local', ['build-dev', 'watch', 'serve-dev'])
