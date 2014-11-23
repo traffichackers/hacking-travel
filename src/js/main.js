@@ -215,13 +215,13 @@ var renderers = {
 	  var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
 	}
 
-    var percentileOrder = ['min', '10', '25', '50', '75', '90', 'max']
+    var percentileOrder = ['max', '90', '75', '50', '25', '10', 'min']
     for (var i=0; i<percentileOrder.length; i++) {
       var chosenPercentile = chosenPercentiles[percentileOrder[i]];
 	  if (type === 'all') {
-		var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, maxPoints);
+		    var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, true, maxPoints);
 	  } else {
-		var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, maxPoints);
+		    var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, true, maxPoints);
 	  }
 	  seriesData.push(seriesElement);
     }
@@ -245,7 +245,7 @@ var renderers = {
     // Add the Predictions
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
     var predictionsStart = graphData.similar_dow.Start
-    var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true);
+    var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true, true);
     seriesData.push(seriesElement);
 
     // Render the new graph
@@ -430,7 +430,7 @@ var helper = {
     }
   },
 
-  prepareGraphSeries: function(unformattedData, level, renderer, distance, start, utc, maxPoints) {
+  prepareGraphSeries: function(unformattedData, level, renderer, distance, start, utc, speed, maxPoints) {
 
     var seriesElement = {};
     var data = [];
@@ -445,7 +445,11 @@ var helper = {
 
     for (var i=0; i<unformattedData.length; i++) {
       if (i<=maxPoints || typeof maxPoints === 'undefined' ) {
-        formattedDatum = {'x':currentTimeSeconds,'y':distance/(unformattedData[i]/60)};
+        if (speed) {
+          formattedDatum = {'x':currentTimeSeconds,'y':unformattedData[i]};
+        } else {
+          formattedDatum = {'x':currentTimeSeconds,'y':distance/(unformattedData[i]/60)};
+        }
         data.push(formattedDatum);
         currentTimeSeconds = currentTimeSeconds + 5*60000/1000;
       }
@@ -458,13 +462,13 @@ var helper = {
 
     // Set Name
     nameMap = {
-      'max':'Min',
-      '90':'10th Percentile',
-      '75':'25th Percentile',
+      'max':'Max',
+      '90':'90th Percentile',
+      '75':'75th Percentile',
       '50':'50th Percentile',
-      '25':'75th Percentile',
-      '10':'90th Percentile',
-      'min':'Max'
+      '25':'25th Percentile',
+      '10':'10th Percentile',
+      'min':'Min'
     }
     var mappedName = nameMap[name];
     if (typeof mappedName !== 'undefined') {
