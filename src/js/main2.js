@@ -21,19 +21,6 @@ var events = {
 
 // Renderers
 var renderers = {
-  setPercentileTabDowLabel: function() {
-    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    dow = helper.getDayOfWeek();
-    $('#dow').html(days[dow]+'s');
-    if (dow === 0 || dow === 6) {
-      $('#dowtype').html('Weekends');
-      $('#dowtype').attr('data-type','weekends')
-    } else {
-      $('#dowtype').html('Weekdays');
-      $('#dowtype').attr('data-type','weekdays')
-    }
-    $('#'+days[dow].toLowerCase()).addClass('active',true);
-  },
 
   renderRoads: function(traffic, roads, backgroundRoads, graphData) {
     var headerElement = $("#header");
@@ -127,30 +114,36 @@ var renderers = {
     var percentileOrder = ['max', '90', '75', '50', '25', '10', 'min']
     for (var i=0; i<percentileOrder.length; i++) {
       var chosenPercentile = chosenPercentiles[percentileOrder[i]];
-	  if (type === 'all') {
-		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, false, maxPoints);
-	  } else {
-		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, true, maxPoints);
-	  }
-	  seriesData.push(seriesElement);
+
+    if (displayDataName === 'today') {
+  	  if (type === 'all') {
+  		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, false, false, maxPoints);
+  	  } else {
+  		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', distance, chosenPercentilesStart, true, true, maxPoints);
+  	  }
+  	  seriesData.push(seriesElement);
+      }
     }
 
     // Add Vertical Line for Today
-    var seriesElement = {};
-    var currentTime = new Date(graphData.similar_dow.Start+"-05:00");
-    var currentTimeSeconds = (currentTime.getTime())/1000;
-    seriesElement.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
-    seriesElement.color = 'rgb(145,196,245)';
-    seriesElement.renderer = 'line';
-    seriesElement.name = 'Now';
-    seriesData.push(seriesElement);
-
+    if (displayDataName === 'today') {
+      var seriesElement = {};
+      var currentTime = new Date(graphData.similar_dow.Start+"-05:00");
+      var currentTimeSeconds = (currentTime.getTime())/1000;
+      seriesElement.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
+      seriesElement.color = 'rgb(145,196,245)';
+      seriesElement.renderer = 'line';
+      seriesElement.name = 'Now';
+      seriesData.push(seriesElement);
+    }
 
     // Add the Predictions
-    var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
-    var predictionsStart = graphData.similar_dow.Start
-    var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true, true);
-    seriesData.push(seriesElement);
+    if (displayDataName === 'today') {
+      var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
+      var predictionsStart = graphData.similar_dow.Start
+      var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions', 'line', distance, predictionsStart, true, true);
+      seriesData.push(seriesElement);
+    }
 
     // Add the Data for Today
     var today = graphData[displayDataName][pairDatum.pairId];
@@ -184,7 +177,9 @@ var renderers = {
       unstack: true,
       series: seriesData,
       width: graphWidth,
-      height: graphHeight
+      height: graphHeight,
+      min: 0,
+      max: 90
     });
     graph.render();
 
@@ -421,7 +416,7 @@ var helper = {
       'Max':outer,
       'Predictions':'rgb(243,154,29)',
       'Earlier Today': 'rgb(135,135,135)',
-      'Thanksgivings Past': 'rgb(135,135,135)',
+      'Thanksgivings Past': 'rgb(115,115,115)',
       'Now':'rgb(0,0,255)'
     }
     seriesElement.color = levels[seriesElement.name]
@@ -829,6 +824,12 @@ $.when(
       events.setZoneGraphControlEvents(zonePairDatum);
     }
   }
+
+
+  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  dow = helper.getDayOfWeek();
+  $('.dow_insert').html(days[dow]);
+
 
   $('.sections').show()
 });
