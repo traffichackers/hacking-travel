@@ -72,7 +72,7 @@ gulp.task('serve-dev', function(callback) {
 
 gulp.task('prod', function() {
   buildAll('build', false, function() {
-    uplaodToAws('www.traffichackers.com');
+    uploadToAws('www.traffichackers.com');
   });
 });
 
