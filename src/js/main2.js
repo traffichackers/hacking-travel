@@ -126,7 +126,7 @@ var renderers = {
     }
 
     // Add Vertical Line for Today
-    if (displayDataName === 'today') {
+    //if (displayDataName === 'today') {
       var seriesElement = {};
       var currentTime = new Date(graphData.similar_dow.Start+"-05:00");
       var currentTimeSeconds = (currentTime.getTime())/1000;
@@ -135,7 +135,7 @@ var renderers = {
       seriesElement.renderer = 'line';
       seriesElement.name = 'Now';
       seriesData.push(seriesElement);
-    }
+    //}
 
     // Add the Predictions
     if (displayDataName === 'today') {
@@ -665,7 +665,7 @@ var dowGetter = new Date();
 var thanksGivingIndex = dowGetter.getDay();
 
 var thanksGivingData = [
-  {'2012': '20121118.json', '2013': '20121124.json' },
+  {'2012': '20121118.json', '2013': '20131124.json' },
   {'2012': '20121119.json', '2013': '20131125.json' },
   {'2012': '20121120.json', '2013': '20131126.json' },
   {'2012': '20121121.json', '2013': '20131127.json' },
@@ -690,7 +690,7 @@ $.when(
   var traffic = trafficResults[0];
 
   zones = {
-    'north': {"northbound": [5587, 5574, 5572, 5511, 5556], "southbound": [/*5557,*/ 5559, /*5573, 5575,*/ 5588] },
+    'north': {"northbound": [5587, 5574, 5572, 5511, 5556], "southbound": [5557, 5559, 5573, 5575, 5588] },
     'south': {"northbound": [10193, 10190, 10189, 10188, 10187/*, 14669*/, 5506], "southbound": [/*14670,*/ 10182, 10181, 10180, 10179, 10178, 5501]},
     'west': {"westbound": [10088, 10086, 10085, 10389, 10386, 10385, 10382, 10357, 10356], "eastbound": [10499, 10379, 10376, 10375, 10374, 10238, 10083, 10082] },
   }
