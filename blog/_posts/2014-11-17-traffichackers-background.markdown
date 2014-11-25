@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Traffic Hackers Background"
-date:   2014-11-20 17:10:29
+date:   2014-11-17 17:10:29
 categories: info
 ---
 You may be staring at a bunch of charts here and wondering "What is this Traffic Hackers thing?" Here's a quick history.
