@@ -430,7 +430,7 @@ var helper = {
     }
   },
 
-  prepareGraphSeries: function(unformattedData, level, renderer, distance, start, utc, speed, maxPoints) {
+  prepareGraphSeries: function(unformattedData, level, renderer, distance, start, utc, maxPoints) {
 
     var seriesElement = {};
     var data = [];

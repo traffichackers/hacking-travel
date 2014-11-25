@@ -179,7 +179,7 @@ var helper = {
     }
   },
 
-  prepareGraphSeries: function(unformattedData, level, renderer, start, utc, speed, maxPoints) {
+  prepareGraphSeries: function(unformattedData, level, renderer, start, utc, maxPoints) {
 
     var seriesElement = {};
     var data = [];
