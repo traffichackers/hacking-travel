@@ -1,0 +1,27 @@
+---
+layout: post
+title:  "Snow?"
+date:   2014-11-25 08:00:00
+categories: info
+---
+
+In addition to being data nerds, and transportation nerds we (the royal we, meaning me at least) are weather nerds.  And boy, is there a poorly-timed storm a-comin'.
+
+Heavy snow will fall north, west and southwest of Boston from about noon Wednesday to midnight, meaning that anyone with travel plans will want to avoid traveling at those times. This won't be a light snow that slightly impacts travel, but one which decreases visibility, speed and safety. One saving grace may be that the ground and pavement is warm from the recent very warm weather, but this will only delay slick roads for some time.
+
+Our question is: what is this going to do to traffic? Our model takes weather conditions in to account, so it expects slower traffic. However, a question is how the model will take in to account people's behavior based on the threat of snow. In theory, a non-parametric model should handle this relatively well, for example: if roadway _x_ becomes more trafficked when rain occurs (or beforehand), this should be picked up. But we only have so much data, and a major snowstorm on the travel day before Thanksgiving is not something we've seen before.
+
+So during the storm, the model should perform relatively well, showing decreased speeds due to the weather. But this afternoon, the model may not be able to detect the [collective freakout][collective freakout] that Bostonians require for the first major snowstorm of the year, coupled with the already near-apocalyptic traffic. So what might happen? Tuesday, expect even-heavier-than-predicted traffic as more people try to get away early. Based on last year, we already expect heavy traffic to begin in earnest around 2:30. North of Boston, it should last until about 7:30, south of the city until 9:00 and west along the Pike until about 10:30. It's possible that traffic will last even longer, once a road is congested adding even a few more cars quickly reduces speed since the capacity of the road is reduced when speeds fall well below free-flow.
+
+Wednesday, there may be fewer cars, but with adverse conditions, much slower travel. And Thursday morning may depend on the severity of the snowstorm. This is still a low-confidence storm; a minor change in the track of the storm, the strength of the high pressure over Quebec or myriad other factors could make a big difference in snow accumulations, especially near the coast (where many drivers begin their trip, and if it's 40 and raining in Boston they may set out west, even if there's an all-out blizzard at 495). The [Probabilistic  Winter Precipitation Guidance][Probabilistic  Winter Precipitation Guidance] from the National Weather Service shows the following percentile ranges for inches of snowfall for the following locations:
+
+
+<img src='/blog/assets/2014_11_25_snow_percentiles.png'/>
+<br/>
+
+So there's a decent chance that Boston will see only a slushy accumulation while a foot of snow falls further west.
+
+And Thursday? Well, everyone who didn't drive on Wednesday has to drive some time. If the storm is in the higher range, expect Thursday morning to be real bad. Leave early. Take your time. And travel safely.
+
+[collective freakout]:      http://www.universalhub.com/french-toast
+[Probabilistic  Winter Precipitation Guidance]:      http://www.wpc.ncep.noaa.gov/pwpf/wwd_percentiles.php?ftype=percentiles&fpd=72&ptype=snow
