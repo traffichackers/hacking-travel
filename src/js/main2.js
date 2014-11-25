@@ -68,7 +68,11 @@ var renderers = {
 
     // Add the Predictions
     if (displayDataName === 'today') {
-      var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
+      if(pairDatum.pairId === 'west-westbound') {
+        var predictions = graphData.similar_dow[pairDatum.pairId]['min'];
+      } else {
+        var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
+      }
       var predictionsStart = graphData.similar_dow.Start
       var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions ', 'line', predictionsStart, true);
       seriesData.push(seriesElement);
@@ -466,6 +470,7 @@ $.when(
   var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   dow = helper.getDayOfWeek();
   $('.dow_insert').html(days[dow]);
+
 
 
   $('.sections').show()

@@ -1,4 +1,5 @@
 // Events
+
 var events = {
 
   initializeEvents: function(traffic, graphData) {

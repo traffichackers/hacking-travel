@@ -33,7 +33,7 @@ function buildAll(destination, includeData, callback) {
 
 function uploadToAws(bucketName) {
   var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: bucketName });
-  var headers = { 'Cache-Control': 'max-age=315360000, no-transform, public' };
+  var headers = { 'Cache-Control': 'max-age=120, no-transform, public' };
   return gulp.src('./build/**/*.*')
   .pipe(awspublish.gzip({ ext: '' }))
   .pipe(publisher.publish(headers))
