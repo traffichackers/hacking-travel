@@ -68,11 +68,7 @@ var renderers = {
 
     // Add the Predictions
     if (displayDataName === 'today') {
-      if(pairDatum.pairId === 'west-westbound') {
-        var predictions = graphData.similar_dow[pairDatum.pairId]['min'];
-      } else {
-        var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
-      }
+      var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
       var predictionsStart = graphData.similar_dow.Start
       var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions ', 'line', predictionsStart, true);
       seriesData.push(seriesElement);
