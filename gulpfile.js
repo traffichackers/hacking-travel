@@ -3,32 +3,36 @@ var gulp = require('gulp');
 var awspublish = require('gulp-awspublish');
 var dotenv = require('dotenv');
 var child_process = require('child_process');
+var del = require('del');
 
 // Globals
 dotenv.load();
 var filelist = ['./src/*.html', './src/js/*', './src/css/*', './src/fonts/*', './src/roads/*', './src/thanksgiving/*'];
 
 function buildAll(destination, includeData, callback) {
-  // Build Site
-  for (var i=0; i<filelist.length; i++) {
-    gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest(destination+'/'));
-  }
 
-  // Build Blog
-  child_process.execFile('jekyll', ['build', '--source', './blog/', '--destination', './'+destination+'/blog/'], function(error, stdout, stderr) {
-     if (error) {
-       console.log(error);
-     } else if (stderr) {
-       console.log(stderr);
-     } else {
-       callback();
-     }
+  del([destination+'/**'], function() {
+    // Build Site
+    for (var i=0; i<filelist.length; i++) {
+      gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest(destination+'/'));
+    }
+
+    // Build Blog
+    child_process.execFile('jekyll', ['build', '--source', './blog/', '--destination', './'+destination+'/blog/'], function(error, stdout, stderr) {
+      if (error) {
+        console.log(error);
+      } else if (stderr) {
+        console.log(stderr);
+      } else {
+        callback();
+      }
+    });
+
+    // Include the Data Directory, if Needed
+    if (includeData) {
+      gulp.src('./src/data/**/*.*', {base:"./src/"}).pipe(gulp.dest(destination+'/'));
+    }
   });
-
-  // Include the Data Directory, if Needed
-  if (includeData) {
-    gulp.src('./src/data/**/*.*', {base:"./src/"}).pipe(gulp.dest(destination+'/'));
-  }
 }
 
 function uploadToAws(bucketName) {
