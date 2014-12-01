@@ -33,7 +33,7 @@ function buildAll(destination, includeData, callback) {
 
 function uploadToAws(bucketName) {
   var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: bucketName });
-  var headers = { 'Cache-Control': 'max-age=120, no-transform, public' };
+  var headers = { 'Cache-Control': 'max-age=0, no-cache, must-revalidate, proxy-revalidate, private' };
   return gulp.src('./build/**/*.*')
   .pipe(awspublish.gzip({ ext: '' }))
   .pipe(publisher.publish(headers))
@@ -73,12 +73,13 @@ gulp.task('serve-dev', function(callback) {
 gulp.task('prod', function() {
   buildAll('build', false, function() {
     uploadToAws('www.traffichackers.com');
+    uploadToAws('traffichackers.com');
   });
 });
 
 gulp.task('dev', function() {
   buildAll('build', false, function() {
-    uploadToAws('dev.traffichackers.com');
+    uploadToAws('traffichackers.com');
   });
 });
 
