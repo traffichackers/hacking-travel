@@ -77,13 +77,13 @@ gulp.task('serve-dev', function(callback) {
 gulp.task('prod', function() {
   buildAll('build', false, function() {
     uploadToAws('www.traffichackers.com');
-    uploadToAws('traffichackers.com');
+    uploadToAws('beta.traffichackers.com');
   });
 });
 
 gulp.task('dev', function() {
   buildAll('build', false, function() {
-    uploadToAws('traffichackers.com');
+    uploadToAws('dev.traffichackers.com');
   });
 });
 
