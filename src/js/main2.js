@@ -22,52 +22,38 @@ var renderers = {
     $("#graph-"+pairDatum.pairId).html('');
     var seriesData = [];
 
-    // Select the proper percentile
-    var type = 'similar'; //$('.type-button.active').attr('id');
-    var subselect = 'dow'; //$('#'+type+'-subselects > .subselects-button.active').attr('data-type');
-
-    // Prepare each percentile
+    // Percentiles
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
     var todayStart = new Date(graphData.today.Start);
-    var minToday = todayStart.getTime()/1000;
     var predictionsStart = new Date(graphData.similar_dow.Start+"-05:00");
     var maxPredictions = predictionsStart.getTime()/1000+predictions.length*5*60;
     var maxPoints = (predictionsStart.getTime()-todayStart.getTime())/(1000*60*5)+predictions.length;
-    var chosenPercentiles = graphData[type+'_'+subselect][pairDatum.pairId];
-    if (type === 'all') {
-	  var chosenPercentilesStart = graphData[displayDataName].Start;
-	} else {
-	  var chosenPercentilesStart = graphData[type+'_'+subselect].Start;
-	}
-
-    var percentileOrder = ['max', '90', '75', '50', '25', '10', 'min']
+    var chosenPercentiles = graphData[displayDataName][pairDatum.pairId];
+    var chosenPercentilesStart = graphData[displayDataName].Start;
+    var percentileOrder = ['max', '90', '75', '50', '25', '10', 'min'];
     for (var i=0; i<percentileOrder.length; i++) {
       var chosenPercentile = chosenPercentiles[percentileOrder[i]];
-
-    if (displayDataName === 'today') {
-  	  if (type === 'all') {
-  		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', chosenPercentilesStart, false, maxPoints);
-  	  } else {
-  		  var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', chosenPercentilesStart, true, maxPoints);
-  	  }
-  	  seriesData.push(seriesElement);
+      if (displayDataName === 'all') {
+        var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', chosenPercentilesStart, false, maxPoints);
+      } else {
+        var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', chosenPercentilesStart, true, maxPoints);
       }
+  	  seriesData.push(seriesElement);
     }
 
+
     // Add Vertical Line for Today
-    //if (displayDataName === 'today') {
-      var seriesElement = {};
-      var currentTime = new Date(graphData.similar_dow.Start+"-05:00");
-      var currentTimeSeconds = (currentTime.getTime())/1000;
-      seriesElement.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
-      seriesElement.color = 'rgb(145,196,245)';
-      seriesElement.renderer = 'line';
-      seriesElement.name = 'Now';
-      seriesData.push(seriesElement);
-    //}
+    var seriesElement = {};
+    var currentTime = new Date(graphData.similar_dow.Start+"-05:00");
+    var currentTimeSeconds = (currentTime.getTime())/1000;
+    seriesElement.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
+    seriesElement.color = 'rgb(145,196,245)';
+    seriesElement.renderer = 'line';
+    seriesElement.name = 'Now';
+    seriesData.push(seriesElement);
 
     // Add the Predictions
-    if (displayDataName === 'today') {
+    if (displayDataName === 'similar_dow') {
       var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
       var predictionsStart = graphData.similar_dow.Start
       var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions ', 'line', predictionsStart, true);
@@ -75,14 +61,12 @@ var renderers = {
     }
 
     // Add the Data for Today
-    var today = graphData[displayDataName][pairDatum.pairId];
-    var todayStart = graphData.today.Start;
-    if (displayDataName === 'today') {
+    if (displayDataName === 'similar_dow') {
+      var today = graphData.today[pairDatum.pairId];
+      var todayStart = graphData.today.Start;
       var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', todayStart, false);
-    } else {
-      var seriesElement = helper.prepareGraphSeries(today, 'Past Thanksgiving', 'line', todayStart, false, maxPoints);
+      seriesData.push(seriesElement);
     }
-    seriesData.push(seriesElement);
 
     // Render the new graph
     var graphWidth, graphHeight;
@@ -99,7 +83,6 @@ var renderers = {
         graphHeight = 200;
       }
     }
-
     var graph = new Rickshaw.Graph({
       element: document.querySelector("#graph-"+pairDatum.pairId),
       renderer: 'multi',
@@ -246,8 +229,10 @@ var helper = {
   },
 
   getDayOfWeek: function() {
+    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     now = new Date();
-    return now.getDay();
+    return days[now.getDay()];
+
   },
 
   getMiseryIndex: function(current, pairIds) {
@@ -297,32 +282,20 @@ var helper = {
 
 // Get Data and Initialize
 var graphData = {};
-var dowGetter = new Date();
-var thanksGivingIndex = dowGetter.getDay();
-
-var thanksGivingData = [
-  {'2012': '20121118.json', '2013': '20131124.json' },
-  {'2012': '20121119.json', '2013': '20131125.json' },
-  {'2012': '20121120.json', '2013': '20131126.json' },
-  {'2012': '20121121.json', '2013': '20131127.json' },
-  {'2012': '20121122.json', '2013': '20131128.json' },
-  {'2012': '20121123.json', '2013': '20131129.json' },
-  {'2012': '20121124.json', '2013': '20131130.json' }];
+var allName = "all_"+helper.getDayOfWeek().toLowerCase()+"s";
 
 $.when(
   $.getJSON("data/predictions/similar_dow.json")
   ,$.getJSON("data/today.json")
   ,$.getJSON("data/current.json")
-  ,$.getJSON("thanksgiving/"+thanksGivingData[thanksGivingIndex][2012])
-  ,$.getJSON("thanksgiving/"+thanksGivingData[thanksGivingIndex][2013])
-).then( function (similarDowResults, todayResults, currentResults, thanksGiving2012Results, thanksGiving2013Results) {
+  ,$.getJSON("data/predictions/"+allName+".json")
+).then( function (similarDowResults, todayResults, currentResults, allResults) {
   var pairDatums = {};
   var allGraphData = {};
 
   allGraphData.similar_dow = similarDowResults[0];
   allGraphData.today = todayResults[0];
-  allGraphData.thanksgiving_2012 = thanksGiving2012Results[0];
-  allGraphData.thanksgiving_2013 = thanksGiving2013Results[0];
+  allGraphData.all = allResults[0];
   var current = currentResults[0];
 
   zones = {
@@ -370,57 +343,66 @@ $.when(
       zonePairDatum.travelTime = numeratorTravelTime/denominator;
       zonePairDatum.pairId = pairName;
 
-      // Coalesce similar_dow
-      var numerator = {};
-      var denominator = {};
-      var pairDatum, distance, percentiles, travelTimes;
-      for (pairId in allGraphData.similar_dow) {
-        if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
-          pairDatum = current.pairData[parseInt(pairId)];
-          if (typeof pairDatum !== 'undefined') {
-            distance = pairDatum.travelTime/60*pairDatum.speed;
-            percentiles = allGraphData.similar_dow[parseInt(pairId)];
-            for (percentile in percentiles) {
-              if (typeof numerator[percentile] === 'undefined') {
-                numerator[percentile] = []
-              }
-              if (typeof denominator[percentile] === 'undefined') {
-                denominator[percentile] = []
-              }
-              travelTimes = percentiles[percentile];
-              for (var i=0; i<travelTimes.length; i++) {
-                if (typeof numerator[percentile][i] === 'undefined') {
-                  numerator[percentile][i] = 0;
+      // Coalesce similar_dow, all_X.json
+      var complexItems = ['similar_dow', 'all'];
+      for (var j=0; j<complexItems.length; j++) {
+        var complexItem = complexItems[j]
+        var numerator = {};
+        var denominator = {};
+        var pairDatum, distance, percentiles, travelTimes;
+        for (pairId in allGraphData[complexItem]) {
+          if (zonePairIds.indexOf(parseInt(pairId)) !== -1) {
+            pairDatum = current.pairData[parseInt(pairId)];
+            if (typeof pairDatum !== 'undefined') {
+              distance = pairDatum.travelTime/60*pairDatum.speed;
+              percentiles = allGraphData[complexItem][parseInt(pairId)];
+              for (percentile in percentiles) {
+                if (typeof numerator[percentile] === 'undefined') {
+                  numerator[percentile] = []
                 }
-                if (typeof denominator[percentile][i] === 'undefined') {
-                  denominator[percentile][i] = 0;
+                if (typeof denominator[percentile] === 'undefined') {
+                  denominator[percentile] = []
                 }
-                numerator[percentile][i] += travelTimes[i]*distance
-                denominator[percentile][i] += distance
+                travelTimes = percentiles[percentile];
+                for (var i=0; i<travelTimes.length; i++) {
+                  if (typeof numerator[percentile][i] === 'undefined') {
+                    numerator[percentile][i] = 0;
+                  }
+                  if (typeof denominator[percentile][i] === 'undefined') {
+                    denominator[percentile][i] = 0;
+                  }
+                  numerator[percentile][i] += travelTimes[i]*distance
+                  denominator[percentile][i] += distance
+                }
               }
             }
           }
         }
-      }
-      var currentNumerator;
-      var currentDenominator;
-      var similarDow = {};
-      similarDow[pairName] = {};
-      for (percentile in numerator) {
-        currentNumerator = numerator[percentile];
-        currentDenominator = denominator[percentile];
-        if (typeof similarDow[percentile] === 'undefined') {
-          similarDow[pairName][percentile] = []
+        var currentNumerator;
+        var currentDenominator;
+        var similarDow = {};
+        similarDow[pairName] = {};
+        for (percentile in numerator) {
+          currentNumerator = numerator[percentile];
+          currentDenominator = denominator[percentile];
+          if (typeof similarDow[percentile] === 'undefined') {
+            similarDow[pairName][percentile] = []
+          }
+          for (var i=0; i<currentNumerator.length; i++) {
+            similarDow[pairName][percentile][i] = currentNumerator[i]/currentDenominator[i];
+          }
         }
-        for (var i=0; i<currentNumerator.length; i++) {
-          similarDow[pairName][percentile][i] = currentNumerator[i]/currentDenominator[i];
+        if (complexItem === 'all') {
+          similarDow.Start = allGraphData.today.Start;
+        } else {
+          similarDow.Start = allGraphData[complexItem].Start;
         }
-      }
-      similarDow.Start = allGraphData.similar_dow.Start;
-      zoneGraphData["similar_dow"] = similarDow;
 
-      // Coalesce today, thanksgiving 2012, and thanksgiving 2013
-      var simpleItems = ['today', 'thanksgiving_2012', 'thanksgiving_2013']
+        zoneGraphData[complexItem] = similarDow;
+      }
+
+      // Coalesce today
+      var simpleItems = ['today'];
       for (var j=0; j<simpleItems.length; j++) {
         var simpleItem = simpleItems[j]
         var numerator = [];
@@ -457,17 +439,13 @@ $.when(
 
       pairDatums[pairName] = zonePairDatum;
       graphData[pairName] = zoneGraphData;
-      renderers.renderGraph(zonePairDatum, zoneGraphData, 'today');
+      renderers.renderGraph(zonePairDatum, zoneGraphData, 'similar_dow');
       events.setZoneGraphControlEvents(zonePairDatum);
     }
   }
 
-
-  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  dow = helper.getDayOfWeek();
-  $('.dow_insert').html(days[dow]);
-
-
-
+  var day = helper.getDayOfWeek();
+  $('.type-button-all').html('All '+day+'s');
+  $('.dow_insert').html(day);
   $('.sections').show()
 });
