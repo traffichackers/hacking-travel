@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Tuesday Recap"
-date:   2014-11-26 17:10:29
+title:  "Thanksgiving Week: Tuesday Recap"
+date:   2014-12-02 17:10:29
 categories: info
 ---
 
@@ -24,7 +24,7 @@ The numbers in the image above correspond to the following:
 1. Around **6 pm**, the entire Turnpike from Boston to Sturbridge is a traffic jam.
 1. Around **7 pm**, the eastern portion of I-90 returns to normal free-flow as rush hour ends, but the western portion continues to be congested.
 1. By about **9 pm**, I-90 east of I-495 finally clears out, and once a segment speeds up, it does so quickly.
-1. The section between I-495 and Auburn is mostly clear by 1 pm (still quite late) but 20 mph traffic continues on the road out to Sturbidge until after midnight.
+1. The section between I-495 and Auburn is mostly clear by **11 pm** (still quite late) but 20 mph traffic continues on the road out to Sturbidge until after midnight.
 
 <br/>
 **Why is the Massachusetts Turnpike so prone to heavy traffic?**
@@ -35,6 +35,7 @@ The Sturbridge tolls are not the cause; even with heavy westbound I-90 traffic, 
 1.  Vehicles leaving the Charlton Service Plaza must merge with traffic already attempting to sort itself (#1, above); this service plaza also sometimes has a full parking lot, causing vehicles to backup onto I-90W.
 1.  Heavy feeder traffic from I-290, I-395 and I-495
 
+<br/>
 Next year? Take the train.
 
 [rollover]: https://twitter.com/DustinGFitch/status/537323227593601024
