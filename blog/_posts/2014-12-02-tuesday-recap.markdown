@@ -12,7 +12,7 @@ As [predicted](/blog/info/2014/11/21/go-west-when-no-one-else-does.html), traffi
 
 We visualized speeds (in mph) on the Massachusetts Turnpike; each segment (Boston at the top, Sturbridge at the bottom) is colored from red (slow) to green (fast):
 
-<img src="/blog/assets/2014_11_26_tuesday_recap_mph.png">
+<a href="/blog/assets/2014_11_26_tuesday_recap_mph.png"><img src="/blog/assets/2014_11_26_tuesday_recap_mph.png"></a>
 
 The numbers in the image above correspond to the following:
 
