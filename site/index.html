@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <title>Traffic Hackers - Traffic Predictions for Eastern Massachusetts </title>
+  <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />
+  <meta name="description" content="Traffic Hackers predicts traffic speeds in Eastern Massachusetts for the next twenty-four (24) hours">
+  <meta name="viewport" content="width=device-width initial-scale=1" />
+
+  <!-- Stylesheets -->
+  <link rel='stylesheet' type='text/css' href='css/bootstrap.min.css'>
+  <link rel='stylesheet' type='text/css' href='css/bootstrap-theme.min.css'>
+  <link rel='stylesheet' type='text/css' href='css/rickshaw.css' />
+  <link rel='stylesheet' type='text/css' href='css/main.css' media='screen' />
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div id="header" class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="glyphicon glyphicon-road" aria-hidden="true"></span> Menu
+          </button>
+          <a class="navbar-brand" href="./">Traffic Hackers</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="index.html">Home</a></li>
+            <li class="hidden-xs"><a href="map.html">Map<sup>beta</sup></a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="blog/">Blog</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div style="margin-top: 2.5em; margin-bottom: 2.5em;" class="row"><div class="col-md-12">
+        <p>Thanksgiving is one of the most congested travel periods of the year: a little traffic knowledge can make miles of difference.  We use MassDOT's real time traffic <a href="http://www.massdot.state.ma.us/developersdata.aspx">feed</a> to generate experimental predictions during this busy travel time.</p>
+        <p><span style="font-weight: 500">Disclaimer:</span> The predictions on this site are the result of an experimental research project and may not be accurate.  Use at your own risk, buckle up, and always take care when driving.</p>
+      </div></div>
+    </div>
+    <div class="container sections">
+      <div class="row sections-row-heading"><div class="col-md-12">I-93 North of Boston</div></div>
+      <div class="row sections-row-description"><div class="col-md-12">
+        <p>Going to New Hampshire? You're probably looking at I-93. North from Boston, 93 winds through the Middlesex Fells and crosses Route 128, passing through Wilmington, Tewksbury, Andover, Lawrence and Methuen before reaching the New Hampshire line.</p>
+        <p style="color: gray;">Transportation Nerd Fact: 93 South is home to Massachusetts' longest permanent carpool lane, from Medford to Boston, all of two miles.</p>
+      </div></div>
+      <div class="row sections-row-charts">
+        <div id="north-northbound" class="col-md-6 sections-col-graphset">
+          <span class="chart-title">Northbound Traffic</span>
+          <div id="detail-region-north-northbound" class="detail-region ">
+            <span class="average-region-speed detail-number"></span>
+            <span class="detail-description">mph</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="misery-index detail-number"></span>
+            <span class="detail-description">misery index</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span class="average-region-status-text detail-description"></span>
+          </div>
+          <div><div id='graph-north-northbound'></div></div>
+          <div id="historical-travel-times-controls">
+            Show Speed Ranges for
+            <div class="btn-group btn-group-xs">
+              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+            </div>
+          </div>
+        </div>
+        <div id="north-southbound" class="col-md-6 sections-col-graphset">
+          <span class="chart-title">Southbound Traffic</span>
+          <div id="detail-region-north-southbound" class="detail-region ">
+            <span class="average-region-speed detail-number"></span>
+            <span class="detail-description">mph</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="misery-index detail-number"></span>
+            <span class="detail-description">misery index</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span class="average-region-status-text detail-description"></span>
+          </div>
+          <div><div id='graph-north-southbound'></div></div>
+          <div id="historical-travel-times-controls">
+            Show Speed Ranges for
+            <div class="btn-group btn-group-xs">
+              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row sections-row-heading"><div class="col-md-12">I-90 West of Boston / Mass Pike</div></div>
+      <div class="row sections-row-description"><div class="col-md-12">
+        <p>The Mass Pike is the main route west from Boston to New York, and as many people come and go to visit family or friends, is often one of the most heavily traveled road segments in the region. Looking to avoid the Pike traffic? Good luck. You can try 95 through Rhode Island, 395 south from Worcester or even Route 2 to the north, but don't expect particularly light traffic.</p>
+        <p style="color: gray;">Transportation Nerd Fact: Like most toll roads, the Mass Pike was funded and partially built before the <a target="_blank" href="http://en.wikipedia.org/wiki/Federal_Aid_Highway_Act_of_1956">Interstate Highway</a> act was signed in to law in 1956, and was grandfathered in to the system.</p>
+      </div></div>
+      <div class="row sections-row-charts">
+        <div id="west-eastbound" class="col-md-6 sections-col-graphset">
+          <span class="chart-title">Eastbound Traffic</span>
+          <div id="detail-region-west-eastbound" class="detail-region ">
+            <span class="average-region-speed detail-number"></span>
+            <span class="detail-description">mph</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="misery-index detail-number"></span>
+            <span class="detail-description">misery index</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span class="average-region-status-text detail-description"></span>
+          </div>
+          <div><div id='graph-west-eastbound'></div></div>
+          <div id="historical-travel-times-controls">
+            Show Speed Ranges for
+            <div class="btn-group btn-group-xs">
+              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+            </div>
+          </div>
+        </div>
+        <div id="west-westbound" class="col-md-6 sections-col-graphset">
+          <span class="chart-title">Westbound Traffic</span><br/>
+          <div id="detail-region-west-westbound" class="detail-region ">
+            <span class="average-region-speed detail-number"></span>
+            <span class="detail-description">mph</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="misery-index detail-number"></span>
+            <span class="detail-description">misery index</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span class="average-region-status-text detail-description"></span>
+          </div>
+          <div><div id='graph-west-westbound'></div></div>
+          <div id="historical-travel-times-controls">
+            Show Speed Ranges for
+            <div class="btn-group btn-group-xs">
+              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row sections-row-heading"><div class="col-md-12">Route 3 South of Boston / Pilgrims Highway</div></div>
+      <div class="row sections-row-description"><div class="col-md-12">
+        <p>The infamous Southeast Expressway leads south to Cape Cod. Traffic on the expressway is a given at nearly any time of day, and while it's not peak season to the Cape, expect traffic getting onto the Sagamore Bridge (at least the rotary there is gone). If you ever wondered where your cranberries came from on Thanksgiving, the sandy soils of the region traversed by Route 3 are some of the top cranberry producing areas in the country.</p>
+        <p style="color: gray;">Transportation Nerd Fact: The "zipper machine" (more technically, the "barrier transfer machine" makes a six mile trek twice daily to borrow one lane from each side of the Expressway to provide more capacity in the peak direction for high occupancy vehicles. Here's an <a target="_blank" href="http://www.patriotledger.com/article/20140111/News/301119707"> article about what it's like inside the machine</a>.</p>
+      </div></div>
+      <div class="row sections-row-charts">
+        <div id="south-northbound" class="col-md-6 sections-col-graphset">
+          <span class="chart-title">Northbound Traffic</span><br/>
+          <div id="detail-region-south-northbound" class="detail-region ">
+            <span class="average-region-speed detail-number"></span>
+            <span class="detail-description">mph</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="misery-index detail-number"></span>
+            <span class="detail-description">misery index</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span class="average-region-status-text detail-description"></span>
+          </div>
+          <div><div id='graph-south-northbound'></div></div>
+          <div id="historical-travel-times-controls">
+            Show Speed Ranges for
+            <div class="btn-group btn-group-xs">
+              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+            </div>
+          </div>
+        </div>
+        <div id="south-southbound" class="col-md-6 sections-col-graphset">
+          <span class="chart-title">Southbound Traffic</span><br/>
+          <div id="detail-region-south-southbound" class="detail-region ">
+            <span class="average-region-speed detail-number"></span>
+            <span class="detail-description">mph</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="misery-index detail-number"></span>
+            <span class="detail-description">misery index</span>
+            &nbsp;&nbsp;&nbsp;
+            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span class="average-region-status-text detail-description"></span>
+          </div>
+          <div><div id='graph-south-southbound'></div></div>
+          <div id="historical-travel-times-controls">
+            Show Speed Ranges for
+            <div class="btn-group btn-group-xs">
+              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="navbar navbar-default navbar-fixed-bottom">
+      <div class="container">
+        <div class="footer-text" style="float: left">
+          <a href="https://twitter.com/traffichackers">
+            <span class="icon  icon--twitter">
+              <svg viewBox="0 0 16 16">
+                <path fill="#828282" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+              </svg>
+            </span>
+            <span class="username">traffichackers</span>
+          </a>
+        </div>
+        <div class="footer-text" style="float: right;">
+          <a target="_blank" href="terms.html">Terms and Conditions</a>
+        </div>
+      </div>
+    </div>
+
+</body>
+</html>
+
+<!-- Libraries -->
+<script type='text/javascript' src='js/jquery-1.11.1.min.js'></script>
+<script type='text/javascript' src='js/d3.v3.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='js/rickshaw.min.js'></script>
+<script type='text/javascript' src='js/bootstrap.min.js'></script>
+<script type='text/javascript' src='js/underscore-min.js'></script>
+<script type='text/javascript' src='js/analytics.js'></script>
+<script type='text/javascript' src='js/main2.js'></script>
