@@ -7,14 +7,14 @@ var del = require('del');
 
 // Globals
 dotenv.load();
-var filelist = ['./src/*.html', './src/js/*', './src/css/*', './src/fonts/*', './src/roads/*', './src/thanksgiving/*'];
+var filelist = ['./site/*.html', './site/js/*', './site/css/*', './site/fonts/*', './site/roads/*'];
 
 function buildAll(destination, includeData, callback) {
 
   del([destination+'/**'], function() {
     // Build Site
     for (var i=0; i<filelist.length; i++) {
-      gulp.src(filelist[i], {base:"./src/"}).pipe(gulp.dest(destination+'/'));
+      gulp.src(filelist[i], {base:"./site/"}).pipe(gulp.dest(destination+'/'));
     }
 
     // Build Blog
@@ -30,7 +30,7 @@ function buildAll(destination, includeData, callback) {
 
     // Include the Data Directory, if Needed
     if (includeData) {
-      gulp.src('./src/data/**/*.*', {base:"./src/"}).pipe(gulp.dest(destination+'/'));
+      gulp.src('./site/data/**/*.*', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
     }
   });
 }
@@ -54,8 +54,8 @@ gulp.task('watch', function(callback) {
     gulp.watch(filelist[i], ['build-dev']);
   }
   gulp.watch('./blog/**/*.*', ['build-dev']);
-  gulp.watch('./src/data/*.json', ['build-dev'])
-  gulp.watch('./src/data/predictions/*.json', ['build-dev'])
+  gulp.watch('./site/data/*.json', ['build-dev'])
+  gulp.watch('./site/data/predictions/*.json', ['build-dev'])
   callback();
 });
 
