@@ -77,7 +77,7 @@ gulp.task('serve-dev', function(callback) {
 gulp.task('prod', function() {
   buildAll('build', false, function() {
     uploadToAws('www.traffichackers.com');
-    uploadToAws('beta.traffichackers.com');
+    uploadToAws('boston.traffichackers.com');
   });
 });
 
