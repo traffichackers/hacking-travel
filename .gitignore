@@ -3,8 +3,9 @@ data/current.json
 data/today.json
 data/predictions/
 node_modules/
-build/
+prod/
 dev/
+local/
 .sass-cache/
 .env
 .awspublish*

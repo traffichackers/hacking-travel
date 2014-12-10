@@ -12,55 +12,62 @@ var filelist = ['./site/*.html', './site/js/*', './site/css/*', './site/fonts/*'
 function buildAll(destination, includeData, callback) {
 
   del([destination+'/**'], function() {
+
     // Build Site
     for (var i=0; i<filelist.length; i++) {
       gulp.src(filelist[i], {base:"./site/"}).pipe(gulp.dest(destination+'/'));
     }
 
-    // Build Blog
-    child_process.execFile('jekyll', ['build', '--source', './blog/', '--destination', './'+destination+'/blog/'], function(error, stdout, stderr) {
-      if (error) {
-        console.log(error);
-      } else if (stderr) {
-        console.log(stderr);
-      } else {
-        callback();
-      }
-    });
-
     // Include the Data Directory, if Needed
     if (includeData) {
       gulp.src('./site/data/**/*.*', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
     }
+
+    // Build Blog
+    buildBlog(destination, callback);
+
   });
 }
 
-function uploadToAws(bucketName) {
+function buildBlog(destination, callback) {
+  // Build Blog
+  child_process.execFile('jekyll', ['build', '--source', './blog/', '--destination', './'+destination+'/blog/'], function(error, stdout, stderr) {
+    if (error) {
+      console.log(error);
+    } else if (stderr) {
+      console.log(stderr);
+    } else {
+      callback();
+    }
+  });
+}
+
+function uploadToAws(directory, bucketName) {
   var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: bucketName });
   var headers = { 'Cache-Control': 'max-age=0, no-cache, must-revalidate, proxy-revalidate, private' };
-  return gulp.src('./build/**/*.*')
+  return gulp.src('./'+directory+'/**/*.*')
   .pipe(awspublish.gzip({ ext: '' }))
   .pipe(publisher.publish(headers))
   .pipe(publisher.cache())
   .pipe(awspublish.reporter());
 }
 
-gulp.task('build-dev', function(callback) {
-  buildAll('dev', true, callback);
+gulp.task('build-local', function(callback) {
+  buildAll('local', true, callback);
 })
 
 gulp.task('watch', function(callback) {
   for (var i=0; i<filelist.length; i++) {
-    gulp.watch(filelist[i], ['build-dev']);
+    gulp.watch(filelist[i], ['build-local']);
   }
-  gulp.watch('./blog/**/*.*', ['build-dev']);
-  gulp.watch('./site/data/*.json', ['build-dev'])
-  gulp.watch('./site/data/predictions/*.json', ['build-dev'])
+  gulp.watch('./blog/**/*.*', ['build-local']);
+  gulp.watch('./site/data/*.json', ['build-local'])
+  gulp.watch('./site/data/predictions/*.json', ['build-local'])
   callback();
 });
 
-gulp.task('serve-dev', function(callback) {
-  child_process.execFile('http-server', ['dev'], function(error, stdout, stderr) {
+gulp.task('serve-local', function(callback) {
+  child_process.execFile('http-server', ['local'], function(error, stdout, stderr) {
     if (error) {
       console.log(error);
     } else if (stderr) {
@@ -75,17 +82,34 @@ gulp.task('serve-dev', function(callback) {
 
 
 gulp.task('prod', function() {
-  buildAll('build', false, function() {
-    uploadToAws('www.traffichackers.com');
-    uploadToAws('boston.traffichackers.com');
+  var environment = 'prod';
+  buildAll(environment, false, function() {
+    uploadToAws(environment,'www.traffichackers.com');
+    uploadToAws(environment,'boston.traffichackers.com');
   });
 });
 
 gulp.task('dev', function() {
-  buildAll('build', false, function() {
+  buildAll('dev', false, function() {
     uploadToAws('dev.traffichackers.com');
   });
 });
 
+gulp.task('local', ['build-local', 'watch', 'serve-local'])
 
-gulp.task('local', ['build-dev', 'watch', 'serve-dev'])
+gulp.task('blog-prod', function() {
+  var destination = 'build';
+  del([destination+'/**'], function() {
+    buildBlog(destination, function() {
+    });
+  });
+})
+
+gulp.task('blog-dev', function() {
+  var environment = 'dev';
+  del([environment+'/**'], function() {
+    buildBlog(environment, function() {
+      uploadToAws(environment,'dev.traffichackers.com');
+    });
+  });
+})
