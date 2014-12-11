@@ -90,8 +90,9 @@ gulp.task('prod', function() {
 });
 
 gulp.task('dev', function() {
-  buildAll('dev', false, function() {
-    uploadToAws('dev.traffichackers.com');
+  var environment = 'dev'
+  buildAll(environment, false, function() {
+    uploadToAws(environment, 'dev.traffichackers.com');
   });
 });
 
