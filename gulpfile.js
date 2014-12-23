@@ -7,7 +7,7 @@ var del = require('del');
 
 // Globals
 dotenv.load();
-var filelist = ['./site/*.html', './site/js/*', './site/css/*', './site/fonts/*', './site/roads/*'];
+var filelist = ['./site/*.html', './site/js/*', './site/css/*', './site/fonts/*', './site/roads/*', './site/christmas/*'];
 
 function buildAll(destination, includeData, callback) {
 
