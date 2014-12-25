@@ -294,17 +294,14 @@ var helper = {
 // Get Data and Initialize
 var graphData = {};
 var allName = "all_"+helper.getDayOfWeek().toLowerCase()+"s";
-var christmasData = [
-{'2012': '20121223.json', '2013': '20131223.json' },
-{'2012': '20121224.json', '2013': '20131224.json' }];
 
 $.when(
   $.getJSON("data/predictions/similar_dow.json")
   ,$.getJSON("data/today.json")
   ,$.getJSON("data/current.json")
   ,$.getJSON("data/predictions/"+allName+".json")
-  ,$.getJSON("christmas/"+christmasData[1][2012])
-  ,$.getJSON("christmas/"+christmasData[1][2013])
+  ,$.getJSON("christmas/20121225.json")
+  ,$.getJSON("christmas/20131225.json")
 ).then( function (similarDowResults, todayResults, currentResults, allResults, christmas2012Results, christmas2013Results) {
   var pairDatums = {};
   var allGraphData = {};
@@ -457,7 +454,7 @@ $.when(
 
       pairDatums[pairName] = zonePairDatum;
       graphData[pairName] = zoneGraphData;
-      renderers.renderGraph(zonePairDatum, zoneGraphData, 'similar_dow');
+      renderers.renderGraph(zonePairDatum, zoneGraphData, 'christmas_2013');
       events.setZoneGraphControlEvents(zonePairDatum);
     }
   }
