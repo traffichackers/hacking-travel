@@ -303,8 +303,8 @@ $.when(
   ,$.getJSON("data/today.json")
   ,$.getJSON("data/current.json")
   ,$.getJSON("data/predictions/"+allName+".json")
-  ,$.getJSON("christmas/"+christmasData[0][2012])
-  ,$.getJSON("christmas/"+christmasData[0][2013])
+  ,$.getJSON("christmas/"+christmasData[1][2012])
+  ,$.getJSON("christmas/"+christmasData[1][2013])
 ).then( function (similarDowResults, todayResults, currentResults, allResults, christmas2012Results, christmas2013Results) {
   var pairDatums = {};
   var allGraphData = {};
