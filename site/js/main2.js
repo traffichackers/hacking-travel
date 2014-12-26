@@ -300,8 +300,8 @@ $.when(
   ,$.getJSON("data/today.json")
   ,$.getJSON("data/current.json")
   ,$.getJSON("data/predictions/"+allName+".json")
-  ,$.getJSON("christmas/20121225.json")
-  ,$.getJSON("christmas/20131225.json")
+  ,$.getJSON("christmas/20121226.json")
+  ,$.getJSON("christmas/20131226.json")
 ).then( function (similarDowResults, todayResults, currentResults, allResults, christmas2012Results, christmas2013Results) {
   var pairDatums = {};
   var allGraphData = {};
@@ -454,7 +454,7 @@ $.when(
 
       pairDatums[pairName] = zonePairDatum;
       graphData[pairName] = zoneGraphData;
-      renderers.renderGraph(zonePairDatum, zoneGraphData, 'christmas_2013');
+      renderers.renderGraph(zonePairDatum, zoneGraphData, 'similar_dow');
       events.setZoneGraphControlEvents(zonePairDatum);
     }
   }
