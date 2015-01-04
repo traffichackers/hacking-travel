@@ -46,31 +46,33 @@ var renderers = {
       }
     }
 
-
-    // Add Vertical Line for Today
-    var seriesElement = {};
-    var currentTime = new Date(graphData.similar_dow.Start+"-05:00");
-    var currentTimeSeconds = (currentTime.getTime())/1000;
-    seriesElement.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
-    seriesElement.color = 'rgb(145,196,245)';
-    seriesElement.renderer = 'line';
-    seriesElement.name = 'Now';
-    seriesData.push(seriesElement);
-
     // Add the Predictions
-    if (displayDataName === 'similar_dow') {
-      var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
-      var predictionsStart = graphData.similar_dow.Start
-      var seriesElement = helper.prepareGraphSeries(predictions, 'Predictions ', 'line', predictionsStart, true);
-      seriesData.push(seriesElement);
-    }
+    var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
+    var predictionsStart = graphData.similar_dow.Start
+    var seriesElement3 = helper.prepareGraphSeries(predictions, 'Predictions ', 'line', predictionsStart, true);
 
     // Add the Data for Today
+    var today = graphData.today[pairDatum.pairId];
+    var todayStart = graphData.today.Start;
+    var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', todayStart, false);
+
+    // Add Vertical Line for Today
+    var seriesElement2 = {};
+    var currentTimeSeconds = seriesElement.data[seriesElement.data.length-1].x
+    seriesElement2.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
+    seriesElement2.color = 'rgb(145,196,245)';
+    seriesElement2.renderer = 'line';
+    seriesElement2.name = 'Now';
+    seriesData.push(seriesElement2);
+
     if (displayDataName === 'similar_dow') {
-      var today = graphData.today[pairDatum.pairId];
-      var todayStart = graphData.today.Start;
-      var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', todayStart, false);
+
+      // Push the Predictions
+      seriesData.push(seriesElement3);
+
+      // Push the Today Data
       seriesData.push(seriesElement);
+
     }
 
     // Render the new graph
