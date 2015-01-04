@@ -29,16 +29,19 @@ var renderers = {
     var maxPredictions = predictionsStart.getTime()/1000+predictions.length*5*60;
     var maxPoints = (predictionsStart.getTime()-todayStart.getTime())/(1000*60*5)+predictions.length;
     var chosenPercentiles = graphData[displayDataName][pairDatum.pairId];
-    var chosenPercentilesStart = graphData[displayDataName].Start;
     var percentileOrder = ['max', '90', '75', '50', '25', '10', 'min'];
-    if (displayDataName === 'all' || displayDataName === 'similar_dow') {
+    if (displayDataName === 'similar_dow' || displayDataName === 'all') {
       for (var i=0; i<percentileOrder.length; i++) {
         var chosenPercentile = chosenPercentiles[percentileOrder[i]];
-        if (displayDataName === 'similar_dow') {
-          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', chosenPercentilesStart, true, maxPoints);
-        } else if (displayDataName === 'all') {
+        if (displayDataName === 'all') {
+          var chosenPercentilesStart = graphData['today'].Start;
           var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', chosenPercentilesStart, false, maxPoints);
+        } else {
+          var chosenPercentilesStart = graphData[displayDataName].Start;
+          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', chosenPercentilesStart, true, maxPoints);
         }
+
+
         seriesData.push(seriesElement);
       }
     }
@@ -69,15 +72,6 @@ var renderers = {
       var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', todayStart, false);
       seriesData.push(seriesElement);
     }
-
-    // Add the Data for Christmas
-    if (displayDataName === 'christmas_2012' || displayDataName === 'christmas_2013') {
-      var lineGraphData = graphData[displayDataName][pairDatum.pairId];
-      var todayStart = graphData.today.Start;
-      var seriesElement = helper.prepareGraphSeries(lineGraphData, 'Earlier Today', 'line', todayStart, false, maxPoints);
-      seriesData.push(seriesElement);
-    }
-
 
     // Render the new graph
     var graphWidth, graphHeight;
@@ -300,17 +294,13 @@ $.when(
   ,$.getJSON("data/today.json")
   ,$.getJSON("data/current.json")
   ,$.getJSON("data/predictions/"+allName+".json")
-  ,$.getJSON("christmas/20121231.json")
-  ,$.getJSON("christmas/20131230.json")
-).then( function (similarDowResults, todayResults, currentResults, allResults, christmas2012Results, christmas2013Results) {
+).then( function (similarDowResults, todayResults, currentResults, allResults) {
   var pairDatums = {};
   var allGraphData = {};
 
   allGraphData.similar_dow = similarDowResults[0];
   allGraphData.today = todayResults[0];
   allGraphData.all = allResults[0];
-  allGraphData.christmas_2012 = christmas2012Results[0];
-  allGraphData.christmas_2013 = christmas2013Results[0];
   var current = currentResults[0];
 
   zones = {
@@ -407,17 +397,12 @@ $.when(
             similarDow[pairName][percentile][i] = currentNumerator[i]/currentDenominator[i];
           }
         }
-        if (complexItem === 'all') {
-          similarDow.Start = allGraphData.today.Start;
-        } else {
-          similarDow.Start = allGraphData[complexItem].Start;
-        }
-
+        similarDow.Start = allGraphData[complexItem].Start;
         zoneGraphData[complexItem] = similarDow;
       }
 
       // Coalesce today
-      var simpleItems = ['today', 'christmas_2012', 'christmas_2013'];
+      var simpleItems = ['today'];
       for (var j=0; j<simpleItems.length; j++) {
         var simpleItem = simpleItems[j]
         var numerator = [];
