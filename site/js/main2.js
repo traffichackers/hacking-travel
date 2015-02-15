@@ -438,11 +438,12 @@ $.when(
         zoneGraphData[simpleItem] = tempSimpleItem;
       }
 
-
-      pairDatums[pairName] = zonePairDatum;
-      graphData[pairName] = zoneGraphData;
-      renderers.renderGraph(zonePairDatum, zoneGraphData, 'similar_dow');
-      events.setZoneGraphControlEvents(zonePairDatum);
+      if (zoneGraphData.similar_dow[pairName][50].length > 0) {
+        pairDatums[pairName] = zonePairDatum;
+        graphData[pairName] = zoneGraphData;
+        renderers.renderGraph(zonePairDatum, zoneGraphData, 'similar_dow');
+        events.setZoneGraphControlEvents(zonePairDatum);
+      }
     }
   }
 
