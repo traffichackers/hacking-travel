@@ -175,7 +175,7 @@ var helper = {
     var data = [];
     var formattedDatum;
   	if (utc === true) {
-  		var currentTime = new Date(start+"-05:00");
+  		var currentTime = new Date(start+"-04:00");
   	} else {
   	  var currentTime = new Date(start);
   	}
