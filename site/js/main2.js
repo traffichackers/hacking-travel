@@ -22,6 +22,26 @@ var renderers = {
     $("#graph-"+pairDatum.pairId).html('');
     var seriesData = [];
 
+    // Add the Data for Today
+    var today = graphData.today[pairDatum.pairId];
+    var startTime = new Date(graphData.today.Start);
+    var startTimeSeconds = startTime.getTime()/1000;
+    var todaySeries = helper.prepareGraphSeries(today, 'Earlier Today', 'line', startTimeSeconds);
+
+    // Add Vertical Line for Today
+    var seriesElement2 = {};
+    var currentTimeSeconds = todaySeries.data[todaySeries.data.length-1].x
+    seriesElement2.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
+    seriesElement2.color = 'rgb(145,196,245)';
+    seriesElement2.renderer = 'line';
+    seriesElement2.name = 'Now';
+
+
+    // Add the Predictions
+    var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
+    var predictionsStart = graphData.similar_dow.Start
+    var seriesElement3 = helper.prepareGraphSeries(predictions, 'Predictions ', 'line', currentTimeSeconds);
+
     // Percentiles
     var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
     var todayStart = new Date(graphData.today.Start);
@@ -34,11 +54,9 @@ var renderers = {
       for (var i=0; i<percentileOrder.length; i++) {
         var chosenPercentile = chosenPercentiles[percentileOrder[i]];
         if (displayDataName === 'all') {
-          var chosenPercentilesStart = graphData['today'].Start;
-          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', chosenPercentilesStart, false, maxPoints);
+          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', currentTimeSeconds, maxPoints);
         } else {
-          var chosenPercentilesStart = graphData[displayDataName].Start;
-          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', chosenPercentilesStart, true, maxPoints);
+          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', currentTimeSeconds, maxPoints);
         }
 
 
@@ -46,23 +64,7 @@ var renderers = {
       }
     }
 
-    // Add the Predictions
-    var predictions = graphData.similar_dow[pairDatum.pairId]['50'];
-    var predictionsStart = graphData.similar_dow.Start
-    var seriesElement3 = helper.prepareGraphSeries(predictions, 'Predictions ', 'line', predictionsStart, true);
-
-    // Add the Data for Today
-    var today = graphData.today[pairDatum.pairId];
-    var todayStart = graphData.today.Start;
-    var seriesElement = helper.prepareGraphSeries(today, 'Earlier Today', 'line', todayStart, false);
-
-    // Add Vertical Line for Today
-    var seriesElement2 = {};
-    var currentTimeSeconds = seriesElement.data[seriesElement.data.length-1].x
-    seriesElement2.data = [{'x':currentTimeSeconds,'y':0}, {'x':currentTimeSeconds, 'y':84}];
-    seriesElement2.color = 'rgb(145,196,245)';
-    seriesElement2.renderer = 'line';
-    seriesElement2.name = 'Now';
+    // Push the data in order for z-rendering
     seriesData.push(seriesElement2);
 
     if (displayDataName === 'similar_dow') {
@@ -71,7 +73,7 @@ var renderers = {
       seriesData.push(seriesElement3);
 
       // Push the Today Data
-      seriesData.push(seriesElement);
+      seriesData.push(todaySeries);
 
     }
 
@@ -169,18 +171,11 @@ var helper = {
     }
   },
 
-  prepareGraphSeries: function(unformattedData, level, renderer, start, utc, maxPoints) {
+  prepareGraphSeries: function(unformattedData, level, renderer, currentTimeSeconds, maxPoints) {
 
     var seriesElement = {};
     var data = [];
     var formattedDatum;
-  	if (utc === true) {
-  		var currentTime = new Date(start+"-04:00");
-  	} else {
-  	  var currentTime = new Date(start);
-  	}
-    var currentTimeSeconds
-    currentTimeSeconds = currentTime.getTime()/1000;
 
     for (var i=0; i<unformattedData.length; i++) {
       if (i<=maxPoints || typeof maxPoints === 'undefined' ) {
