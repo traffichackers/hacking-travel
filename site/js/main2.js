@@ -54,7 +54,7 @@ var renderers = {
       for (var i=0; i<percentileOrder.length; i++) {
         var chosenPercentile = chosenPercentiles[percentileOrder[i]];
         if (displayDataName === 'all') {
-          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', currentTimeSeconds, maxPoints);
+          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', startTimeSeconds, maxPoints);
         } else {
           var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', currentTimeSeconds, maxPoints);
         }
@@ -64,17 +64,13 @@ var renderers = {
       }
     }
 
-    // Push the data in order for z-rendering
+    // Push today's traffic data
     seriesData.push(seriesElement2);
+    seriesData.push(todaySeries);
 
+    // Push the predictions for today
     if (displayDataName === 'similar_dow') {
-
-      // Push the Predictions
       seriesData.push(seriesElement3);
-
-      // Push the Today Data
-      seriesData.push(todaySeries);
-
     }
 
     // Render the new graph
