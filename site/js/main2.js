@@ -10,7 +10,7 @@ var events = {
       $(typeButtons).removeClass('active');
       clickedElement.addClass('active');
       var displayDataName = clickedElement.attr('data-display')
-      //renderers.renderGraph(pairDatum, graphData[pairDatum.pairId], displayDataName);
+      renderers.renderGraph(pairDatum, graphData[pairDatum.pairId], displayDataName);
     });
   }
 };
@@ -53,7 +53,11 @@ var renderers = {
     if (displayDataName === 'similar_dow' || displayDataName === 'all') {
       for (var i=0; i<percentileOrder.length; i++) {
         var chosenPercentile = chosenPercentiles[percentileOrder[i]];
-        var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', startTimeSeconds, maxPoints);
+        if (displayDataName === 'all') {
+          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', startTimeSeconds, maxPoints);
+        } else {
+          var seriesElement = helper.prepareGraphSeries(chosenPercentile, percentileOrder[i], 'area', currentTimeSeconds, maxPoints);
+        }
 
 
         seriesData.push(seriesElement);
@@ -63,6 +67,11 @@ var renderers = {
     // Push today's traffic data
     seriesData.push(seriesElement2);
     seriesData.push(todaySeries);
+
+    // Push the predictions for today
+    if (displayDataName === 'similar_dow') {
+      seriesData.push(seriesElement3);
+    }
 
     // Render the new graph
     var graphWidth, graphHeight;
