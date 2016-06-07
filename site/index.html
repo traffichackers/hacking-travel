@@ -36,9 +36,15 @@
     </div>
 
     <div class="container">
-      <div style="margin-top: 2.5em; margin-bottom: 2.5em;" class="row"><div class="col-md-12">
+      <div style="margin-top: 2.5em; margin-bottom: 1.5em;" class="row"><div class="col-md-12">
         <p>A little traffic knowledge can make miles of difference.  We use MassDOT's real time traffic <a href="http://www.massdot.state.ma.us/developersdata.aspx">feed</a> to generate experimental predictions during this busy travel time.</p>
         <p><span style="font-weight: 500">Disclaimer:</span> The predictions on this site are the result of an experimental research project and may not be accurate.  Use at your own risk, buckle up, and always take care when driving.</p>
+      </div></div>
+      <div style="margin-top: 1.0em; margin-bottom: 0em;" class="row"><div class="col-md-12">
+        <span style="color: rgb(233,78,69)">
+          <span class="glyphicon glyphicon-exclamation-sign"></span>
+           Predictions and real time traffic data are currently unavailable due to technical issues with MassDOT's real time traffic feed.  We have contacted MassDOT and are awaiting resolution.
+        </span>
       </div></div>
     </div>
     <div class="container sections">
@@ -50,46 +56,22 @@
       <div class="row sections-row-charts">
         <div id="north-northbound" class="col-md-6 sections-col-graphset">
           <span class="chart-title">Northbound Traffic</span>
-          <div id="detail-region-north-northbound" class="detail-region ">
-            <span class="average-region-speed detail-number"></span>
-            <span class="detail-description">mph</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="misery-index detail-number"></span>
-            <span class="detail-description">misery index</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span class="average-region-status-text detail-description"></span>
-          </div>
           <div><div id='graph-north-northbound'></div></div>
           <div id="historical-travel-times-controls">
             <span>Show Speed Ranges for &nbsp;</span>
             <div class="btn-group btn-group-xs">
-              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
-              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all active">All</button>
             </div>
           </div>
         </div>
 
         <div id="north-southbound" class="col-md-6 sections-col-graphset">
           <span class="chart-title">Southbound Traffic</span>
-          <br/>
-          <br/>
-          <div id="detail-region-north-southbound" class="detail-region ">
-            <span class="average-region-speed detail-number"></span>
-            <span class="detail-description">mph</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="misery-index detail-number"></span>
-            <span class="detail-description">misery index</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span class="average-region-status-text detail-description"></span>
-          </div>
           <div><div id='graph-north-southbound'></div></div>
           <div id="historical-travel-times-controls">
             <span>Show Speed Ranges for &nbsp;</span>
             <div class="btn-group btn-group-xs">
-              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
-              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all active">All</button>
             </div>
           </div>
         </div>
@@ -104,43 +86,21 @@
       <div class="row sections-row-charts">
         <div id="west-eastbound" class="col-md-6 sections-col-graphset">
           <span class="chart-title">Eastbound Traffic</span>
-          <div id="detail-region-west-eastbound" class="detail-region ">
-            <span class="average-region-speed detail-number"></span>
-            <span class="detail-description">mph</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="misery-index detail-number"></span>
-            <span class="detail-description">misery index</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span class="average-region-status-text detail-description"></span>
-          </div>
           <div><div id='graph-west-eastbound'></div></div>
           <div id="historical-travel-times-controls">
             <span>Show Speed Ranges for &nbsp;</span>
             <div class="btn-group btn-group-xs">
-              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
-              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all active">All</button>
             </div>
           </div>
         </div>
         <div id="west-westbound" class="col-md-6 sections-col-graphset">
           <span class="chart-title">Westbound Traffic</span><br/>
-          <div id="detail-region-west-westbound" class="detail-region ">
-            <span class="average-region-speed detail-number"></span>
-            <span class="detail-description">mph</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="misery-index detail-number"></span>
-            <span class="detail-description">misery index</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span class="average-region-status-text detail-description"></span>
-          </div>
           <div><div id='graph-west-westbound'></div></div>
           <div id="historical-travel-times-controls">
             <span>Show Speed Ranges for &nbsp;</span>
             <div class="btn-group btn-group-xs">
-              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
-              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all active">All</button>
             </div>
           </div>
         </div>
@@ -154,43 +114,21 @@
       <div class="row sections-row-charts" style="margin-bottom: 3em;">
         <div id="south-northbound" class="col-md-6 sections-col-graphset">
           <span class="chart-title">Northbound Traffic</span><br/>
-          <div id="detail-region-south-northbound" class="detail-region ">
-            <span class="average-region-speed detail-number"></span>
-            <span class="detail-description">mph</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="misery-index detail-number"></span>
-            <span class="detail-description">misery index</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span class="average-region-status-text detail-description"></span>
-          </div>
           <div><div id='graph-south-northbound'></div></div>
           <div id="historical-travel-times-controls">
             <span>Show Speed Ranges for &nbsp;</span>
             <div class="btn-group btn-group-xs">
-              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
-              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all active">All</button>
             </div>
           </div>
         </div>
         <div id="south-southbound" class="col-md-6 sections-col-graphset">
           <span class="chart-title">Southbound Traffic</span><br/>
-          <div id="detail-region-south-southbound" class="detail-region ">
-            <span class="average-region-speed detail-number"></span>
-            <span class="detail-description">mph</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="misery-index detail-number"></span>
-            <span class="detail-description">misery index</span>
-            &nbsp;&nbsp;&nbsp;
-            <span class="average-region-status">&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span class="average-region-status-text detail-description"></span>
-          </div>
           <div><div id='graph-south-southbound'></div></div>
           <div id="historical-travel-times-controls">
             <span>Show Speed Ranges for &nbsp;</span>
             <div class="btn-group btn-group-xs">
-              <button data-display="similar_dow" type="button" class="btn btn-default type-button active">Today's Predictions</button>
-              <button data-display="all" type="button" class="btn btn-default type-button type-button-all">All</button>
+              <button data-display="all" type="button" class="btn btn-default type-button type-button-all active">All</button>
             </div>
           </div>
         </div>
