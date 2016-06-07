@@ -43,7 +43,6 @@ function buildBlog(destination, callback) {
 }
 
 function uploadToAws(directory, bucketName) {
-  console.log(process.env.AWS_ACCESS_KEY_ID)
   var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: bucketName });
   var headers = { 'Cache-Control': 'max-age=0, no-cache, must-revalidate, proxy-revalidate, private' };
   return gulp.src('./'+directory+'/**/*.*')
