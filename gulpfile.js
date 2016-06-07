@@ -20,7 +20,10 @@ function buildAll(destination, includeData, callback) {
 
     // Include the Data Directory, if Needed
     if (includeData) {
-      gulp.src('./site/data/*.*', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
+      gulp.src('./site/data/*.json', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
+      gulp.src('./site/data/predictions/similar_dow.json', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
+      gulp.src('./site/data/predictions/similar_weekdays.json', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
+      gulp.src('./site/data/predictions/similarw_weekends.json', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
     }
 
     // Build Blog
