@@ -21,6 +21,7 @@ function buildAll(destination, includeData, callback) {
     // Include the Data Directory, if Needed
     if (includeData) {
       gulp.src('./site/data/*.*', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
+      gulp.src('./site/data/predictions/*.*').pipe(gulp.dest(destination+'/data/predictions'));
     }
 
     // Build Blog
