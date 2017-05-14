@@ -20,7 +20,7 @@ function buildAll(destination, includeData, callback) {
 
     // Include the Data Directory, if Needed
     if (includeData) {
-      gulp.src('./site/data/**/*.*', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
+      gulp.src('./site/data/*.*', {base:"./site/"}).pipe(gulp.dest(destination+'/'));
     }
 
     // Build Blog
@@ -43,6 +43,7 @@ function buildBlog(destination, callback) {
 }
 
 function uploadToAws(directory, bucketName) {
+  console.log(process.env.AWS_ACCESS_KEY_ID)
   var publisher = awspublish.create({ key: process.env.AWS_ACCESS_KEY_ID,  secret: process.env.AWS_SECRET_ACCESS_KEY, bucket: bucketName });
   var headers = { 'Cache-Control': 'max-age=0, no-cache, must-revalidate, proxy-revalidate, private' };
   return gulp.src('./'+directory+'/**/*.*')
@@ -83,7 +84,7 @@ gulp.task('serve-local', function(callback) {
 
 gulp.task('prod', function() {
   var environment = 'prod';
-  buildAll(environment, false, function() {
+  buildAll(environment, true, function() {
     uploadToAws(environment,'www.traffichackers.com');
     uploadToAws(environment,'boston.traffichackers.com');
   });

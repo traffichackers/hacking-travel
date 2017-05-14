@@ -64,14 +64,6 @@ var renderers = {
       }
     }
 
-    // Push today's traffic data
-    seriesData.push(seriesElement2);
-    seriesData.push(todaySeries);
-
-    // Push the predictions for today
-    if (displayDataName === 'similar_dow') {
-      seriesData.push(seriesElement3);
-    }
 
     // Render the new graph
     var graphWidth, graphHeight;
@@ -429,12 +421,10 @@ $.when(
         zoneGraphData[simpleItem] = tempSimpleItem;
       }
 
-      if (zoneGraphData.similar_dow[pairName][50].length > 0) {
-        pairDatums[pairName] = zonePairDatum;
-        graphData[pairName] = zoneGraphData;
-        renderers.renderGraph(zonePairDatum, zoneGraphData, 'similar_dow');
-        events.setZoneGraphControlEvents(zonePairDatum);
-      }
+      pairDatums[pairName] = zonePairDatum;
+      graphData[pairName] = zoneGraphData;
+      renderers.renderGraph(zonePairDatum, zoneGraphData, 'similar_dow');
+      events.setZoneGraphControlEvents(zonePairDatum);
     }
   }
 
